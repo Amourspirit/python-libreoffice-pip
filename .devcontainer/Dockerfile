@@ -3,6 +3,7 @@ FROM linuxserver/libreoffice:${LO_VERSION}
 
 ARG CODE_PORT=2002
 ARG CONFIG_DIR=/config
+ARG POETRY_VER=1.6.1
 
 # Had Error: Compilation error in psutil/_psutil_linux
 # See Github: https://github.com/giampaolo/psutil//issues/664
@@ -67,7 +68,7 @@ ENV RUN_ENV=${RUN_ENV} \
     PIP_NO_CACHE_DIR=off \
     PIP_DISABLE_PIP_VERSION_CHECK=on \
     PIP_DEFAULT_TIMEOUT=100 \
-    POETRY_VERSION=1.5.1 \
+    POETRY_VERSION=${POETRY_VER} \
     LO_CONN_PORT=${CODE_PORT}
     # ENV=$CONFIG_DIR/.bashrc
     # PATH="$CONFIG_DIR/.cargo/bin:$PATH"
@@ -85,7 +86,7 @@ WORKDIR /workspace/libreoffice_pip_ext
 COPY ./*.toml ./*.lock ./
 RUN poetry config virtualenvs.in-project true \
     && poetry install $(test "$RUN_ENV" == production && echo "--no-dev") --no-interaction --no-ansi --no-root --no-cache \
-    && sed -i "s/include-system-site-packages = false/include-system-site-packages = true/g" /workspace/libreoffice_pip_ext/.venv/pyvenv.cfg
+    && sed -i "s/include-system-site-packages = false/include-system-site-packages = false/g" /workspace/libreoffice_pip_ext/.venv/pyvenv.cfg
 
 # Many of these environment variable are required for python and LibreOffice imports to work correctly.
 # For instance without proper environment vars: from com.sun.star.frame import XComponentLoader # results in error

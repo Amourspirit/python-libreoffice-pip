@@ -1,10 +1,12 @@
 # coding: utf-8
 from __future__ import annotations
 from pathlib import Path
-from dataclasses import dataclass
-from typing import List
 import json
-import os
+import sys
+import logging
+
+logger = logging.getLogger(__name__)
+logger.debug("config.py imported")
 
 from .input_output import file_util
 
@@ -26,7 +28,7 @@ class ConfigMeta(type):
                     "url_pip": "https://bootstrap.pypa.io/get-pip.py",
                     "log_file": "lo_pip.log",
                     "log_name": "OOO PIP Installer",
-                    "log_level": "INFO",
+                    "": "INFO",
                     "log_format": "%(asctime)s - %(name)s - %(levelname)s - %(message)s",
                     "py_pkg_dir": "py_pkgs",
                 }
@@ -43,6 +45,7 @@ class Config(metaclass=ConfigMeta):
     """
 
     def __init__(self, **kwargs):
+        logger.debug("Config.__init__ called")
         self._url_pip = str(kwargs["url_pip"])
         self._log_file = str(kwargs["log_file"])
         self._log_name = str(kwargs["log_name"])
@@ -50,9 +53,12 @@ class Config(metaclass=ConfigMeta):
         self._py_pkg_dir = str(kwargs["py_pkg_dir"])
         python_path = file_util.get_which("python")
         if not python_path:
+            python_path = sys.executable
+        if not python_path:
             raise FileNotFoundError("python not found")
         self._python_path = Path(python_path)
-        self._log_level = self._get_log_level(kwargs["Log_level"])
+        self._log_level = self._get_log_level(kwargs["log_level"])
+        logger.debug("Config.__init__ completed")
 
     def _get_log_level(self, log_level: str | int) -> int:
         if isinstance(log_level, str):

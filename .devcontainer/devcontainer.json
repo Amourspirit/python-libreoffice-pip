@@ -13,13 +13,13 @@
 	// "features": {},
 
 	// Use 'forwardPorts' to make a list of ports inside the container available locally.
-	"forwardPorts": [3002, 3003],
+	"forwardPorts": [3020, 3021],
 	"portsAttributes": {
-		"3002": {
+		"3020": {
 			"visibility": "private",
 			"label": "LibreOffice http Server"
 		},
-		"3003": {
+		"3021": {
 			"visibility": "private",
 			"label": "LibreOffice https Server"
 		},
@@ -60,7 +60,7 @@
 						]
 					}
 				},
-				"vs-browser.url": "http://localhost:3002"
+				"vs-browser.url": "http://localhost:3020"
 			}
 		}
 	},
