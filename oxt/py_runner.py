@@ -19,7 +19,8 @@ implementation_services = ("com.sun.star.task.Job",)
 LOG_LEVEL = logging.DEBUG
 
 
-handler = logging.FileHandler("/home/paul/tmp/py_runner.log", encoding="utf8", delay=True)
+# handler = logging.FileHandler("/home/paul/tmp/py_runner.log", encoding="utf8", delay=True)
+handler = logging.FileHandler("D:\\tmp\\log\\py_runner.log", encoding="utf8", delay=True)
 handler.setLevel(LOG_LEVEL)
 
 logging.basicConfig(handlers=[handler], level=LOG_LEVEL)
@@ -99,6 +100,18 @@ class ___lo_implementation_name___(unohelper.Base, XJob):
                 sys.path.remove(this_pth)
         return
 
+
+    def _process_req(self) -> None:
+        """Process the requirements.txt file."""
+        logger.info("Processing requirements.txt file…")
+        this_pth = os.path.dirname(__file__)
+        req_file = os.path.join(this_pth, "requirements.txt")
+        if not os.path.exists(req_file):
+            logger.error("requirements.txt file not found")
+            return
+        try:
+            
+        return
 
 g_TypeTable = {}
 # pythonloader looks for a static g_ImplementationHelper variable

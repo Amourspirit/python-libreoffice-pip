@@ -28,9 +28,10 @@ class ConfigMeta(type):
                     "url_pip": "https://bootstrap.pypa.io/get-pip.py",
                     "log_file": "lo_pip.log",
                     "log_name": "OOO PIP Installer",
-                    "": "INFO",
+                    "log_level": "INFO",
                     "log_format": "%(asctime)s - %(name)s - %(levelname)s - %(message)s",
                     "py_pkg_dir": "py_pkgs",
+                    "requirements": [],
                 }
 
             cls._instance = super().__call__(**data)
@@ -51,6 +52,7 @@ class Config(metaclass=ConfigMeta):
         self._log_name = str(kwargs["log_name"])
         self._log_format = str(kwargs["log_format"])
         self._py_pkg_dir = str(kwargs["py_pkg_dir"])
+        self._requirements = set(kwargs["requirements"])
         python_path = file_util.get_which("python")
         if not python_path:
             python_path = sys.executable
@@ -145,3 +147,12 @@ class Config(metaclass=ConfigMeta):
         The value for this property can be set in pyproject.toml (tool.oxt.token.py_pkg_dir)
         """
         return self._py_pkg_dir
+
+    @property
+    def requirements(self) -> set[str]:
+        """
+        Gets the set of requirements.
+
+        The value for this property can be set in pyproject.toml (tool.oxt.token.requirements)
+        """
+        return self._requirements

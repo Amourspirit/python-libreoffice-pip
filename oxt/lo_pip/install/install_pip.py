@@ -53,7 +53,7 @@ class InstallPip:
 
             if not filename.exists():
                 # msg = ("Unable to copy PIP installation file",)
-
+                logger.error("Unable to copy PIP installation file")
                 return
 
             # PIP installation file has been saved
@@ -61,7 +61,7 @@ class InstallPip:
             try:
                 # "Starting PIP installation…"
                 logger.info("Starting PIP installation…")
-                cmd = [str(self.path_python), f"{path_pip}", "--user"]
+                cmd = [str(self.path_python), f"{filename}", "--user"]
 
                 process = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
                 stdout, stderr = process.communicate()
