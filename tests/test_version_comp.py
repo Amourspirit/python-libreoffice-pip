@@ -5,7 +5,7 @@ if __name__ == "__main__":
     pytest.main([__file__])
 
 
-from oxt.lo_pip.utils.ver_comp import version_compare
+from oxt.lo_pip.utils.ver_info import version_compare
 
 
 @pytest.mark.parametrize(
