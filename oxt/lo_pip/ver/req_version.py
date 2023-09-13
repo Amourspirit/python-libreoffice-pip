@@ -22,12 +22,12 @@ class ReqVersion(Version):
     def _process_full_verion(self, version: str) -> str:
         match = re.search(r"\d", version)
         if match:
-            prefix = version[: match.start()]
-            ver = version[match.start() :]
+            prefix = version[: match.start()].strip()
+            ver = version[match.start() :].strip()
         else:
             # no prefix means equal.
             prefix = "=="
-            ver = version
+            ver = version.strip()
         if not self._validate_prefix(prefix):
             raise ValueError(f"Invalid prefix: {prefix}")
         self._prefix = prefix

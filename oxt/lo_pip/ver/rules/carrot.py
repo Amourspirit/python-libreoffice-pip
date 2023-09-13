@@ -1,6 +1,6 @@
 from __future__ import annotations
 from ..req_version import ReqVersion
-from typing import List
+from typing import Any, List
 
 
 class Carrot:
@@ -12,6 +12,9 @@ class Carrot:
     in the major, minor, patch grouping.
     """
 
+    # def __call__(self, *args: Any, **kwds: Any) -> Any:
+    #     pass
+
     def get_is_match(self, vstr: str) -> bool:
         """Check if the version matches the given string."""
         vlen = len(vstr)
@@ -21,7 +24,7 @@ class Carrot:
 
     def get_versions(self, vstr: str) -> List[ReqVersion]:
         """Get the list of versions."""
-        ver = vstr[1:]
+        ver = vstr[1:].strip()
         if ver == "":
             return []
         v1 = ReqVersion(f">={ver}")

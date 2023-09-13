@@ -6,6 +6,9 @@ from typing import Protocol, List
 class VerProto(Protocol):
     """A protocol for version objects."""
 
+    # def __call__(self) -> "VerProto":
+    #     ...
+
     def get_is_match(self, vstr: str) -> bool:
         """Check if the version matches the given string."""
         ...
@@ -28,6 +31,7 @@ class VerProto(Protocol):
 
         Returns:
             Returns:
-            int: ``-1`` if the version is less than the range, ``0`` if the version is in the range, ``1`` if the version is greater than the range.
+            int: ``0`` if the version is in the range, some other value if the version is not in the range.
+                Implemented by each rule.
         """
         ...
