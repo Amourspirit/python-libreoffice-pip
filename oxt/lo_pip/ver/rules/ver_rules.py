@@ -12,6 +12,8 @@ from .not_equals import NotEquals
 from .tilde import Tilde
 from .wildcard import Wildcard
 
+# https://www.darius.page/pipdev/
+
 
 class VerRules:
     """Manages rules for Versions"""
@@ -32,9 +34,6 @@ class VerRules:
 
         Args:
             rule (VerProto): Rule to register
-
-        Raises:
-            TypeError: If rules is not inherited form IRuleArea
         """
         if rule in self._rules:
             # msg = f"{self.__class__.__name__}.register_rule() Rule is already registered"
@@ -50,7 +49,7 @@ class VerRules:
             rule (VerProto): Rule to unregister
 
         Raises:
-            ValueError: If rule is not present
+            ValueError: If an error occurs
         """
         try:
             key = str(id(rule))

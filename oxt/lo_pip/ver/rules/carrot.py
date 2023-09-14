@@ -18,9 +18,18 @@ class Carrot:
     def get_is_match(self, vstr: str) -> bool:
         """Check if the version matches the given string."""
         vlen = len(vstr)
-        if vlen < 2 or vlen > 6:
+        if vlen < 2:
             return False
-        return vstr.startswith("^")
+        # return vstr.startswith("^")
+        if not vstr.startswith("^"):
+            return False
+        try:
+            versions = self.get_versions(vstr)
+            if len(versions) == 2:
+                return True
+            return False
+        except Exception:
+            return False
 
     def get_versions(self, vstr: str) -> List[ReqVersion]:
         """Get the list of versions."""
@@ -38,7 +47,7 @@ class Carrot:
             return ""
         v1 = versions[0]
         v2 = versions[1]
-        return f"{v1.get_pip_ver_str()} {v2.get_pip_ver_str()}"
+        return f"{v1.get_pip_ver_str()}, {v2.get_pip_ver_str()}"
 
     def get_version_is_valid(self, check_version: str, vstr: str) -> int:
         """

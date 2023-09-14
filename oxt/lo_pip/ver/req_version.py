@@ -57,7 +57,8 @@ class ReqVersion(Version):
 
     def get_pip_ver_str(self) -> str:
         """Get the pip version string."""
-        return f"{self._prefix} {self.major}.{self.minor}.{self.micro}"
+        return self._prefix + str(self)
+        # return f"{self._prefix} {self.major}.{self.minor}.{self.micro}"
 
     @property
     def prefix(self) -> str:

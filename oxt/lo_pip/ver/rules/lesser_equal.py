@@ -37,9 +37,17 @@ class LesserEqual:
     def get_is_match(self, vstr: str) -> bool:
         """Check if the version matches the given string."""
         vlen = len(vstr)
-        if vlen < 3 or vlen > 10:
+        if vlen < 3:
             return False
-        return self._starts_with_less_equal(vstr)
+        if not self._starts_with_less_equal(vstr):
+            return False
+        try:
+            versions = self.get_versions(vstr)
+            if len(versions) == 1:
+                return True
+            return False
+        except Exception:
+            return False
 
     def get_versions(self, vstr: str) -> List[ReqVersion]:
         """Get the list of versions. In this case it will be a single version, unless vstr is invalid in which case it will be an empty list."""

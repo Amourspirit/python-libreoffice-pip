@@ -6,9 +6,6 @@ from typing import Protocol, List
 class VerProto(Protocol):
     """A protocol for version objects."""
 
-    # def __call__(self) -> "VerProto":
-    #     ...
-
     def get_is_match(self, vstr: str) -> bool:
         """Check if the version matches the given string."""
         ...
