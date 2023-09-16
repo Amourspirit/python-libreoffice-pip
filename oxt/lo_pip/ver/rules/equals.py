@@ -1,10 +1,11 @@
 from __future__ import annotations
 from ..req_version import ReqVersion
+from .ver_rule_base import VerRuleBase
 from typing import List
 import re
 
 
-class Equals:
+class Equals(VerRuleBase):
     """
     A class to represent a Equal version.
     """
@@ -34,31 +35,31 @@ class Equals:
         pattern = r"^==\s*\d"
         return bool(re.match(pattern, string))
 
-    def get_is_match(self, vstr: str) -> bool:
+    def get_is_match(self) -> bool:
         """Check if the version matches the given string."""
-        vlen = len(vstr)
+        vlen = len(self.vstr)
         if vlen < 3:
             return False
-        if not self._starts_with_equal(vstr):
+        if not self._starts_with_equal(self.vstr):
             return False
-        if vstr.endswith("*"):
+        if self.vstr.endswith("*"):
             return False
         try:
-            versions = self.get_versions(vstr)
+            versions = self.get_versions()
             if len(versions) == 1:
                 return True
             return False
         except Exception:
             return False
 
-    def get_versions(self, vstr: str) -> List[ReqVersion]:
+    def get_versions(self) -> List[ReqVersion]:
         """Get the list of versions. In this case it will be a single version, unless vstr is invalid in which case it will be an empty list."""
-        ver = vstr[2:].strip()
+        ver = self.vstr[2:].strip()
         if ver == "":
             return []
         return [ReqVersion(f"=={ver}")]
 
-    def get_versions_str(self, vstr: str) -> str:
+    def get_versions_str(self) -> str:
         """
         Gets the list of versions as strings.
         In this case in the form of ``== 1.2.3``.
@@ -66,12 +67,12 @@ class Equals:
         Retruns:
             str: The version as a string or an empty string if the version is invalid.
         """
-        versions = self.get_versions(vstr)
+        versions = self.get_versions()
         if len(versions) == 1:
             return versions[0].get_pip_ver_str()
         return ""
 
-    def get_version_is_valid(self, check_version: str, vstr: str) -> int:
+    def get_version_is_valid(self, check_version: str) -> int:
         """
         Check if the version is valid. check_version is valid if it is equal to vstr.
 
@@ -85,7 +86,7 @@ class Equals:
         """
         try:
             check_ver = ReqVersion(f"=={check_version}")
-            versions = self.get_versions(vstr)
+            versions = self.get_versions()
             if len(versions) != 1:
                 return -2
             v1 = versions[0]

@@ -24,27 +24,28 @@ from oxt.lo_pip.ver.rules.greater import Greater
     ],
 )
 def test_is_match(match: str) -> None:
-    rule = Greater()
-    assert rule.get_is_match(match)
+    rule = Greater(match)
+    assert rule.get_is_match()
 
 
 def test_get_version() -> None:
-    rule = Greater()
     ver = ">1.2.4"
-    assert rule.get_is_match(ver)
-    versions = rule.get_versions(ver)
+    rule = Greater(ver)
+    assert rule.get_is_match()
+    versions = rule.get_versions()
     assert len(versions) == 1
     assert versions[0].prefix == ">"
     assert versions[0].major == 1
     assert versions[0].minor == 2
     assert versions[0].micro == 4
 
-    pip_ver_str = rule.get_versions_str(ver)
+    pip_ver_str = rule.get_versions_str()
     assert pip_ver_str == ">1.2.4"
 
     ver = "> 1.2.dev1"
-    assert rule.get_is_match(ver)
-    versions = rule.get_versions(ver)
+    rule = Greater(ver)
+    assert rule.get_is_match()
+    versions = rule.get_versions()
     assert len(versions) == 1
     assert versions[0].prefix == ">"
     assert versions[0].major == 1
@@ -52,68 +53,72 @@ def test_get_version() -> None:
     assert versions[0].dev == 1
     assert versions[0].is_devrelease
 
-    pip_ver_str = rule.get_versions_str(ver)
+    pip_ver_str = rule.get_versions_str()
     assert pip_ver_str == ">1.2.dev1"
 
     ver = "> 1.2pre1"
-    assert rule.get_is_match(ver)
-    versions = rule.get_versions(ver)
+    rule = Greater(ver)
+    assert rule.get_is_match()
+    versions = rule.get_versions()
     assert len(versions) == 1
     assert versions[0].prefix == ">"
     assert versions[0].major == 1
     assert versions[0].minor == 2
     assert versions[0].is_prerelease
 
-    pip_ver_str = rule.get_versions_str(ver)
+    pip_ver_str = rule.get_versions_str()
     assert pip_ver_str == ">1.2rc1"
 
     ver = "> 1.2pre1"
-    assert rule.get_is_match(ver)
-    versions = rule.get_versions(ver)
+    rule = Greater(ver)
+    assert rule.get_is_match()
+    versions = rule.get_versions()
     assert len(versions) == 1
     assert versions[0].prefix == ">"
     assert versions[0].major == 1
     assert versions[0].minor == 2
     assert versions[0].is_prerelease
 
-    pip_ver_str = rule.get_versions_str(ver)
+    pip_ver_str = rule.get_versions_str()
     assert pip_ver_str == ">1.2rc1"
 
     ver = "> 1.2.rc1"
-    assert rule.get_is_match(ver)
-    versions = rule.get_versions(ver)
+    rule = Greater(ver)
+    assert rule.get_is_match()
+    versions = rule.get_versions()
     assert len(versions) == 1
     assert versions[0].prefix == ">"
     assert versions[0].major == 1
     assert versions[0].minor == 2
     assert versions[0].is_prerelease
 
-    pip_ver_str = rule.get_versions_str(ver)
+    pip_ver_str = rule.get_versions_str()
     assert pip_ver_str == ">1.2rc1"
 
     ver = "> 1.2rc1"
-    assert rule.get_is_match(ver)
-    versions = rule.get_versions(ver)
+    rule = Greater(ver)
+    assert rule.get_is_match()
+    versions = rule.get_versions()
     assert len(versions) == 1
     assert versions[0].prefix == ">"
     assert versions[0].major == 1
     assert versions[0].minor == 2
     assert versions[0].is_prerelease
 
-    pip_ver_str = rule.get_versions_str(ver)
+    pip_ver_str = rule.get_versions_str()
     assert pip_ver_str == ">1.2rc1"
 
 
 def test_get_version_is_valid() -> None:
-    rule = Greater()
     ver = ">1.2.4"
-    assert rule.get_is_match(ver)
-    assert rule.get_version_is_valid("1.2.4", ver) == 2
-    assert rule.get_version_is_valid("1.2.5", ver) == 0
-    assert rule.get_version_is_valid("1.3.0", ver) == 0
-    assert rule.get_version_is_valid("2.0.0", ver) == 0
-    assert rule.get_version_is_valid("1.2.3", ver) == -1
-    assert rule.get_version_is_valid("0.0.3", ver) == -1
+    rule = Greater(ver)
+    assert rule.get_is_match()
+    assert rule.get_version_is_valid("1.2.4") == 2
+    assert rule.get_version_is_valid("1.2.5") == 0
+    assert rule.get_version_is_valid("1.3.0") == 0
+    assert rule.get_version_is_valid("2.0.0") == 0
+    assert rule.get_version_is_valid("1.2.3") == -1
+    assert rule.get_version_is_valid("0.0.3") == -1
 
 
 @pytest.mark.parametrize(
@@ -134,6 +139,6 @@ def test_get_version_is_valid() -> None:
     ],
 )
 def test_get_version_is_valid_suffix(check_ver: str, vstr: str, result: int) -> None:
-    rule = Greater()
-    assert rule.get_is_match(vstr)
-    assert rule.get_version_is_valid(check_ver, vstr) == result
+    rule = Greater(vstr)
+    assert rule.get_is_match()
+    assert rule.get_version_is_valid(check_ver) == result

@@ -2,6 +2,7 @@ from __future__ import annotations
 import re
 from typing import List, cast
 from ..req_version import ReqVersion
+from .ver_rule_base import VerRuleBase
 
 
 # https://www.darius.page/pipdev
@@ -10,7 +11,7 @@ from ..req_version import ReqVersion
 # https://peps.python.org/pep-0440/#compatible-release
 
 
-class Tilde:
+class Tilde(VerRuleBase):
     """
     A class to represent a tilde version.
 
@@ -31,29 +32,29 @@ class Tilde:
         pattern = r"^\d+\."
         return bool(re.match(pattern, string))
 
-    def get_is_match(self, vstr: str) -> bool:
+    def get_is_match(self) -> bool:
         """Check if the version matches the given string."""
-        vlen = len(vstr)
+        vlen = len(self.vstr)
         if vlen < 3:
             return False
-        if not vstr.startswith("~="):
+        if not self.vstr.startswith("~="):
             return False
-        if not self._starts_with_digits_and_dot(vstr[2:].lstrip()):
+        if not self._starts_with_digits_and_dot(self.vstr[2:].lstrip()):
             return False
         try:
-            versions = self.get_versions(vstr)
+            versions = self.get_versions()
             if len(versions) == 2:
                 return True
             return False
         except Exception:
             return False
 
-    def get_versions(self, vstr: str) -> List[ReqVersion]:
+    def get_versions(self) -> List[ReqVersion]:
         """Get the list of versions."""
         # Single digit version is not valid such as ~=1
         # All version that start with ~= will have a ending version that ends with post# where # is a number.
 
-        ver = vstr[2:].strip()
+        ver = self.vstr[2:].strip()
         if ver == "":
             return []
         if not self._starts_with_digits_and_dot(ver):
@@ -92,28 +93,27 @@ class Tilde:
     #     else:
     #         return ReqVersion(f"<{v1.major + 1}.0.0")
 
-    def get_versions_str(self, vstr: str) -> str:
+    def get_versions_str(self) -> str:
         """Get the list of versions as strings."""
-        versions = self.get_versions(vstr)
+        versions = self.get_versions()
         if len(versions) != 2:
             return ""
         v1 = versions[0]
         v2 = versions[1]
         return f"{v1.get_pip_ver_str()}, {v2.get_pip_ver_str()}"
 
-    def get_version_is_valid(self, check_version: str, vstr: str) -> int:
+    def get_version_is_valid(self, check_version: str) -> int:
         """
         Check if the version is valid.
 
         Args:
             check_version (str): Version to check in the form of ``1.2.3`` (no prefix).
-            vstr (str): version string in the form of ``~1.2.3``.
 
         Returns:
             int: ``-1`` if the version is less than the range, ``0`` if the version is in the range, ``1`` if the version is greater than the range.
         """
         check_ver = ReqVersion(f"=={check_version}")
-        versions = self.get_versions(vstr)
+        versions = self.get_versions()
         v1 = versions[0]
         v2 = versions[1]
         if check_ver >= v1 and check_ver < v2:

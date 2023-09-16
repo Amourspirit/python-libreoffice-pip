@@ -20,7 +20,6 @@ class VerRules:
 
     def __init__(self) -> None:
         self._rules: List[Type[VerProto]] = []
-        self._cache: Dict[str, VerProto] = {}
         self._register_known_rules()
 
     def __len__(self) -> int:
@@ -52,9 +51,6 @@ class VerRules:
             ValueError: If an error occurs
         """
         try:
-            key = str(id(rule))
-            if key in self._cache:
-                del self._cache[key]
             self._rules.remove(rule)
         except ValueError as e:
             msg = f"{self.__class__.__name__}.unregister_rule() Unable to unregister rule."
@@ -74,7 +70,19 @@ class VerRules:
         self._reg_rule(rule=Tilde)
         self._reg_rule(rule=Wildcard)
 
-    def get_matched_rules(self, vstr: str) -> List[VerProto]:
+    def split_and_strip(self, string: str) -> List[str]:
+        """Split a string by commas and strip any leading or lagging whitespace.
+
+        Args:
+            string (str): The input string.
+
+        Returns:
+            List[str]: The list of substrings with leading and lagging whitespace removed.
+        """
+        clean_str = string.replace(";", ",")
+        return [s.strip() for s in clean_str.split(",")]
+
+    def get_partical_matched_rules(self, vstr: str) -> List[VerProto]:
         """
         Get matched rules
 
@@ -86,14 +94,27 @@ class VerRules:
         """
         resuts: List[VerProto] = []
         for rule in self._rules:
-            key = str(id(rule))
-            if key in self._cache:
-                inst = self._cache[key]
-            else:
-                inst = rule()
-                self._cache[key] = inst
-            if inst.get_is_match(vstr):
+            inst = rule(vstr=vstr)
+            if inst.get_is_match():
                 resuts.append(inst)
+        return resuts
+
+    def get_matched_rules(self, vstr: str) -> List[VerProto]:
+        """
+        Get matched rules
+
+        Args:
+            vstr (str): Version in string form, e.g. ``==1.2.3`` or ``>=1.2.3,<2.0.0``
+
+        Returns:
+            List[VerProto]: List of matched rules
+        """
+        ver_strings = self.split_and_strip(vstr)
+
+        resuts: List[VerProto] = []
+
+        for ver_str in ver_strings:
+            resuts.extend(self.get_partical_matched_rules(ver_str))
         return resuts
 
     # endregion Methods

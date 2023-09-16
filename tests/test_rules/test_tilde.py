@@ -23,8 +23,8 @@ from oxt.lo_pip.ver.rules.tilde import Tilde
     ],
 )
 def test_is_match(match: str) -> None:
-    rule = Tilde()
-    assert rule.get_is_match(match)
+    rule = Tilde(match)
+    assert rule.get_is_match()
 
 
 @pytest.mark.parametrize(
@@ -37,15 +37,15 @@ def test_is_match(match: str) -> None:
     ],
 )
 def test_is_not_match(match: str) -> None:
-    rule = Tilde()
-    assert rule.get_is_match(match) == False
+    rule = Tilde(match)
+    assert rule.get_is_match() == False
 
 
 def test_get_version() -> None:
-    rule = Tilde()
     ver = "~=1.2.3"
-    assert rule.get_is_match(ver)
-    versions = rule.get_versions(ver)
+    rule = Tilde(ver)
+    assert rule.get_is_match()
+    versions = rule.get_versions()
     assert len(versions) == 2
     assert versions[0].prefix == ">="
     assert versions[0].major == 1
@@ -57,12 +57,13 @@ def test_get_version() -> None:
     assert versions[1].minor == 3
     assert versions[1].micro == 0
 
-    pip_ver_str = rule.get_versions_str(ver)
+    pip_ver_str = rule.get_versions_str()
     assert pip_ver_str == ">=1.2.3, <1.3.0"
 
     ver = "~=1.2"
-    assert rule.get_is_match(ver)
-    versions = rule.get_versions(ver)
+    rule = Tilde(ver)
+    assert rule.get_is_match()
+    versions = rule.get_versions()
     assert len(versions) == 2
     assert versions[0].prefix == ">="
     assert versions[0].major == 1
@@ -74,12 +75,13 @@ def test_get_version() -> None:
     assert versions[1].minor == 3
     assert versions[1].micro == 0
 
-    pip_ver_str = rule.get_versions_str(ver)
+    pip_ver_str = rule.get_versions_str()
     assert pip_ver_str == ">=1.2, <1.3.0"
 
     ver = "~=1.1"
-    assert rule.get_is_match(ver)
-    versions = rule.get_versions(ver)
+    rule = Tilde(ver)
+    assert rule.get_is_match()
+    versions = rule.get_versions()
     assert len(versions) == 2
     assert versions[0].prefix == ">="
     assert versions[0].major == 1
@@ -91,18 +93,18 @@ def test_get_version() -> None:
     assert versions[1].minor == 2
     assert versions[1].micro == 0
 
-    pip_ver_str = rule.get_versions_str(ver)
+    pip_ver_str = rule.get_versions_str()
     assert pip_ver_str == ">=1.1, <1.2.0"
 
 
 def test_get_version_is_valid() -> None:
-    rule = Tilde()
     ver = "~=1.2.4"
-    assert rule.get_is_match(ver)
-    assert rule.get_version_is_valid("1.2.4", ver) == 0
-    assert rule.get_version_is_valid("1.2.9", ver) == 0
-    assert rule.get_version_is_valid("1.2.3", ver) == -1
-    assert rule.get_version_is_valid("1.3", ver) == 1
+    rule = Tilde(ver)
+    assert rule.get_is_match()
+    assert rule.get_version_is_valid("1.2.4") == 0
+    assert rule.get_version_is_valid("1.2.9") == 0
+    assert rule.get_version_is_valid("1.2.3") == -1
+    assert rule.get_version_is_valid("1.3") == 1
 
 
 @pytest.mark.parametrize(
@@ -124,6 +126,6 @@ def test_get_version_is_valid() -> None:
     ],
 )
 def test_get_version_is_valid_suffix(check_ver: str, vstr: str, result: int) -> None:
-    rule = Tilde()
-    assert rule.get_is_match(vstr)
-    assert rule.get_version_is_valid(check_ver, vstr) == result
+    rule = Tilde(vstr)
+    assert rule.get_is_match()
+    assert rule.get_version_is_valid(check_ver) == result

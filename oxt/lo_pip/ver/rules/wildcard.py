@@ -2,9 +2,10 @@ from __future__ import annotations
 from typing import List
 import re
 from ..req_version import ReqVersion
+from .ver_rule_base import VerRuleBase
 
 
-class Wildcard:
+class Wildcard(VerRuleBase):
     """
     A class to represent a Wildcard version.
 
@@ -36,27 +37,27 @@ class Wildcard:
         pattern = r"^==\s*"
         return bool(re.match(pattern, string))
 
-    def get_is_match(self, vstr: str) -> bool:
+    def get_is_match(self) -> bool:
         """Check if the version matches the given string."""
-        vlen = len(vstr)
+        vlen = len(self.vstr)
         if vlen == 0:
             return False
-        if not self._starts_with_equal(vstr):
+        if not self._starts_with_equal(self.vstr):
             return False
-        if not vstr.endswith("*"):
+        if not self.vstr.endswith("*"):
             return False
         try:
-            versions = self.get_versions(vstr)
+            versions = self.get_versions()
             if len(versions) >= 1:
                 return True
             return False
         except Exception:
             return False
 
-    def get_versions(self, vstr: str) -> List[ReqVersion]:
+    def get_versions(self) -> List[ReqVersion]:
         """Get the list of versions."""
 
-        ver = vstr[2:].strip()  # remove ==
+        ver = self.vstr[2:].strip()  # remove ==
 
         if ver[:-1].strip() == "":
             return [ReqVersion(f">=0.0.0")]
@@ -68,9 +69,9 @@ class Wildcard:
             v2 = ReqVersion(f"<{v1.major + 1}.0.0")
         return [v1, v2]
 
-    def get_versions_str(self, vstr: str) -> str:
+    def get_versions_str(self) -> str:
         """Get the list of versions as strings."""
-        versions = self.get_versions(vstr)
+        versions = self.get_versions()
         if len(versions) == 1:
             return versions[0].get_pip_ver_str()
         if len(versions) != 2:
@@ -79,19 +80,18 @@ class Wildcard:
         v2 = versions[1]
         return f"{v1.get_pip_ver_str()}, {v2.get_pip_ver_str()}"
 
-    def get_version_is_valid(self, check_version: str, vstr: str) -> int:
+    def get_version_is_valid(self, check_version: str) -> int:
         """
         Check if the version is valid.
 
         Args:
             check_version (str): Version to check in the form of ``1.2.3`` (no prefix).
-            vstr (str): version string in the form of ``1.2.*``.
 
         Returns:
             int: ``-1`` if the version is less than the range, ``0`` if the version is in the range, ``1`` if the version is greater than the range.
         """
         check_ver = ReqVersion(f"=={check_version}")
-        versions = self.get_versions(vstr)
+        versions = self.get_versions()
         if len(versions) == 1:
             # in this instance a sigle version is returned, with a value of >=0.0.0
             return 0

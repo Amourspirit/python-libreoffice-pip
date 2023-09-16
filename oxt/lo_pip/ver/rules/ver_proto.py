@@ -6,29 +6,37 @@ from typing import Protocol, List
 class VerProto(Protocol):
     """A protocol for version objects."""
 
-    def get_is_match(self, vstr: str) -> bool:
+    def __init__(self, vstr: str) -> None:
+        """Initialize the version object."""
+        ...
+
+    def get_is_match(self) -> bool:
         """Check if the version matches the given string."""
         ...
 
-    def get_versions(self, vstr: str) -> List[ReqVersion]:
+    def get_versions(self) -> List[ReqVersion]:
         """Get the list of versions."""
         ...
 
-    def get_versions_str(self, vstr: str) -> str:
+    def get_versions_str(self) -> str:
         """Get the list of versions as strings."""
         ...
 
-    def get_version_is_valid(self, check_version: str, vstr: str) -> int:
+    def get_version_is_valid(self, check_version: str) -> int:
         """
         Check if the version is valid.
 
         Args:
             check_version (str): Version to check in the form of ``1.2.3`` (no prefix).
-            vstr (str): version string in the form of ``^1.2.3`` or other prefix.
 
         Returns:
             Returns:
             int: ``0`` if the version is in the range, some other value if the version is not in the range.
                 Implemented by each rule.
         """
+        ...
+
+    @property
+    def vstr(self) -> str:
+        """Get the version string."""
         ...
