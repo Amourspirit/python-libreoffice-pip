@@ -32,6 +32,9 @@ else:
         # At installation time, no context is available -> just ignore it.
         pass
 
+_si = subprocess.STARTUPINFO()
+_si.dwFlags |= subprocess.STARTF_USESHOWWINDOW
+
 
 class InstallPip:
     """Singleton class for the PIP install."""
@@ -63,7 +66,7 @@ class InstallPip:
                 logger.info("Starting PIP installation…")
                 cmd = [str(self.path_python), f"{filename}", "--user"]
 
-                process = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+                process = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, startupinfo=_si)
                 stdout, stderr = process.communicate()
                 str_stderr = stderr.decode("utf-8")
                 if process.returncode != 0:
@@ -74,7 +77,7 @@ class InstallPip:
                     return
 
                 cmd = self._cmd_pip("--version")
-                process = subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+                process = subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, startupinfo=_si)
                 if process.returncode == 0:
                     # "PIP was installed successfully"
                     logger.info("PIP was installed successfully")
@@ -135,7 +138,7 @@ class InstallPip:
             cmd = self._cmd_pip(*[*cmd, "-r", f"{path}"])
             msg = "Install - Installing requirements success!"
             err_msg = "Install - Installing requirements failed!"
-        process = subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        process = subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, startupinfo=_si)
         if process.returncode == 0:
             logger.info(msg)
         else:
@@ -145,7 +148,7 @@ class InstallPip:
     def is_pip_installed(self) -> bool:
         """Check if PIP is installed."""
         cmd = self._cmd_pip("--version")
-        result = subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        result = subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, startupinfo=_si)
         if result.returncode == 0:
             return True
         return False

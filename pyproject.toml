@@ -2,9 +2,9 @@
 build_dir = "build"
 dist_dir = "dist"
 oxt_name = "OooPip"
-token_file_ext = ["txt", "xml", "xcu", "json"]
+token_file_ext = ["txt", "xml", "xcu"]
 update_file = "ooopip.ext.update.xml"
-py_pkg_names = ["ooodev", "ooo"]
+py_pkg_names = ["packaging"]
 py_pkg_files = ["typing_extensions.py"]
 py_pkg_dir = "py_pkgs"
 
@@ -30,6 +30,7 @@ log_format = "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
 [tool.oxt.requirements]
 # https://python-poetry.org/docs/dependency-specification/
 verr = "^1.1.2"
+typing-extensions = ">=4.7.0"
 
 [tool.poetry]
 name = "libreoffice pip template"

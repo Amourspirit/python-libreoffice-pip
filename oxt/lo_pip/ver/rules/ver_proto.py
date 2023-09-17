@@ -36,6 +36,18 @@ class VerProto(Protocol):
         """
         ...
 
+    def get_installed_is_valid(self, check_version: str) -> bool:
+        """
+        Gets if the installed version is valid when compared to this rule.
+
+        Args:
+            check_version (str): The installed version to check.
+
+        Returns:
+            bool: True if the installed version is valid, False otherwise.
+        """
+        ...
+
     @property
     def vstr(self) -> str:
         """Get the version string."""

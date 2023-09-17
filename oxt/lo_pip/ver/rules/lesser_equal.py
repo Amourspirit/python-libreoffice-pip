@@ -72,13 +72,13 @@ class LesserEqual(VerRuleBase):
 
     def get_version_is_valid(self, check_version: str) -> int:
         """
-        Check if the version is valid. check_version is valid if it is less than or equal to vstr.
+        Check if the version is valid. check_version is valid if it is less than or equal.
 
         Args:
             check_version (str): Version to check in the form of ``1.2.3`` (no prefix).
 
         Returns:
-            int: ``0`` if the check_version is less than or equal to vstr, ``1`` if the check_version is greater than vstr.
+            int: ``0`` if the check_version is less than or equal, ``1`` if the check_version is greater.
                 ``-2`` if the version is invalid.
         """
         try:
@@ -96,3 +96,15 @@ class LesserEqual(VerRuleBase):
                 return 1
         except Exception:
             return -2
+
+    def get_installed_is_valid(self, check_version: str) -> bool:
+        """
+        Gets if the installed version is valid when compared to this rule.
+
+        Args:
+            check_version (str): The installed version to check.
+
+        Returns:
+            bool: True if the installed version is valid, False otherwise.
+        """
+        return self.get_version_is_valid(check_version) >= 0

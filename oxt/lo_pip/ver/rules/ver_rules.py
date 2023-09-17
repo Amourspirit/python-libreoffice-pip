@@ -1,5 +1,5 @@
 from __future__ import annotations
-from typing import List, Type, Dict
+from typing import Iterable, List, Type, Dict
 from .ver_proto import VerProto
 from .carrot import Carrot
 from .equals import Equals
@@ -18,9 +18,16 @@ from .wildcard import Wildcard
 class VerRules:
     """Manages rules for Versions"""
 
-    def __init__(self) -> None:
+    def __init__(self, auto_register: bool = True) -> None:
+        """
+        Initialize VerRules
+
+        Args:
+            auto_register (bool, optional): Determines if know rules are automatically registered. Defaults to True.
+        """
         self._rules: List[Type[VerProto]] = []
-        self._register_known_rules()
+        if auto_register:
+            self._register_known_rules()
 
     def __len__(self) -> int:
         return len(self._rules)
@@ -116,5 +123,40 @@ class VerRules:
         for ver_str in ver_strings:
             resuts.extend(self.get_partical_matched_rules(ver_str))
         return resuts
+
+    def get_installed_is_valid(self, vstr: str, check_version: str) -> bool:
+        """
+        Gets if the installed version is valid when compared to this rule.
+
+        Args:
+            vstr (str): Version in string form, e.g. ``==1.2.3`` or ``>=1.2.3,<2.0.0``
+            check_version (str): The installed version to check. Eg: ``1.2.3``
+
+        Returns:
+            bool: True if the installed version is valid, False otherwise.
+        """
+        rules = self.get_matched_rules(vstr)
+        is_valid = True
+        for rule in rules:
+            is_valid = is_valid and rule.get_installed_is_valid(check_version)
+
+        return is_valid
+
+    def get_installed_is_valid_by_rules(self, rules: Iterable[VerProto], check_version: str) -> bool:
+        """
+        Gets if the installed version is valid when compared to this rule.
+
+        Args:
+            rules (List[VerProto]): List of rules to check
+            check_version (str): The installed version to check. Eg: ``1.2.3``
+
+        Returns:
+            bool: True if the installed version is valid, False otherwise.
+        """
+        is_valid = True
+        for rule in rules:
+            is_valid = is_valid and rule.get_installed_is_valid(check_version)
+
+        return is_valid
 
     # endregion Methods

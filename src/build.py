@@ -7,6 +7,7 @@ from .build_args import BuildArgs
 from .processing.token import Token
 from .processing.packages import Packages
 from .processing.update import Update
+from .processing.json_config import JsonConfig
 
 
 class Build:
@@ -30,6 +31,8 @@ class Build:
         self._copy_src_dest()
         if self._args.process_tokens:
             self._process_tokens()
+
+        self._process_config()
 
         if self._args.process_py_packages:
             pythonpath = self._build_path / self._config.py_pkg_dir
@@ -78,6 +81,11 @@ class Build:
             text = file_util.read_file(py_file)
             text = self.process_tokens(text)
             file_util.write_string_to_file(py_file, text)
+
+    def _process_config(self) -> None:
+        config_file = self._build_path / "lo_pip" / "config.json"
+        json_config = JsonConfig()
+        json_config.update_json_config(config_file)
 
     def _copy_py_packages(self) -> None:
         """Copies the python packages to the build directory."""

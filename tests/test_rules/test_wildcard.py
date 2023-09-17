@@ -98,3 +98,21 @@ def test_get_version_is_valid() -> None:
     assert rule.get_version_is_valid("1.2.4") == 0
     assert rule.get_version_is_valid("0.0.1") == 0
     assert rule.get_version_is_valid("99.0.1") == 0
+
+
+@pytest.mark.parametrize(
+    "check_ver,vstr,result",
+    [
+        ("1.2.4", "==1.2.*", True),
+        ("1.2.5", "== 1.*", True),
+        ("1.4.3", "==1.2.*", False),
+        ("1.2.3", "==1.2.*", True),
+        ("2.0.0", "==1.2.*", False),
+        ("1.1.3", "==1.2.*", False),
+        ("1.2.4", "==*", True),
+    ],
+)
+def test_get_installed_valid(check_ver: str, vstr: str, result: bool) -> None:
+    rule = Wildcard(vstr)
+    assert rule.get_is_match()
+    assert rule.get_installed_is_valid(check_ver) == result

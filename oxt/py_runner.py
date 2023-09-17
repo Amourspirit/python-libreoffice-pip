@@ -12,6 +12,7 @@ if TYPE_CHECKING:
     # just for design time
     from lo_pip.config import Config
     from lo_pip.install.install_pip import InstallPip
+    from lo_pip.install.install_pkg import InstallPkg
 
 implementation_name = "___lo_identifier___.___lo_implementation_name___"
 implementation_services = ("com.sun.star.task.Job",)
@@ -68,8 +69,15 @@ class ___lo_implementation_name___(unohelper.Base, XJob):
                     pth_added = True
                     logger.debug(f"{this_pth}: appended to sys.path")
                 from lo_pip.config import Config
+
+                logger.debug("Imported Config")
                 from lo_pip.install.install_pip import InstallPip
-            logger.debug("Imported Config and InstallPip")
+
+                logger.debug("Imported InstallPip")
+                from lo_pip.install.install_pkg import InstallPkg
+
+                logger.debug("Imported InstallPkg")
+
             cfg = Config()
             logger.debug("Created config instance")
             if cfg.py_pkg_dir:
@@ -92,26 +100,21 @@ class ___lo_implementation_name___(unohelper.Base, XJob):
                     logger.info("Pip has been installed")
                 else:
                     logger.info("Pip was not successfully installed")
+
+            # install any packages that are not installed
+            pkg_installer = InstallPkg()
+            logger.debug("Created InstallPkg instance")
+            pkg_installer.install()
+
             logger.info("OooPipRunner execute Done!")
         except Exception as err:
             logger.error(err)
         finally:
             if pth_added:
                 sys.path.remove(this_pth)
+                logger.debug(f"{this_pth}: removed from sys.path")
         return
 
-
-    def _process_req(self) -> None:
-        """Process the requirements.txt file."""
-        logger.info("Processing requirements.txt file…")
-        this_pth = os.path.dirname(__file__)
-        req_file = os.path.join(this_pth, "requirements.txt")
-        if not os.path.exists(req_file):
-            logger.error("requirements.txt file not found")
-            return
-        try:
-            
-        return
 
 g_TypeTable = {}
 # pythonloader looks for a static g_ImplementationHelper variable

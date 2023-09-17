@@ -19,10 +19,18 @@ class ReqVersion(Version):
         ver = self._process_full_verion(version)
         super().__init__(ver)
 
+    def __repr__(self) -> str:
+        """A representation of the ReqVersion that shows all internal state.
+
+        >>> ReqVersion('1.0.0')
+        <ReqVersion('1.0.0')>
+        """
+        return f"<ReqVersion('{self}')>"
+
     def _process_full_verion(self, version: str) -> str:
         match = re.search(r"\d", version)
         if match:
-            prefix = version[: match.start()].strip()
+            prefix = version[: match.start()].strip() or "=="
             ver = version[match.start() :].strip()
         else:
             # no prefix means equal.

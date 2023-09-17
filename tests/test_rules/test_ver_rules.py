@@ -143,3 +143,44 @@ def test_expect_not_equal(installed_str: str, vstr: str, expected_result: bool) 
     for rule in rules:
         result = rule.get_version_is_valid(installed_str) == 0
         assert result == expected_result
+
+
+@pytest.mark.parametrize(
+    "check_ver,vstr,result",
+    [
+        ("1.2.4", "^1.2.4", True),
+        ("1.2.5", "^1.2.4", True),
+        ("1.2.3", "^1.2.4", False),
+        ("1.1.1", "!=1.1.0, ^1.2.4", False),
+        ("1.3.3", "!=1.1.0, ^1.2.4", True),
+        ("1.1.0", "!=1.1.0, ^1.0.4", False),
+        ("1.1.1", "!=1.1.0, >=1.0.9", True),
+        ("1.1.4", "<1.1.5, >1.1.3", True),
+        ("1.1.6", "<1.1.5, >1.1.3", False),
+        ("1.1.4", "<1.1.5, >1.1.3", True),
+        ("1.1.2", "<1.1.5, >1.1.1", True),
+        ("1.1.2", "<1.1.5, >1.1.1, !=1.1.2", False),
+        ("1.1.5", ">=1.1.5, <=1.1.5", True),
+        ("1.5.2", ">=1.5, >1.1.5", True),
+        ("1.5.2", ">=1.5, <2", True),
+        ("1.4.2", ">=1.5, <2", False),
+        ("2.1", ">=1.5, <2", False),
+        ("1.5", ">=1.5, <2", True),
+        ("5", ">=1.5, <2", False),
+        ("1.999", ">=1.5, <2", True),
+        ("1.5.2", "~=1.5", True),
+        ("1.5.99", "~=1.5", True),
+        ("1.6.0", "~=1.5", False),
+        ("1.7", "~=1.5", False),
+        ("1.5.2", "~=1.5, <2", True),
+        ("1.5.2", "~=1.5, <2, !=1.5.1", True),
+        ("1.5.2", "~=1.5, <2, !=1.5.2", False),
+        ("1.6.0", "==1.*", True),
+        ("1.6.0", "==1.*, !=1.6.0", False),
+        ("2.0", "==1.*", False),
+        ("1.1.2", "^1.1.2", True),
+    ],
+)
+def test_meet_requirements(check_ver: str, vstr: str, result: bool) -> None:
+    vr = VerRules()
+    assert vr.get_installed_is_valid(vstr=vstr, check_version=check_ver) == result

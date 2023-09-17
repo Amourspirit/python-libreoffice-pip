@@ -4,6 +4,5 @@
     "log_level": "___log_level___",
     "log_file": "___log_file___",
     "log_format": "___log_format___",
-    "py_pkg_dir": "___py_pkg_dir___",
-    "requirements": ["verr"]
+    "py_pkg_dir": "___py_pkg_dir___"
 }

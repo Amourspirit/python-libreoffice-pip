@@ -142,3 +142,27 @@ def test_get_version_is_valid_suffix(check_ver: str, vstr: str, result: int) -> 
     rule = GreaterEqual(vstr)
     assert rule.get_is_match()
     assert rule.get_version_is_valid(check_ver) == result
+
+
+@pytest.mark.parametrize(
+    "check_ver,vstr,result",
+    [
+        ("1.2.4", ">=1.2.4", True),
+        ("1.2.5", ">= 1.2.4", True),
+        ("1.2.3", ">= 1.2.4", False),
+        ("1.2rc1", ">=1.2.pre1", True),
+        ("1.2rc1", ">=1.2.rc1", True),
+        ("1.2rc1", ">=1.2.pre2", False),
+        ("1.2rc2", ">=1.2.pre2", True),
+        ("1.2dev3", ">=1.2.dev3", True),
+        ("1.2dev1", ">=1.2dev2", False),
+        ("1.2dev3", ">=1.2dev2", True),
+        ("1.2post3", ">=1.2.post3", True),
+        ("1.2post1", ">=1.2post2", False),
+        ("1.2post3", ">=1.2post2", True),
+    ],
+)
+def test_get_installed_valid(check_ver: str, vstr: str, result: bool) -> None:
+    rule = GreaterEqual(vstr)
+    assert rule.get_is_match()
+    assert rule.get_installed_is_valid(check_ver) == result

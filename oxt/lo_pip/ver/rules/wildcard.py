@@ -89,16 +89,32 @@ class Wildcard(VerRuleBase):
 
         Returns:
             int: ``-1`` if the version is less than the range, ``0`` if the version is in the range, ``1`` if the version is greater than the range.
+                ``-2`` if the version is invalid.
         """
-        check_ver = ReqVersion(f"=={check_version}")
-        versions = self.get_versions()
-        if len(versions) == 1:
-            # in this instance a sigle version is returned, with a value of >=0.0.0
-            return 0
-        v1 = versions[0]
-        v2 = versions[1]
-        if check_ver >= v1 and check_ver < v2:
-            return 0
-        if check_ver < v1:
-            return -1
-        return 1
+        try:
+            check_ver = ReqVersion(f"=={check_version}")
+            versions = self.get_versions()
+            if len(versions) == 1:
+                # in this instance a sigle version is returned, with a value of >=0.0.0
+                return 0
+            v1 = versions[0]
+            v2 = versions[1]
+            if check_ver >= v1 and check_ver < v2:
+                return 0
+            if check_ver < v1:
+                return -1
+            return 1
+        except Exception:
+            return -2
+
+    def get_installed_is_valid(self, check_version: str) -> bool:
+        """
+        Gets if the installed version is valid when compared to this rule.
+
+        Args:
+            check_version (str): The installed version to check.
+
+        Returns:
+            bool: True if the installed version is valid, False otherwise.
+        """
+        return self.get_version_is_valid(check_version) == 0

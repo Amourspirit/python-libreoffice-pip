@@ -1,6 +1,7 @@
 # coding: utf-8
 from __future__ import annotations
 from pathlib import Path
+from typing import Dict
 import json
 import sys
 import logging
@@ -21,6 +22,7 @@ class ConfigMeta(type):
             if config_file.exists():
                 with open(config_file, "r") as file:
                     data = json.load(file)
+                    logger.debug("Configuration: Loaded config.json")
             else:
                 # provide defaults because at this time scriptmerge
                 # does not include non *.py files when it packages scripts
@@ -31,8 +33,9 @@ class ConfigMeta(type):
                     "log_level": "INFO",
                     "log_format": "%(asctime)s - %(name)s - %(levelname)s - %(message)s",
                     "py_pkg_dir": "py_pkgs",
-                    "requirements": [],
+                    "requirements": {},
                 }
+                logger.debug("Configuration: no config.json, using defaults")
 
             cls._instance = super().__call__(**data)
         return cls._instance
@@ -52,7 +55,9 @@ class Config(metaclass=ConfigMeta):
         self._log_name = str(kwargs["log_name"])
         self._log_format = str(kwargs["log_format"])
         self._py_pkg_dir = str(kwargs["py_pkg_dir"])
-        self._requirements = set(kwargs["requirements"])
+        if "requirements" not in kwargs:
+            kwargs["requirements"] = {}
+        self._requirements: Dict[str, str] = dict(**kwargs["requirements"])
         python_path = file_util.get_which("python")
         if not python_path:
             python_path = sys.executable
@@ -149,10 +154,13 @@ class Config(metaclass=ConfigMeta):
         return self._py_pkg_dir
 
     @property
-    def requirements(self) -> set[str]:
+    def requirements(self) -> Dict[str, str]:
         """
         Gets the set of requirements.
 
         The value for this property can be set in pyproject.toml (tool.oxt.token.requirements)
+
+        The key is the name of the package and the value is the version number.
+        Example: {"requests": ">=2.25.1"}
         """
         return self._requirements
