@@ -21,7 +21,8 @@ publisher_url = "https://github.com/Amourspirit/python-libreoffice-pip"
 update_url_oxt = "https://raw.githubusercontent.com/Amourspirit/python-libreoffice-pip/main/___dist_dir___/___oxt_name___.oxt"
 update_url_xml = "https://raw.githubusercontent.com/Amourspirit/python-libreoffice-pip/main/___dist_dir___/___update_file___"
 url_pip = 'https://bootstrap.pypa.io/get-pip.py'
-log_file = "ooo_pip.log"
+# set log_file to "" to disable logging
+log_file = "pip_install.log"
 log_name = "OOO PIP Installer"
 log_level = "DEBUG" # NONE, DEBUG, INFO, WARNING, ERROR, CRITICAL
 log_format = "%(asctime)s - %(name)s - %(levelname)s - %(message)s"

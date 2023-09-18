@@ -20,9 +20,10 @@ class OxtLogger(Logger):
         # Logger.__init__(self, name=log_name, level=cfg.log_level)
         super().__init__(name=log_name, level=self.config.log_level)
 
-        self.addHandler(self.get_console_handler())
         if self.log_file:
             self.addHandler(self.get_file_handler())
+        else:
+            self.addHandler(self.get_console_handler())
 
         # with this pattern, it's rarely necessary to propagate the| error up to parent
         self.propagate = False

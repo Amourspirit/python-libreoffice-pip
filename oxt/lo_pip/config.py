@@ -51,11 +51,10 @@ class Config(metaclass=ConfigMeta):
 
     def __init__(self, **kwargs):
         log_file = str(kwargs["log_file"])
-        if not log_file:
-            log_file = "lo_pip.log"
-        log_pth = Path(log_file)
-        if not log_pth.is_absolute():
-            log_file = Path(file_util.get_user_profile_path(True), log_pth)
+        if log_file:
+            log_pth = Path(log_file)
+            if not log_pth.is_absolute():
+                log_file = Path(file_util.get_user_profile_path(True), log_pth)
         self._log_file = str(log_file)
         # self._log_file = "D:\\tmp\\log\\py_runner.log"
         # logger.debug("Config.__init__ called")
