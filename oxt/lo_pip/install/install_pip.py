@@ -4,34 +4,13 @@ import tempfile
 from pathlib import Path
 from typing import List
 import urllib.request
-import os.path
-import logging
-import uno
-
-from com.sun.star.uno import RuntimeException
 
 from ..config import Config
-from ..input_output import file_util
+from ..oxt_logger import OxtLogger
 
 
-logger = logging.getLogger(Config().log_name)
-formatter = logging.Formatter(Config().log_format)
-
-if Config().log_level <= 0:
-    log_handler = logging.StreamHandler()
-    log_handler.setFormatter(formatter)
-else:
-    try:
-        log_handler = logging.FileHandler(
-            os.path.join(uno.fileUrlToSystemPath(file_util.get_user_profile_path()), Config().log_file),
-            mode="w",
-            delay=True,
-        )
-        log_handler.setFormatter(formatter)
-    except RuntimeException:
-        # At installation time, no context is available -> just ignore it.
-        pass
-
+# https://stackoverflow.com/search?q=%5Bpython%5D+run+subprocess+without+popup+terminal
+# silent subprocess
 _si = subprocess.STARTUPINFO()
 _si.dwFlags |= subprocess.STARTF_USESHOWWINDOW
 
@@ -42,6 +21,7 @@ class InstallPip:
     def __init__(self) -> None:
         self._config = Config()
         self.path_python = Path(self._config.python_path)
+        self._logger = OxtLogger(log_name=__name__)
 
     def install_pip(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
@@ -56,14 +36,14 @@ class InstallPip:
 
             if not filename.exists():
                 # msg = ("Unable to copy PIP installation file",)
-                logger.error("Unable to copy PIP installation file")
+                self._logger.error("Unable to copy PIP installation file")
                 return
 
             # PIP installation file has been saved
 
             try:
                 # "Starting PIP installation…"
-                logger.info("Starting PIP installation…")
+                self._logger.info("Starting PIP installation…")
                 cmd = [str(self.path_python), f"{filename}", "--user"]
 
                 process = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, startupinfo=_si)
@@ -71,33 +51,33 @@ class InstallPip:
                 str_stderr = stderr.decode("utf-8")
                 if process.returncode != 0:
                     # "PIP installation has failed, see log"
-                    logger.error("PIP installation has failed")
+                    self._logger.error("PIP installation has failed")
                     if str_stderr:
-                        logger.error(str_stderr)
+                        self._logger.error(str_stderr)
                     return
 
                 cmd = self._cmd_pip("--version")
                 process = subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, startupinfo=_si)
                 if process.returncode == 0:
                     # "PIP was installed successfully"
-                    logger.info("PIP was installed successfully")
+                    self._logger.info("PIP was installed successfully")
                 else:
                     # "PIP installation has failed, see log"
-                    logger.error("PIP installation has failed")
+                    self._logger.error("PIP installation has failed")
             except Exception as err:
                 # "PIP installation has failed, see log"
-                logger.error("PIP installation has failed")
-                logger.error(err)
+                self._logger.error("PIP installation has failed")
+                self._logger.error(err)
 
             return
 
     def install_requirements(self, fnm: str | Path) -> None:
         """Install the requirements."""
-        logger.info("install_requirements - Installing requirements…")
+        self._logger.info("install_requirements - Installing requirements…")
         if not self.is_pip_installed():
             self.install_pip()
         if not self.is_pip_installed():
-            logger.error("install_requirements - PIP installation has failed")
+            self._logger.error("install_requirements - PIP installation has failed")
             return
         self._install(path=str(fnm))
         return
@@ -113,7 +93,7 @@ class InstallPip:
 
     def pip_upgrade(self) -> None:
         """Upgrade PIP."""
-        logger.info("pip_upgrade - Upgrading PIP…")
+        self._logger.info("pip_upgrade - Upgrading PIP…")
         if not self.is_pip_installed():
             self.install_pip()
         if not self.is_pip_installed():
@@ -140,9 +120,9 @@ class InstallPip:
             err_msg = "Install - Installing requirements failed!"
         process = subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, startupinfo=_si)
         if process.returncode == 0:
-            logger.info(msg)
+            self._logger.info(msg)
         else:
-            logger.error(err_msg)
+            self._logger.error(err_msg)
         return
 
     def is_pip_installed(self) -> bool:

@@ -4,10 +4,11 @@ from pathlib import Path
 from typing import Dict
 import json
 import sys
-import logging
 
-logger = logging.getLogger(__name__)
-logger.debug("config.py imported")
+# import logging
+
+# logger = logging.getLogger(__name__)
+# logger.debug("config.py imported")
 
 from .input_output import file_util
 
@@ -22,7 +23,7 @@ class ConfigMeta(type):
             if config_file.exists():
                 with open(config_file, "r") as file:
                     data = json.load(file)
-                    logger.debug("Configuration: Loaded config.json")
+                    # logger.debug("Configuration: Loaded config.json")
             else:
                 # provide defaults because at this time scriptmerge
                 # does not include non *.py files when it packages scripts
@@ -35,7 +36,7 @@ class ConfigMeta(type):
                     "py_pkg_dir": "py_pkgs",
                     "requirements": {},
                 }
-                logger.debug("Configuration: no config.json, using defaults")
+                # logger.debug("Configuration: no config.json, using defaults")
 
             cls._instance = super().__call__(**data)
         return cls._instance
@@ -49,9 +50,16 @@ class Config(metaclass=ConfigMeta):
     """
 
     def __init__(self, **kwargs):
-        logger.debug("Config.__init__ called")
+        log_file = str(kwargs["log_file"])
+        if not log_file:
+            log_file = "lo_pip.log"
+        log_pth = Path(log_file)
+        if not log_pth.is_absolute():
+            log_file = Path(file_util.get_user_profile_path(True), log_pth)
+        self._log_file = str(log_file)
+        # self._log_file = "D:\\tmp\\log\\py_runner.log"
+        # logger.debug("Config.__init__ called")
         self._url_pip = str(kwargs["url_pip"])
-        self._log_file = str(kwargs["log_file"])
         self._log_name = str(kwargs["log_name"])
         self._log_format = str(kwargs["log_format"])
         self._py_pkg_dir = str(kwargs["py_pkg_dir"])
@@ -65,7 +73,7 @@ class Config(metaclass=ConfigMeta):
             raise FileNotFoundError("python not found")
         self._python_path = Path(python_path)
         self._log_level = self._get_log_level(kwargs["log_level"])
-        logger.debug("Config.__init__ completed")
+        # logger.debug("Config.__init__ completed")
 
     def _get_log_level(self, log_level: str | int) -> int:
         if isinstance(log_level, str):

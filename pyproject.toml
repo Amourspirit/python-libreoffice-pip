@@ -23,7 +23,7 @@ update_url_xml = "https://raw.githubusercontent.com/Amourspirit/python-libreoffi
 url_pip = 'https://bootstrap.pypa.io/get-pip.py'
 log_file = "ooo_pip.log"
 log_name = "OOO PIP Installer"
-log_level = "INFO" # NONE, DEBUG, INFO, WARNING, ERROR, CRITICAL
+log_level = "DEBUG" # NONE, DEBUG, INFO, WARNING, ERROR, CRITICAL
 log_format = "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
 # log_format = "%(levelname)s [%(module)s.py][%(funcName)s::%(lineno)d] %(message)s"
 

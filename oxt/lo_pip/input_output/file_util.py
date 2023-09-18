@@ -2,7 +2,7 @@ from __future__ import annotations
 import os
 import shutil
 from pathlib import Path
-from typing import Iterable, List
+from typing import Any, Iterable, List
 import os
 from shutil import which
 from contextlib import contextmanager
@@ -157,12 +157,22 @@ def is_on_path(name: str | Path) -> bool:
     return which(name) is not None
 
 
-def get_user_profile_path() -> str:
+def get_user_profile_path(as_sys_path: bool = True, ctx: Any = None) -> str:
     """
     Returns the path to the user profile directory.
+
+    Args:
+        as_sys_path (bool): If True, returns the path as a system path entry otherwise ``file:///`` format.
+            Defaults to True.
+        ctx (Any): The context to use. Defaults to None.
     """
-    return (
-        uno.getComponentContext()
-        .ServiceManager.createInstance("com.sun.star.util.PathSubstitution")  # type: ignore
-        .substituteVariables("$(user)", True)
+    if ctx is None:
+        ctx = uno.getComponentContext()
+    result = ctx.ServiceManager.createInstance(
+        "com.sun.star.util.PathSubstitution"
+    ).substituteVariables(  # type: ignore
+        "$(user)", True
     )
+    if as_sys_path:
+        return uno.fileUrlToSystemPath(result)
+    return result
