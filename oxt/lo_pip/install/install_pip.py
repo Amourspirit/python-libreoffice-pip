@@ -9,7 +9,7 @@ import os
 
 from ..config import Config
 from ..oxt_logger import OxtLogger
-
+from . import detect
 
 # https://stackoverflow.com/search?q=%5Bpython%5D+run+subprocess+without+popup+terminal
 # silent subprocess on Windows
@@ -30,6 +30,9 @@ class InstallPip:
         self._logger = OxtLogger(log_name=__name__)
 
     def install_pip(self) -> None:
+        if detect.is_flatpak():
+            self._logger.error("PIP installation has failed - Flatpak")
+            return
         with tempfile.TemporaryDirectory() as temp_dir:
             # Do something with the temporary directory
             # print(f"Temporary directory created at {temp_dir}")

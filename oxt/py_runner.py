@@ -165,6 +165,7 @@ class ___lo_implementation_name___(unohelper.Base, XJob):
                     self._logger.info("Pip has been installed")
                 else:
                     self._logger.info("Pip was not successfully installed")
+                    return
 
             # install any packages that are not installed
             pkg_installer = InstallPkg()
