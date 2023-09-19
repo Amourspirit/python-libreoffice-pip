@@ -1,5 +1,6 @@
 from __future__ import unicode_literals, annotations
 from typing import TYPE_CHECKING, Any
+from pathlib import Path
 import uno
 import unohelper
 import sys
@@ -29,17 +30,26 @@ class ___lo_implementation_name___(unohelper.Base, XJob):
             user_path = self._get_user_profile_path(True, self.ctx)
             # logger.debug(f"Init: user_path: {user_path}")
             self._user_path = user_path
-        except Exception as err:
+        except Exception:
             # logger.error(err)
             pass
 
         self._add_local_path_to_sys_path()
+        if TYPE_CHECKING:
+            # design time
+            self._config = Config()
+        else:
+            # run time
+            # from lo_pip.input_output import file_util
+            from lo_pip.config import Config
 
-        # for pth in sys.path:
-        #     logger.debug(f"Sys.path at Init: {pth}")
+            self._config = Config()
+
         self._logger = self._get_local_logger()
         self._logger.debug("Got OxtLogger instance")
         self._logger.debug("OooPipRunner Init Done")
+
+        self._add_py_req_pkgs_to_sys_path()
 
     def _get_user_profile_path(self, as_sys_path: bool = True, ctx: Any = None) -> str:
         """
@@ -81,14 +91,42 @@ class ___lo_implementation_name___(unohelper.Base, XJob):
             return
         if self._this_pth in sys.path:
             sys.path.remove(self._this_pth)
-            # logger.debug(f"{self._this_pth}: removed from sys.path")
+            self._logger.debug(f"sys.path removed: {self._this_pth}")
         self._path_added = False
 
     def _add_py_pkgs_to_sys_path(self) -> None:
-        pth = os.path.join(os.path.dirname(__file__), "py_pkgs.zip")
-        if not pth in sys.path:
-            self._logger.debug(f"{pth}: appended to sys.path")
-            sys.path.append(pth)
+        # pth = os.path.join(os.path.dirname(__file__), "py_pkgs.zip")
+        pth = Path(os.path.dirname(__file__), f"{self._config.py_pkg_dir}.zip")
+        if not pth.exists():
+            return
+        str_pth = str(pth)
+        if not str_pth in sys.path:
+            self._logger.debug(f"sys.path appended: {str_pth}")
+            sys.path.append(str_pth)
+
+    def _add_py_req_pkgs_to_sys_path(self) -> None:
+        pth = Path(os.path.dirname(__file__), f"req_{self._config.py_pkg_dir}.zip")
+        if not pth.exists():
+            return
+        # should be only LibreOffice on Windows needs packaging
+        try:
+            self._logger.debug("Importing packaging")
+            import packaging  # noqa: F401
+
+            self._logger.debug("packaging imported")
+        except ModuleNotFoundError:
+            self._logger.debug("packaging not found. Adding to sys.path")
+            str_pth = str(pth)
+            if not str_pth in sys.path:
+                self._logger.debug(f"sys.path appended: {str_pth}")
+                sys.path.append(str_pth)
+
+    def _remove_py_req_pkgs_from_sys_path(self) -> None:
+        pth = Path(os.path.dirname(__file__), f"req_{self._config.py_pkg_dir}.zip")
+        str_pth = str(pth)
+        if str_pth in sys.path:
+            self._logger.debug(f"sys.path removed: {str_pth}")
+            sys.path.remove(str_pth)
 
     def execute(self, *args):
         # make sure our pythonpath is in sys.path
@@ -97,32 +135,22 @@ class ___lo_implementation_name___(unohelper.Base, XJob):
         try:
             self._add_local_path_to_sys_path()
             self._add_py_pkgs_to_sys_path()
+            self._add_py_req_pkgs_to_sys_path()
 
             if not TYPE_CHECKING:
                 # run time
-                # from lo_pip.input_output import file_util
-                from lo_pip.config import Config
-
-                cfg = Config()
-
-                self._logger.debug("Imported Config")
                 from lo_pip.install.install_pip import InstallPip
 
                 self._logger.debug("Imported InstallPip")
                 from lo_pip.install.install_pkg import InstallPkg
 
-                self._logger.debug("Imported InstallPkg")
-            else:
-                # design time
-                cfg = Config()
-
             self._logger.debug("Created config instance")
-            if cfg.py_pkg_dir:
+            if self._config.py_pkg_dir:
                 # add package zip file to the sys.path
-                pth = os.path.join(os.path.dirname(__file__), f"{cfg.py_pkg_dir}.zip")
+                pth = os.path.join(os.path.dirname(__file__), f"{self._config.py_pkg_dir}.zip")
 
                 if os.path.exists(pth) and os.path.isfile(pth) and os.path.getsize(pth) > 0 and not pth in sys.path:
-                    self._logger.debug(f"{pth} appended to sys.path")
+                    self._logger.debug(f"sys.path appended: {pth}")
                     sys.path.append(pth)
             # sys.path.insert(0, sys.path.pop(sys.path.index(pth)))
 
@@ -149,6 +177,7 @@ class ___lo_implementation_name___(unohelper.Base, XJob):
                 self._logger.error(err)
         finally:
             self._remove_local_path_from_sys_path()
+            self._remove_py_req_pkgs_from_sys_path()
         return
 
 

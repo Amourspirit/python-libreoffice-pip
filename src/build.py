@@ -6,6 +6,7 @@ from . import file_util
 from .build_args import BuildArgs
 from .processing.token import Token
 from .processing.packages import Packages
+from .processing.req_packages import ReqPackages
 from .processing.update import Update
 from .processing.json_config import JsonConfig
 
@@ -33,6 +34,10 @@ class Build:
             self._process_tokens()
 
         self._process_config()
+        self._copy_py_req_packages()
+        self._copy_py_req_files()
+        self._clear_req_cache()
+        self._zip_req_python_path()
 
         if self._args.process_py_packages:
             pythonpath = self._build_path / self._config.py_pkg_dir
@@ -97,14 +102,41 @@ class Build:
         packages = Packages()
         packages.copy_files(self._build_path / self._config.py_pkg_dir)
 
+    def _copy_py_req_packages(self) -> None:
+        """Copies the python packages to the build directory."""
+        packages = ReqPackages()
+        packages.copy_packages(self._build_path / f"req_{self._config.py_pkg_dir}")
+
+    def _copy_py_req_files(self) -> None:
+        """Copies the python files to the build directory."""
+        packages = ReqPackages()
+        packages.copy_files(self._build_path / f"req_{self._config.py_pkg_dir}")
+
     def _clear_cache(self) -> None:
         """Cleans the cache."""
         packages = Packages()
+        if not packages.has_modules():
+            return
         packages.clear_cache(self._build_path / self._config.py_pkg_dir)
+
+    def _clear_req_cache(self) -> None:
+        """Cleans the cache."""
+        packages = ReqPackages()
+        packages.clear_cache(self._build_path / f"req_{self._config.py_pkg_dir}")
 
     def _zip_python_path(self) -> None:
         """Zips the python path."""
         pth = self._build_path / self._config.py_pkg_dir
+        if not pth.exists():
+            return
+        file_util.zip_folder(folder=pth)
+        shutil.rmtree(pth)
+
+    def _zip_req_python_path(self) -> None:
+        """Zips the required packages path."""
+        pth = self._build_path / f"req_{self._config.py_pkg_dir}"
+        if not pth.exists():
+            return
         file_util.zip_folder(folder=pth)
         shutil.rmtree(pth)
 

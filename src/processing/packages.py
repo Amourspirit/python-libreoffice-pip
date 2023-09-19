@@ -2,7 +2,7 @@ from __future__ import annotations
 import os
 import sys
 import shutil
-from typing import Set
+from typing import Set, cast, List
 from pathlib import Path
 
 import toml
@@ -15,9 +15,8 @@ class Packages(metaclass=Singleton):
 
     def __init__(self) -> None:
         self._config = Config()
-        cfg = toml.load(self._config.toml_path)
-        self._pkg_names: Set[str] = set(cfg["tool"]["oxt"]["config"]["py_pkg_names"])
-        self._pkg_files: Set[str] = set(cfg["tool"]["oxt"]["config"]["py_pkg_files"])
+        self._pkg_names = self._get_package_names()
+        self._pkg_files = self._get_package_files()
         self._venv_path = Path(self._get_virtual_env_path())
         major, minor, *_ = sys.version_info
         self._site_packages_path = self._venv_path / "lib" / f"python{major}.{minor}" / "site-packages"
@@ -28,6 +27,32 @@ class Packages(metaclass=Singleton):
             raise FileNotFoundError("Unable to get Site Packages Path")
 
     # region Methods
+
+    def _get_package_names(self) -> Set[str]:
+        """Gets the Package Names."""
+        cfg = toml.load(self._config.toml_path)
+        lst = cast(List[str], cfg["tool"]["oxt"]["config"]["py_pkg_names"])
+        if not isinstance(lst, list):
+            raise ValueError("py_pkg_names is not a list")
+        self._check_list_values_are_strings(lst)
+        pkg_names: Set[str] = set(lst)
+        return pkg_names
+
+    def _get_package_files(self) -> Set[str]:
+        """Gets the Package Files."""
+        cfg = toml.load(self._config.toml_path)
+        lst = cast(List[str], cfg["tool"]["oxt"]["config"]["py_pkg_files"])
+        if not isinstance(lst, list):
+            raise ValueError("py_pkg_files is not a list")
+        self._check_list_values_are_strings(lst)
+        pkg_files: Set[str] = set(lst)
+        return pkg_files
+
+    def _check_list_values_are_strings(self, lst: List[str]) -> None:
+        """Check that all the values in the list are strings."""
+        for item in lst:
+            if not isinstance(item, str):
+                raise ValueError(f"item '{item}' is not a string")
 
     def _get_virtual_env_path(self) -> str:
         """
@@ -92,6 +117,10 @@ class Packages(metaclass=Singleton):
             dir = dest / dir
             if os.path.isdir(dir):
                 self.clear_cache(dir)
+
+    def has_modules(self) -> bool:
+        """Returns True if the packages has modules."""
+        return len(self._pkg_names) + len(self._pkg_files) > 0
 
     # endregion Methods
 

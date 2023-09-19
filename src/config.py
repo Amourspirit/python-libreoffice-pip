@@ -19,6 +19,7 @@ class Config(metaclass=Singleton):
         self._root_path = self._toml_path.parent
         cfg = toml.load(self._toml_path)
         token = Token()
+
         cfg_meta: Dict[str, Any] = cfg["tool"]["oxt"]["config"]
         self._build_dir_name = token.process(cast(str, cfg_meta["build_dir"]))
         self._dist_dir_name = token.process(cast(str, cfg_meta["dist_dir"]))
@@ -28,6 +29,24 @@ class Config(metaclass=Singleton):
         self._license = cast(str, cfg["tool"]["poetry"]["license"])
         self._token_file_ext: Set[str] = set(cast(list, cfg_meta["token_file_ext"]))
         self._py_pkg_dir = cast(str, cfg_meta["py_pkg_dir"])
+        self._validate()
+
+    def _validate(self) -> None:
+        """Validate the configuration."""
+        if not self._build_dir_name:
+            raise ValueError("build_dir_name is empty")
+        if not self._dist_dir_name:
+            raise ValueError("dist_dir_name is empty")
+        if not self._otx_name:
+            raise ValueError("otx_name is empty")
+        if not self._update_file:
+            raise ValueError("update_file is empty")
+        if not self._ver_str:
+            raise ValueError("ver_str is empty")
+        if not self._license:
+            raise ValueError("license is empty")
+        if not self._py_pkg_dir:
+            raise ValueError("py_pkg_dir is empty")
 
     # region Properties
     @property

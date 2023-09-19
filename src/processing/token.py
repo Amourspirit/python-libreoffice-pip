@@ -24,8 +24,31 @@ class Token(metaclass=Singleton):
         self._tokens["___py_pkg_dir___"] = str(cfg["tool"]["oxt"]["config"]["py_pkg_dir"])
         for token, replacement in self._tokens.items():
             self._tokens[token] = self.process(replacement)
+        self._validate()
 
     # region Methods
+    def _validate(self) -> None:
+        keys = {
+            "lo_identifier",
+            "lo_implementation_name",
+            "display_name_en_us",
+            "description_en_us",
+            "publisher_en_us",
+            "url_pip",
+            "log_format",
+        }
+        for key in keys:
+            str_key = f"___{key}___"
+            if str_key not in self._tokens:
+                raise ValueError(f"Token '{key}' not found")
+            if not self._tokens[str_key]:
+                raise ValueError(f"Token '{key}' is empty")
+        if "___log_level___" not in self._tokens:
+            raise ValueError("Token 'log_level' not found")
+        levels = {"debug", "info", "warning", "error", "critical"}
+        if self._tokens["___log_level___"].lower() not in levels:
+            raise ValueError(f"Token 'log_level' is invalid: {self._tokens['___log_level___']}")
+
     def process(self, text: str) -> str:
         """Processes the given text."""
         for token, replacement in self._tokens.items():

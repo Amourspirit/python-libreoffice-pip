@@ -4,8 +4,8 @@ dist_dir = "dist"
 oxt_name = "OooPip"
 token_file_ext = ["txt", "xml", "xcu"]
 update_file = "ooopip.ext.update.xml"
-py_pkg_names = ["packaging"]
-py_pkg_files = ["typing_extensions.py"]
+py_pkg_names = []  # ["ooodev", "ooo"]
+py_pkg_files = []
 py_pkg_dir = "py_pkgs"
 
 
