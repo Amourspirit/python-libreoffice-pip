@@ -5,7 +5,8 @@
     "dictionaries": [],
     "words": [
         "mkdirp",
-        "soffice"
+        "soffice",
+        "startupinfo"
     ],
     "ignoreWords": [],
     "import": []

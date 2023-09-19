@@ -18,8 +18,11 @@ from ..oxt_logger import OxtLogger
 
 # https://stackoverflow.com/search?q=%5Bpython%5D+run+subprocess+without+popup+terminal
 # silent subprocess
-_si = subprocess.STARTUPINFO()
-_si.dwFlags |= subprocess.STARTF_USESHOWWINDOW
+if os.name == "nt":
+    _si = subprocess.STARTUPINFO()
+    _si.dwFlags |= subprocess.STARTF_USESHOWWINDOW
+else:
+    _si = None
 
 
 class InstallPkg:
@@ -68,7 +71,10 @@ class InstallPkg:
         self._logger.info(f"Installing package {pkg}")
         msg = f"Pip Install - Upgrading success for: {pkg_cmd}"
         err_msg = f"Pip Install - Upgrading failed for: {pkg_cmd}"
-        process = subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, startupinfo=_si)
+        if _si:
+            process = subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, startupinfo=_si)
+        else:
+            process = subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         if process.returncode == 0:
             self._logger.info(msg)
         else:

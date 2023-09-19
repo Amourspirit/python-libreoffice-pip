@@ -4,15 +4,21 @@ import tempfile
 from pathlib import Path
 from typing import List
 import urllib.request
+import os
+
 
 from ..config import Config
 from ..oxt_logger import OxtLogger
 
 
 # https://stackoverflow.com/search?q=%5Bpython%5D+run+subprocess+without+popup+terminal
-# silent subprocess
-_si = subprocess.STARTUPINFO()
-_si.dwFlags |= subprocess.STARTF_USESHOWWINDOW
+# silent subprocess on Windows
+# Check for windows
+if os.name == "nt":
+    _si = subprocess.STARTUPINFO()
+    _si.dwFlags |= subprocess.STARTF_USESHOWWINDOW
+else:
+    _si = None
 
 
 class InstallPip:
@@ -45,8 +51,10 @@ class InstallPip:
                 # "Starting PIP installation…"
                 self._logger.info("Starting PIP installation…")
                 cmd = [str(self.path_python), f"{filename}", "--user"]
-
-                process = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, startupinfo=_si)
+                if _si:
+                    process = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, startupinfo=_si)
+                else:
+                    process = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
                 stdout, stderr = process.communicate()
                 str_stderr = stderr.decode("utf-8")
                 if process.returncode != 0:
@@ -57,7 +65,10 @@ class InstallPip:
                     return
 
                 cmd = self._cmd_pip("--version")
-                process = subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, startupinfo=_si)
+                if _si:
+                    process = subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, startupinfo=_si)
+                else:
+                    process = subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
                 if process.returncode == 0:
                     # "PIP was installed successfully"
                     self._logger.info("PIP was installed successfully")
@@ -118,7 +129,12 @@ class InstallPip:
             cmd = self._cmd_pip(*[*cmd, "-r", f"{path}"])
             msg = "Install - Installing requirements success!"
             err_msg = "Install - Installing requirements failed!"
-        process = subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, startupinfo=_si)
+        if _si:
+            process = subprocess.run(
+                cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, startupinfo=_si
+            )  # noqa: E501
+        else:
+            process = subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         if process.returncode == 0:
             self._logger.info(msg)
         else:
@@ -128,7 +144,10 @@ class InstallPip:
     def is_pip_installed(self) -> bool:
         """Check if PIP is installed."""
         cmd = self._cmd_pip("--version")
-        result = subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, startupinfo=_si)
+        if _si:
+            result = subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, startupinfo=_si)
+        else:
+            result = subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         if result.returncode == 0:
             return True
         return False
