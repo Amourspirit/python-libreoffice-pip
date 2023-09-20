@@ -4,9 +4,10 @@ dist_dir = "dist"
 oxt_name = "OooPip"
 token_file_ext = ["txt", "xml", "xcu"]
 update_file = "ooopip.ext.update.xml"
-py_pkg_names = []  # ["ooodev", "ooo"]
+py_pkg_names = [] # ["ooodev", "ooo"]
 py_pkg_files = []
 py_pkg_dir = "py_pkgs"
+zip_preinstall_pure = true
 
 
 [tool.oxt.token]
@@ -30,8 +31,10 @@ log_format = "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
 
 [tool.oxt.requirements]
 # https://python-poetry.org/docs/dependency-specification/
-verr = "^1.1.2"
 typing-extensions = ">=4.7.0"
+
+[tool.oxt.preinstall.pure]
+verr = ">=1.1.2"
 
 [tool.poetry]
 name = "libreoffice pip template"

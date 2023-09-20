@@ -22,7 +22,11 @@ def _args_process_cmd(args: argparse.Namespace) -> None:
 def _args_action_build(args: argparse.Namespace) -> None:
     builder = Build(
         args=BuildArgs(
-            clean=args.clean, oxt_src=args.oxt_source, process_tokens=args.process_tokens, make_dist=args.make_dist
+            clean=args.clean,
+            oxt_src=args.oxt_source,
+            process_tokens=args.process_tokens,
+            make_dist=args.make_dist,
+            pre_install_pure_packages=args.process_pure,
         )
     )
     print("Processing...", end="", flush=True)
@@ -49,6 +53,14 @@ def _args_add_sub_build(parser: argparse.ArgumentParser) -> None:
         help="Do not process tokens",
         action="store_false",
         dest="process_tokens",
+        default=True,
+    )
+    parser.add_argument(
+        "-p",
+        "--no-pure-packages",
+        help="Do not pre-install pure packages",
+        action="store_false",
+        dest="process_pure",
         default=True,
     )
     parser.add_argument(

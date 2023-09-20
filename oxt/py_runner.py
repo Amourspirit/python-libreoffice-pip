@@ -5,6 +5,7 @@ import uno
 import unohelper
 import sys
 import os
+import time
 
 from com.sun.star.task import XJob
 
@@ -104,6 +105,17 @@ class ___lo_implementation_name___(unohelper.Base, XJob):
             self._logger.debug(f"sys.path appended: {str_pth}")
             sys.path.append(str_pth)
 
+    def _add_pure_pkgs_to_sys_path(self) -> None:
+        # pth = os.path.join(os.path.dirname(__file__), "py_pkgs.zip")
+        pth = Path(os.path.dirname(__file__), f"pure.zip")
+        if not pth.exists():
+            self._logger.debug(f"pure.zip not found: {pth}")
+            return
+        str_pth = str(pth)
+        if not str_pth in sys.path:
+            self._logger.debug(f"sys.path appended: {str_pth}")
+            sys.path.append(str_pth)
+
     def _add_py_req_pkgs_to_sys_path(self) -> None:
         pth = Path(os.path.dirname(__file__), f"req_{self._config.py_pkg_dir}.zip")
         if not pth.exists():
@@ -131,11 +143,14 @@ class ___lo_implementation_name___(unohelper.Base, XJob):
     def execute(self, *args):
         # make sure our pythonpath is in sys.path
         self._logger.debug("OooPipRunner executing")
+        start_time = time.time()
+
         # logger = None
         try:
             self._add_local_path_to_sys_path()
             self._add_py_pkgs_to_sys_path()
             self._add_py_req_pkgs_to_sys_path()
+            self._add_pure_pkgs_to_sys_path()
 
             if not TYPE_CHECKING:
                 # run time
@@ -172,13 +187,16 @@ class ___lo_implementation_name___(unohelper.Base, XJob):
             self._logger.debug("Created InstallPkg instance")
             pkg_installer.install()
 
-            self._logger.info("OooPipRunner execute Done!")
+            self._logger.info("___lo_implementation_name___ execute Done!")
         except Exception as err:
             if self._logger:
                 self._logger.error(err)
         finally:
             self._remove_local_path_from_sys_path()
             self._remove_py_req_pkgs_from_sys_path()
+        end_time = time.time()
+        if self._logger:
+            self._logger.info(f"___lo_implementation_name___ execution time: {end_time - start_time} seconds")
         return
 
 

@@ -35,6 +35,7 @@ class ConfigMeta(type):
                     "log_format": "%(asctime)s - %(name)s - %(levelname)s - %(message)s",
                     "py_pkg_dir": "py_pkgs",
                     "requirements": {},
+                    "zipped_preinstall_pure": False,
                 }
                 # logger.debug("Configuration: no config.json, using defaults")
 
@@ -62,6 +63,7 @@ class Config(metaclass=ConfigMeta):
         self._log_name = str(kwargs["log_name"])
         self._log_format = str(kwargs["log_format"])
         self._py_pkg_dir = str(kwargs["py_pkg_dir"])
+        self._zipped_preinstall_pure = bool(kwargs["zipped_preinstall_pure"])
         if "requirements" not in kwargs:
             kwargs["requirements"] = {}
         self._requirements: Dict[str, str] = dict(**kwargs["requirements"])
@@ -171,3 +173,14 @@ class Config(metaclass=ConfigMeta):
         Example: {"requests": ">=2.25.1"}
         """
         return self._requirements
+
+    @property
+    def zipped_preinstall_pure(self) -> bool:
+        """
+        Gets the flag indicating if pure python packages are be zipped.
+
+        The value for this property can be set in pyproject.toml (tool.oxt.config.zip_preinstall_pure)
+
+        If this is set to ``True`` then pure python packages will be zipped and installed as a zip file.
+        """
+        return self._zipped_preinstall_pure

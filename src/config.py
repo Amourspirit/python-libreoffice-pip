@@ -27,8 +27,9 @@ class Config(metaclass=Singleton):
         self._update_file = token.process(cast(str, cfg_meta["update_file"]))
         self._ver_str = cast(str, cfg["tool"]["poetry"]["version"])
         self._license = cast(str, cfg["tool"]["poetry"]["license"])
-        self._token_file_ext: Set[str] = set(cast(list, cfg_meta["token_file_ext"]))
+        self._token_file_ext: Set[str] = set(cast(List, cfg_meta["token_file_ext"]))
         self._py_pkg_dir = cast(str, cfg_meta["py_pkg_dir"])
+        self._zip_preinstall_pure = cast(bool, cfg_meta["zip_preinstall_pure"])
         self._validate()
 
     def _validate(self) -> None:
@@ -101,8 +102,19 @@ class Config(metaclass=Singleton):
 
         This property is related ot the py_pkg_names and py_pkg_files properties.
         This is the directory that will be created in the oxt zip file and an
-        embeded zip that contains 'py_pkg_names' directories and 'py_pkg_files' names.
+        embedded zip that contains 'py_pkg_names' directories and 'py_pkg_files' names.
         """
         return self._py_pkg_dir
+
+    @property
+    def zip_preinstall_pure(self) -> bool:
+        """
+        Whether to zip the preinstall pure python files.
+
+        If True, the preinstall pure python files will be zipped and embedded in the
+        oxt zip file. If False, the preinstall pure python files will be copied to
+        the oxt pythonpath file.
+        """
+        return self._zip_preinstall_pure
 
     # endregion Properties

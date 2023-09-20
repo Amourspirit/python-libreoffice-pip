@@ -9,6 +9,7 @@ from .processing.packages import Packages
 from .processing.req_packages import ReqPackages
 from .processing.update import Update
 from .processing.json_config import JsonConfig
+from .install.pre_install_pure import PreInstallPure
 
 
 class Build:
@@ -48,6 +49,9 @@ class Build:
             self._copy_py_files()
             self._clear_cache()
             self._zip_python_path()
+
+        if self._args.pre_install_pure_packages:
+            self._pre_install_pure_packages()
 
         if self._args.make_dist:
             self._zip_build()
@@ -131,6 +135,11 @@ class Build:
             return
         file_util.zip_folder(folder=pth)
         shutil.rmtree(pth)
+
+    def _pre_install_pure_packages(self) -> None:
+        """Installs the pure python packages."""
+        pre_install = PreInstallPure()
+        pre_install.install()
 
     def _zip_req_python_path(self) -> None:
         """Zips the required packages path."""

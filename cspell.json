@@ -6,8 +6,10 @@
     "words": [
         "flatpak",
         "mkdirp",
+        "preinstall",
         "soffice",
-        "startupinfo"
+        "startupinfo",
+        "unohelper"
     ],
     "ignoreWords": [],
     "import": []

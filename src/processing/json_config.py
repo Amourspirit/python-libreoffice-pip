@@ -16,6 +16,10 @@ class JsonConfig(metaclass=Singleton):
         self._config = Config()
         cfg = toml.load(self._config.toml_path)
         self._requirements = cast(Dict[str, str], cfg["tool"]["oxt"]["requirements"])
+        try:
+            self._zip_preinstall_pure = bool(cfg["tool"]["oxt"]["config"]["zip_preinstall_pure"])
+        except Exception:
+            self._zip_preinstall_pure = False
 
     def update_json_config(self, json_config_path: Path) -> None:
         """Read and updates the config.json file."""
@@ -29,6 +33,7 @@ class JsonConfig(metaclass=Singleton):
         json_config["log_format"] = token.tokens["___log_format___"]
         json_config["py_pkg_dir"] = token.tokens["___py_pkg_dir___"]
 
+        json_config["zipped_preinstall_pure"] = self._zip_preinstall_pure
         # update the requirements
         json_config["requirements"] = self._requirements
 

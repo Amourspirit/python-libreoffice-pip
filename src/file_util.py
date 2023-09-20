@@ -154,3 +154,26 @@ def is_on_path(name: str | Path) -> bool:
     Such as 'python', 'pip', 'git', etc.
     """
     return which(name) is not None
+
+
+def clear_cache(dst: str | Path) -> None:
+    """
+    Recursively removes generic `__pycache__` .
+
+    The `__pycache__` files are automatically created by python during the simulation.
+    This function removes the generic files on simulation start and simulation end.
+    """
+    if isinstance(dst, str):
+        dest = Path(dst)
+    else:
+        dest = dst
+    if not dest.exists():
+        return
+    del_dir = "__pycache__"
+    if del_dir in os.listdir(dst):
+        shutil.rmtree(dest / del_dir, ignore_errors=True)
+
+    for dir in os.listdir(dest):
+        dir = dest / dir
+        if os.path.isdir(dir):
+            clear_cache(dir)

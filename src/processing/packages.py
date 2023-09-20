@@ -8,6 +8,7 @@ from pathlib import Path
 import toml
 from ..meta.singleton import Singleton
 from ..config import Config
+from .. import file_util
 
 
 class Packages(metaclass=Singleton):
@@ -103,20 +104,7 @@ class Packages(metaclass=Singleton):
         The `__pycache__` files are automatically created by python during the simulation.
         This function removes the generic files on simulation start and simulation end.
         """
-        if isinstance(dst, str):
-            dest = Path(dst)
-        else:
-            dest = dst
-        if not dest.exists():
-            return
-        del_dir = "__pycache__"
-        if del_dir in os.listdir(dst):
-            shutil.rmtree(dest / del_dir, ignore_errors=True)
-
-        for dir in os.listdir(dest):
-            dir = dest / dir
-            if os.path.isdir(dir):
-                self.clear_cache(dir)
+        file_util.clear_cache(dst)
 
     def has_modules(self) -> bool:
         """Returns True if the packages has modules."""
