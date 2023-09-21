@@ -4,6 +4,7 @@ from pathlib import Path
 from typing import Dict
 import json
 import sys
+import platform
 
 # import logging
 
@@ -25,8 +26,6 @@ class ConfigMeta(type):
                     data = json.load(file)
                     # logger.debug("Configuration: Loaded config.json")
             else:
-                # provide defaults because at this time scriptmerge
-                # does not include non *.py files when it packages scripts
                 data = {
                     "url_pip": "https://bootstrap.pypa.io/get-pip.py",
                     "log_file": "lo_pip.log",
@@ -43,6 +42,11 @@ class ConfigMeta(type):
         return cls._instance
 
 
+OS = platform.system()
+IS_WIN = OS == "Windows"
+IS_MAC = OS == "Darwin"
+
+
 class Config(metaclass=ConfigMeta):
     """
     Singleton Configuration Class
@@ -51,6 +55,8 @@ class Config(metaclass=ConfigMeta):
     """
 
     def __init__(self, **kwargs):
+        from .lo_util import Util
+
         log_file = str(kwargs["log_file"])
         if log_file:
             log_pth = Path(log_file)
@@ -67,14 +73,23 @@ class Config(metaclass=ConfigMeta):
         if "requirements" not in kwargs:
             kwargs["requirements"] = {}
         self._requirements: Dict[str, str] = dict(**kwargs["requirements"])
-        python_path = file_util.get_which("python")
-        if not python_path:
-            python_path = sys.executable
-        if not python_path:
-            raise FileNotFoundError("python not found")
-        self._python_path = Path(python_path)
         self._log_level = self._get_log_level(kwargs["log_level"])
+        self._os = platform.system()
+        self._is_win = self._os == "Windows"
+        self._is_mac = self._os == "Darwin"
+
+        util = Util()
+        if self._is_win:
+            self._python_path = Path(self.join(util.config("Module"), "python.exe"))
+        elif self._is_mac:
+            self._python_path = Path(self.join(util.config("Module"), "..", "Resources", "python"))
+        else:
+            self._python_path = Path(sys.executable)
+
         # logger.debug("Config.__init__ completed")
+
+    def join(self, *paths: str):
+        return str(Path(paths[0]).joinpath(*paths[1:]))
 
     def _get_log_level(self, log_level: str | int) -> int:
         if isinstance(log_level, str):
@@ -184,3 +199,24 @@ class Config(metaclass=ConfigMeta):
         If this is set to ``True`` then pure python packages will be zipped and installed as a zip file.
         """
         return self._zipped_preinstall_pure
+
+    @property
+    def is_win(self) -> bool:
+        """
+        Gets the flag indicating if the operating system is Windows.
+        """
+        return self._is_win
+
+    @property
+    def is_mac(self) -> bool:
+        """
+        Gets the flag indicating if the operating system is macOS.
+        """
+        return self._is_mac
+
+    @property
+    def os(self) -> str:
+        """
+        Gets the operating system.
+        """
+        return self._os

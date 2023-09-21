@@ -1,38 +1,45 @@
 from __future__ import annotations
+import platform
 import subprocess
 import tempfile
 from pathlib import Path
 from typing import List
-import urllib.request
+
+# import urllib.request
 import os
 
 
 from ..config import Config
 from ..oxt_logger import OxtLogger
 from . import detect
+from .download import Download
+
+IS_WIN = platform.system() == "Windows"
 
 # https://stackoverflow.com/search?q=%5Bpython%5D+run+subprocess+without+popup+terminal
 # silent subprocess on Windows
 # Check for windows
-if os.name == "nt":
-    _si = subprocess.STARTUPINFO()
-    _si.dwFlags |= subprocess.STARTF_USESHOWWINDOW
+if IS_WIN:
+    _si = subprocess.STARTUPINFO()  # type: ignore
+    _si.dwFlags |= subprocess.STARTF_USESHOWWINDOW  # type: ignore
 else:
     _si = None
 
 
 class InstallPip:
-    """Singleton class for the PIP install."""
+    """class for the PIP install."""
 
     def __init__(self) -> None:
         self._config = Config()
-        self.path_python = Path(self._config.python_path)
         self._logger = OxtLogger(log_name=__name__)
+        self.path_python = self._config.python_path
+        self._logger.debug(f"Python path: {self.path_python}")
 
     def install_pip(self) -> None:
         if detect.is_flatpak():
             self._logger.error("PIP installation has failed - Flatpak")
             return
+
         with tempfile.TemporaryDirectory() as temp_dir:
             # Do something with the temporary directory
             # print(f"Temporary directory created at {temp_dir}")
@@ -40,11 +47,18 @@ class InstallPip:
 
             url = self._config.url_pip
             filename = path_pip / "get-pip.py"
+            dl = Download()
+            data, h, err = dl.url_open(url, verify=False)
+            if err:
+                self._logger.error("Unable to download PIP installation file")
+                return
+            dl.save_binary(pth=filename, data=data)
 
-            urllib.request.urlretrieve(url, filename)
+            # urllib.request.urlretrieve(url, filename)
 
-            if not filename.exists():
-                # msg = ("Unable to copy PIP installation file",)
+            if filename.exists():
+                self._logger.info("PIP installation file has been saved")
+            else:
                 self._logger.error("Unable to copy PIP installation file")
                 return
 
@@ -146,14 +160,14 @@ class InstallPip:
 
     def is_pip_installed(self) -> bool:
         """Check if PIP is installed."""
-        cmd = self._cmd_pip("--version")
+        # cmd = self._cmd_pip("--version")
+        # cmd = '"{}" -m pip -V'.format(self.path_python)
+        cmd = [str(self.path_python), "-m", "pip", "-V"]
         if _si:
             result = subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, startupinfo=_si)
         else:
             result = subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-        if result.returncode == 0:
-            return True
-        return False
+        return result.returncode == 0
 
     # def cmd_shell_action(self, event: Any) -> None:
     #     cmd = None

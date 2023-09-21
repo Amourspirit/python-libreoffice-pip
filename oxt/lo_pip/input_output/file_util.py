@@ -162,9 +162,9 @@ def get_user_profile_path(as_sys_path: bool = True, ctx: Any = None) -> str:
     Returns the path to the user profile directory.
 
     Args:
-        as_sys_path (bool): If True, returns the path as a system path entry otherwise ``file:///`` format.
+        as_sys_path (bool, optional): If True, returns the path as a system path entry otherwise ``file:///`` format.
             Defaults to True.
-        ctx (Any): The context to use. Defaults to None.
+        ctx (Any, optional): The context to use. Defaults to None.
     """
     if ctx is None:
         ctx = uno.getComponentContext()
@@ -173,6 +173,30 @@ def get_user_profile_path(as_sys_path: bool = True, ctx: Any = None) -> str:
     ).substituteVariables(  # type: ignore
         "$(user)", True
     )
-    if as_sys_path:
-        return uno.fileUrlToSystemPath(result)
-    return result
+    return uno.fileUrlToSystemPath(result) if as_sys_path else result
+
+
+def get_package_location(pkg_id: str, as_sys_path: bool = True, ctx: Any = None) -> str:
+    """
+    Gets the package location.
+
+    Something link this: 'file:///home/user/.config/libreoffice/4/user/uno_packages/cache/uno_packages/lu323960zf5pw.tmp_/OooPip.oxt'
+
+    Args:
+        pkg_id (str): _description_
+        as_sys_path (bool, optional): If True, returns the path as a system path entry otherwise ``file:///`` format.
+            Defaults to True.
+        ctx (Any, optional): The context to use. Defaults to None.
+
+    Returns:
+        str: _description_
+    """
+    # sourcery skip: reintroduce-else, swap-if-else-branches, use-named-expression
+    if ctx is None:
+        ctx = uno.getComponentContext()
+    pip = ctx.getValueByName("/singletons/com.sun.star.deployment.PackageInformationProvider")
+    # pip.getPackageLocation("org.openoffice.extensions.ooopip")
+    result = pip.getPackageLocation(pkg_id)
+    if not result:
+        return ""
+    return uno.fileUrlToSystemPath(result) if as_sys_path else result
