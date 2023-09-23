@@ -7,11 +7,6 @@ import os
 import sys
 import platform
 
-# import logging
-
-# logger = logging.getLogger(__name__)
-# logger.debug("config.py imported")
-
 from .input_output import file_util
 
 
@@ -89,10 +84,7 @@ class Config(metaclass=ConfigMeta):
         if app_img:
             self._is_app_image = True
         flat_pak_id = os.getenv("FLATPAK_ID", "")
-        if flat_pak_id.lower() == "org.libreoffice.libreoffice":
-            self._is_flatpak = True
-        else:
-            self._is_flatpak = False
+        self._is_flatpak = flat_pak_id.lower() == "org.libreoffice.libreoffice"
         self._site_packages = ""
         util = Util()
         self._python_major_minor = self._get_python_major_minor()
