@@ -49,10 +49,7 @@ class PipInstallBuild:
             target = f'"{target}"'
         cmd = ["install", f"--target={target}"]
 
-        if ver:
-            pkg_cmd = f"{pkg}{ver}"
-        else:
-            pkg_cmd = pkg
+        pkg_cmd = f"{pkg}{ver}" if ver else pkg
         cmd = self._cmd_pip(*[*cmd, pkg_cmd])
         # msg = f"Pip Install - Upgrading success for: {pkg_cmd}"
         err_msg = f"Pip Install - Upgrading failed for: {pkg_cmd}"
@@ -60,9 +57,7 @@ class PipInstallBuild:
             process = subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, startupinfo=_si)
         else:
             process = subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-        if process.returncode == 0:
-            pass
-        else:
+        if process.returncode != 0:
             raise Exception(err_msg)
         return
 

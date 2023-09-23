@@ -20,6 +20,10 @@ class JsonConfig(metaclass=Singleton):
             self._zip_preinstall_pure = bool(cfg["tool"]["oxt"]["config"]["zip_preinstall_pure"])
         except Exception:
             self._zip_preinstall_pure = False
+        try:
+            self._pip_wheel_url = str(cfg["tool"]["oxt"]["config"]["pip_wheel_url"])
+        except Exception:
+            self._pip_wheel_url = ""
 
     def update_json_config(self, json_config_path: Path) -> None:
         """Read and updates the config.json file."""
@@ -32,8 +36,11 @@ class JsonConfig(metaclass=Singleton):
         json_config["log_file"] = token.tokens["___log_file___"]
         json_config["log_format"] = token.tokens["___log_format___"]
         json_config["py_pkg_dir"] = token.tokens["___py_pkg_dir___"]
+        json_config["lo_identifier"] = token.tokens["___lo_identifier___"]
+        json_config["lo_implementation_name"] = token.tokens["___lo_implementation_name___"]
 
         json_config["zipped_preinstall_pure"] = self._zip_preinstall_pure
+        json_config["pip_wheel_url"] = self._pip_wheel_url
         # update the requirements
         json_config["requirements"] = self._requirements
 

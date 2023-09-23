@@ -7,7 +7,9 @@ update_file = "ooopip.ext.update.xml"
 py_pkg_names = [] # ["ooodev", "ooo"]
 py_pkg_files = []
 py_pkg_dir = "py_pkgs"
+pip_wheel_url = "https://files.pythonhosted.org/packages/50/c2/e06851e8cc28dcad7c155f4753da8833ac06a5c704c109313b8d5a62968a/pip-23.2.1-py3-none-any.whl"
 zip_preinstall_pure = true
+
 
 
 [tool.oxt.token]

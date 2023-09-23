@@ -105,10 +105,7 @@ def zip_folder(folder: str | Path, base_name: str = "", dest_dir: str | Path = "
     Returns:
         None
     """
-    if isinstance(folder, str):
-        folder_path = Path(folder)
-    else:
-        folder_path = folder
+    folder_path = Path(folder) if isinstance(folder, str) else folder
     if not folder_path.is_dir():
         raise ValueError(f"Expected folder, got '{folder_path}'")
     if not folder_path.is_absolute():
@@ -119,10 +116,7 @@ def zip_folder(folder: str | Path, base_name: str = "", dest_dir: str | Path = "
         base_name = folder_path.name
 
     if isinstance(dest_dir, str):
-        if dest_dir == "":
-            dest_dir = folder_path.parent
-        else:
-            dest_dir = Path(dest_dir)
+        dest_dir = folder_path.parent if dest_dir == "" else Path(dest_dir)
     else:
         dest_dir = dest_dir.absolute()
 
@@ -135,6 +129,49 @@ def zip_folder(folder: str | Path, base_name: str = "", dest_dir: str | Path = "
         shutil.make_archive(base_name, "zip", folder_path)
 
 
+def unzip_file(zip_file: str | Path, dest_dir: str | Path = "") -> None:
+    """
+    Unzip the given zip file to the specified destination directory.
+
+    Args:
+        zip_file (str | Path): The zip file to unzip.
+        dest_dir (str | Path, optional): The destination directory to unzip to.
+
+    Returns:
+        None:
+    """
+    from zipfile import ZipFile
+
+    zip_file_path = Path(zip_file) if isinstance(zip_file, str) else zip_file
+    if not zip_file_path.is_file():
+        raise ValueError(f"Expected file, got '{zip_file_path}'")
+    if not zip_file_path.is_absolute():
+        zip_file_path = zip_file_path.absolute()
+    if not zip_file_path.exists():
+        raise FileNotFoundError(f"File '{zip_file_path}' not found")
+
+    if isinstance(dest_dir, str):
+        dest_dir = zip_file_path.parent if dest_dir == "" else Path(dest_dir)
+    else:
+        dest_dir = dest_dir.absolute()
+
+    if not dest_dir.is_dir():
+        raise ValueError(f"Expected folder, got '{dest_dir}'")
+    if not dest_dir.exists():
+        try:
+            dest_dir.mkdir(parents=True)
+        except Exception as e:
+            raise FileNotFoundError(f"Folder '{dest_dir}' not found, unable to create folder.") from e
+        if not dest_dir.exists():
+            raise FileNotFoundError(f"Folder '{dest_dir}' not found")
+
+    with change_dir(dest_dir):
+        with ZipFile(zip_file_path) as f:
+            f.extractall(dest_dir)
+    # with change_dir(dest_dir):
+    #     shutil.unpack_archive(zip_file_path, dest_dir)
+
+
 def get_which(name: str | Path) -> str:
     """
     Returns the path to the executable which would be executed in the current
@@ -143,9 +180,7 @@ def get_which(name: str | Path) -> str:
     Such as 'python', 'pip', 'git', etc.
     """
     result = which(name)
-    if result is None:
-        return ""
-    return str(result)
+    return "" if result is None else str(result)
 
 
 def is_on_path(name: str | Path) -> bool:

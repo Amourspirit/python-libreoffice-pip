@@ -3,6 +3,7 @@ from __future__ import annotations
 from pathlib import Path
 from typing import Dict
 import json
+import os
 import sys
 import platform
 
@@ -33,6 +34,9 @@ class ConfigMeta(type):
                     "log_level": "INFO",
                     "log_format": "%(asctime)s - %(name)s - %(levelname)s - %(message)s",
                     "py_pkg_dir": "py_pkgs",
+                    "pip_wheel_url": "",
+                    "lo_identifier": "",
+                    "lo_implementation_name": "",
                     "requirements": {},
                     "zipped_preinstall_pure": False,
                 }
@@ -66,9 +70,12 @@ class Config(metaclass=ConfigMeta):
         # self._log_file = "D:\\tmp\\log\\py_runner.log"
         # logger.debug("Config.__init__ called")
         self._url_pip = str(kwargs["url_pip"])
+        self._pip_wheel_url = str(kwargs["pip_wheel_url"])
         self._log_name = str(kwargs["log_name"])
         self._log_format = str(kwargs["log_format"])
         self._py_pkg_dir = str(kwargs["py_pkg_dir"])
+        self._lo_identifier = str(kwargs["lo_identifier"])
+        self._lo_implementation_name = str(kwargs["lo_implementation_name"])
         self._zipped_preinstall_pure = bool(kwargs["zipped_preinstall_pure"])
         if "requirements" not in kwargs:
             kwargs["requirements"] = {}
@@ -77,14 +84,33 @@ class Config(metaclass=ConfigMeta):
         self._os = platform.system()
         self._is_win = self._os == "Windows"
         self._is_mac = self._os == "Darwin"
-
+        self._is_app_image = False
+        app_img = os.getenv("APPIMAGE", "")
+        if app_img:
+            self._is_app_image = True
+        flat_pak_id = os.getenv("FLATPAK_ID", "")
+        if flat_pak_id.lower() == "org.libreoffice.libreoffice":
+            self._is_flatpak = True
+        else:
+            self._is_flatpak = False
+        self._site_packages = ""
         util = Util()
+        self._python_major_minor = self._get_python_major_minor()
+
         if self._is_win:
             self._python_path = Path(self.join(util.config("Module"), "python.exe"))
         elif self._is_mac:
             self._python_path = Path(self.join(util.config("Module"), "..", "Resources", "python"))
+            self._site_packages = self._get_mac_site_packages_dir()
+        elif self._is_app_image:
+            self._python_path = Path(self.join(util.config("Module"), "python"))
+            self._site_packages = self._get_default_site_packages_dir()
         else:
             self._python_path = Path(sys.executable)
+            if self._is_flatpak:
+                self._site_packages = self._get_flatpak_site_packages_dir()
+            else:
+                self._site_packages = self._get_default_site_packages_dir()
 
         # logger.debug("Config.__init__ completed")
 
@@ -112,6 +138,28 @@ class Config(metaclass=ConfigMeta):
             return log_level
         else:
             raise TypeError(f"Invalid log level type: {type(log_level)}")
+
+    def _get_python_major_minor(self) -> str:
+        return f"{sys.version_info.major}.{sys.version_info.minor}"
+
+    def _get_default_site_packages_dir(self) -> str:
+        site_packages = Path.home() / f".local/lib/python{self.python_major_minor}/site-packages"
+        site_packages.mkdir(parents=True, exist_ok=True)
+        return str(site_packages)
+
+    def _get_flatpak_site_packages_dir(self) -> str:
+        sand_box = os.getenv("FLATPAK_SANDBOX_DIR", "") or str(
+            Path.home() / ".var/app/org.libreoffice.LibreOffice/sandbox"
+        )
+        site_packages = Path(sand_box) / f"lib/python{self.python_major_minor}/site-packages"
+        site_packages.mkdir(parents=True, exist_ok=True)
+        return str(site_packages)
+
+    def _get_mac_site_packages_dir(self) -> str:
+        # sourcery skip: class-extract-method
+        site_packages = Path.home() / f"Library/LibreOfficePython/{self.python_major_minor}/lib/python/site-packages"
+        site_packages.mkdir(parents=True, exist_ok=True)
+        return str(site_packages)
 
     @property
     def url_pip(self) -> str:
@@ -215,8 +263,65 @@ class Config(metaclass=ConfigMeta):
         return self._is_mac
 
     @property
+    def is_app_image(self) -> bool:
+        """
+        Gets the flag indicating if LibreOffice is running as an AppImage.
+        """
+        return self._is_app_image
+
+    @property
+    def is_flatpak(self) -> bool:
+        """
+        Gets the flag indicating if LibreOffice is running as a Flatpak.
+        """
+        return self._is_flatpak
+
+    @property
     def os(self) -> str:
         """
         Gets the operating system.
         """
         return self._os
+
+    @property
+    def pip_wheel_url(self) -> str:
+        """
+        Gets the pip wheel url.
+
+        May be empty string.
+        """
+        return self._pip_wheel_url
+
+    @property
+    def lo_identifier(self) -> str:
+        """
+        Gets the LibreOffice identifier, such as, ``org.openoffice.extensions.ooopip``
+
+        The value for this property can be set in pyproject.toml (tool.oxt.token.lo_identifier)
+        """
+        return self._lo_identifier
+
+    @property
+    def lo_implementation_name(self) -> str:
+        """
+        Gets the LibreOffice implementation name, such as ``OooPipRunner``
+
+        The value for this property can be set in pyproject.toml (tool.oxt.token.lo_implementation_name)
+        """
+        return self._lo_implementation_name
+
+    @property
+    def python_major_minor(self) -> str:
+        """
+        Gets the python major minor version, such as ``3.9``
+        """
+        return self._python_major_minor
+
+    @property
+    def site_packages(self) -> str:
+        """
+        Gets the path to the site-packages directory. May be empty string.
+
+        Is valid for ``Flatpak``, ``MAC``, ``App Image``, ``Linux``.
+        """
+        return self._site_packages

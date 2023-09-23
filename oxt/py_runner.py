@@ -1,4 +1,5 @@
 from __future__ import unicode_literals, annotations
+import contextlib
 from typing import TYPE_CHECKING, Any
 from pathlib import Path
 import uno
@@ -27,25 +28,17 @@ class ___lo_implementation_name___(unohelper.Base, XJob):
         # logger.debug("OooPipRunner Init")
         self.ctx = ctx
         self._user_path = ""
-        try:
+        with contextlib.suppress(Exception):
             user_path = self._get_user_profile_path(True, self.ctx)
             # logger.debug(f"Init: user_path: {user_path}")
             self._user_path = user_path
-        except Exception:
-            # logger.error(err)
-            pass
-
         self._add_local_path_to_sys_path()
-        if TYPE_CHECKING:
-            # design time
-            self._config = Config()
-        else:
+        if not TYPE_CHECKING:
             # run time
-            # from lo_pip.input_output import file_util
             from lo_pip.config import Config
 
-            self._config = Config()
-
+        # design time
+        self._config = Config()
         self._logger = self._get_local_logger()
         self._logger.debug("Got OxtLogger instance")
         self._logger.debug("OooPipRunner Init Done")
@@ -67,9 +60,7 @@ class ___lo_implementation_name___(unohelper.Base, XJob):
         ).substituteVariables(  # type: ignore
             "$(user)", True
         )
-        if as_sys_path:
-            return uno.fileUrlToSystemPath(result)
-        return result
+        return uno.fileUrlToSystemPath(result) if as_sys_path else result
 
     def _get_local_logger(self) -> OxtLogger:
         from lo_pip.oxt_logger import OxtLogger
@@ -81,7 +72,7 @@ class ___lo_implementation_name___(unohelper.Base, XJob):
 
     def _add_local_path_to_sys_path(self) -> None:
         # add the path of this module to the sys.path
-        if not self._this_pth in sys.path:
+        if self._this_pth not in sys.path:
             sys.path.append(self._this_pth)
             # logger.debug(f"{self._this_pth}: appended to sys.path")
         self._path_added = True
@@ -101,18 +92,18 @@ class ___lo_implementation_name___(unohelper.Base, XJob):
         if not pth.exists():
             return
         str_pth = str(pth)
-        if not str_pth in sys.path:
+        if str_pth not in sys.path:
             self._logger.debug(f"sys.path appended: {str_pth}")
             sys.path.append(str_pth)
 
     def _add_pure_pkgs_to_sys_path(self) -> None:
         # pth = os.path.join(os.path.dirname(__file__), "py_pkgs.zip")
-        pth = Path(os.path.dirname(__file__), f"pure.zip")
+        pth = Path(os.path.dirname(__file__), "pure.zip")
         if not pth.exists():
             self._logger.debug(f"pure.zip not found: {pth}")
             return
         str_pth = str(pth)
-        if not str_pth in sys.path:
+        if str_pth not in sys.path:
             self._logger.debug(f"sys.path appended: {str_pth}")
             sys.path.append(str_pth)
 
@@ -129,7 +120,7 @@ class ___lo_implementation_name___(unohelper.Base, XJob):
         except ModuleNotFoundError:
             self._logger.debug("packaging not found. Adding to sys.path")
             str_pth = str(pth)
-            if not str_pth in sys.path:
+            if str_pth not in sys.path:
                 self._logger.debug(f"sys.path appended: {str_pth}")
                 sys.path.append(str_pth)
 
@@ -139,6 +130,15 @@ class ___lo_implementation_name___(unohelper.Base, XJob):
         if str_pth in sys.path:
             self._logger.debug(f"sys.path removed: {str_pth}")
             sys.path.remove(str_pth)
+
+    def _add_site_package_dir_to_sys_path(self) -> None:
+        if not self._config.site_packages:
+            return
+        if self._config.site_packages not in sys.path:
+            sys.path.append(self._config.site_packages)
+            self._logger.debug(f"sys.path appended: {self._config.site_packages}")
+        else:
+            self._logger.debug(f"sys.path already contains: {self._config.site_packages}")
 
     def execute(self, *args):
         # make sure our pythonpath is in sys.path
@@ -151,6 +151,7 @@ class ___lo_implementation_name___(unohelper.Base, XJob):
             self._add_py_pkgs_to_sys_path()
             self._add_py_req_pkgs_to_sys_path()
             self._add_pure_pkgs_to_sys_path()
+            self._add_site_package_dir_to_sys_path()
 
             if not TYPE_CHECKING:
                 # run time
@@ -164,7 +165,7 @@ class ___lo_implementation_name___(unohelper.Base, XJob):
                 # add package zip file to the sys.path
                 pth = os.path.join(os.path.dirname(__file__), f"{self._config.py_pkg_dir}.zip")
 
-                if os.path.exists(pth) and os.path.isfile(pth) and os.path.getsize(pth) > 0 and not pth in sys.path:
+                if os.path.exists(pth) and os.path.isfile(pth) and os.path.getsize(pth) > 0 and pth not in sys.path:
                     self._logger.debug(f"sys.path appended: {pth}")
                     sys.path.append(pth)
             # sys.path.insert(0, sys.path.pop(sys.path.index(pth)))
