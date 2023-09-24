@@ -34,6 +34,7 @@ class ConfigMeta(type):
                     "lo_implementation_name": "",
                     "requirements": {},
                     "zipped_preinstall_pure": False,
+                    "auto_install_in_site_packages": False,
                 }
                 # logger.debug("Configuration: no config.json, using defaults")
 
@@ -72,6 +73,10 @@ class Config(metaclass=ConfigMeta):
         self._lo_identifier = str(kwargs["lo_identifier"])
         self._lo_implementation_name = str(kwargs["lo_implementation_name"])
         self._zipped_preinstall_pure = bool(kwargs["zipped_preinstall_pure"])
+        # auto_install_in_site_packages
+        self._auto_install_in_site_packages = bool(kwargs["auto_install_in_site_packages"])
+        if not self._auto_install_in_site_packages and os.getenv("DEV_CONTAINER", "") == "1":
+            self._auto_install_in_site_packages = True
         if "requirements" not in kwargs:
             kwargs["requirements"] = {}
         self._requirements: Dict[str, str] = dict(**kwargs["requirements"])
@@ -239,6 +244,22 @@ class Config(metaclass=ConfigMeta):
         If this is set to ``True`` then pure python packages will be zipped and installed as a zip file.
         """
         return self._zipped_preinstall_pure
+
+    @property
+    def auto_install_in_site_packages(self) -> bool:
+        """
+        Gets the flag indicating if packages are installed in the site-packages directory set in this config.
+
+        The value for this property can be set in pyproject.toml (tool.oxt.config.auto_install_in_site_packages)
+
+        If this is set to ``True`` then packages will be installed in the site-packages directory if this config has the value set.
+
+        Flatpak ignores this setting and always installs packages in the site-packages directory determined in this config.
+
+        Note:
+            When running in a dev container (Codespace), this value is always set to ``True``.
+        """
+        return self._auto_install_in_site_packages
 
     @property
     def is_win(self) -> bool:

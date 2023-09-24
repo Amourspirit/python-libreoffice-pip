@@ -31,6 +31,11 @@ class InstallPkgFlatpak(InstallPkg):
             ver (str): The version of the package to install.
         """
 
+        if not self.config.site_packages:
+            self._logger.error(
+                "No site-packages directory set in configuration. site_packages value should be set in lo_pip.config.py"
+            )
+            return
         cmd = ["install", "--upgrade", f"--target={self.config.site_packages}"]
         pkg_cmd = f"{pkg}{ver}" if ver else pkg
         cmd = self._cmd_pip(*[*cmd, pkg_cmd])

@@ -65,7 +65,21 @@ class InstallPkg:
             pkg (str): The name of the package to install.
             ver (str): The version of the package to install.
         """
-        cmd = ["install", "--upgrade", "--user"]
+        auto_target = False
+        if self.config.auto_install_in_site_packages:
+            if self.config.site_packages:
+                auto_target = True
+            else:
+                self._logger.debug(
+                    "auto_install_in_site_packages is set to True; However, No site-packages directory set in configuration. site_packages value should be set in lo_pip.config.py"
+                )
+                self._logger.debug(
+                    "Ignoring auto_install_in_site_packages and continuing to install in user directory via pip --user"
+                )
+        if auto_target:
+            cmd = ["install", "--upgrade", f"--target={self.config.site_packages}"]
+        else:
+            cmd = ["install", "--upgrade", "--user"]
         pkg_cmd = f"{pkg}{ver}" if ver else pkg
         cmd = self._cmd_pip(*[*cmd, pkg_cmd])
         self._logger.debug(f"Running command {cmd}")
