@@ -3,12 +3,12 @@ import sys
 from logging import Logger
 from logging.handlers import TimedRotatingFileHandler
 
-from ..config import Config
+from .. import config
 
 
 class OxtLogger(Logger):
     def __init__(self, log_file: str = "", log_name: str = "", *args, **kwargs):
-        self.config = Config()
+        self.config = config.Config()
         self.formatter = logging.Formatter(self.config.log_format)
         if not log_file:
             log_file = self.config.log_file

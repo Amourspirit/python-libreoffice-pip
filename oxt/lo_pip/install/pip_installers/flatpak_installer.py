@@ -1,4 +1,5 @@
 from __future__ import annotations
+from typing import List
 import sys
 import subprocess
 from pathlib import Path
@@ -26,6 +27,9 @@ class FlatpakInstaller(BaseInstaller):
 
         return
 
+    def _get_pip_cmd(self, filename: Path) -> List[str]:
+        return [str(self.path_python), f"{filename}", "--user"]
+
     def _install_wheel(self) -> bool:
         cfg = Config()
         result = False
@@ -46,7 +50,7 @@ class FlatpakInstaller(BaseInstaller):
         self._logger.info("Starting PIP installation…")
         cfg = Config()
         try:
-            cmd = [str(self.path_python), f"{filename}", "--user"]
+            cmd = self._get_pip_cmd(filename)
             process = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, env=self._get_env())
             _, stderr = process.communicate()
             str_stderr = stderr.decode("utf-8")

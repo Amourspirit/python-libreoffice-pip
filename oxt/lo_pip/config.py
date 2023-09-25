@@ -12,6 +12,10 @@ from .input_output import file_util
 
 if TYPE_CHECKING:
     from .lo_util import Session
+    from .lo_util import Util
+    from lo_pip.info import ExtensionInfo
+
+    # from .info.extension_info import ExtensionInfo
 
 
 class ConfigMeta(type):
@@ -59,11 +63,10 @@ class Config(metaclass=ConfigMeta):
     """
 
     def __init__(self, **kwargs):
-        from .lo_util import Util
-
         if not TYPE_CHECKING:
             from .lo_util import Session
-        self._session = Session()
+            from lo_pip.info import ExtensionInfo
+            from .lo_util import Util
 
         log_file = str(kwargs["log_file"])
         if log_file:
@@ -72,17 +75,16 @@ class Config(metaclass=ConfigMeta):
                 log_file = Path(file_util.get_user_profile_path(True), log_pth)
 
         self._log_file = str(log_file)
-        # self._log_file = "D:\\tmp\\log\\py_runner.log"
-        # logger.debug("Config.__init__ called")
-        self._url_pip = str(kwargs["url_pip"])
-        self._pip_wheel_url = str(kwargs["pip_wheel_url"])
         self._log_name = str(kwargs["log_name"])
         self._log_format = str(kwargs["log_format"])
+        self._session = Session()
+        self._extension_info = ExtensionInfo()
+        self._url_pip = str(kwargs["url_pip"])
+        self._pip_wheel_url = str(kwargs["pip_wheel_url"])
         self._py_pkg_dir = str(kwargs["py_pkg_dir"])
         self._lo_identifier = str(kwargs["lo_identifier"])
         self._lo_implementation_name = str(kwargs["lo_implementation_name"])
         self._zipped_preinstall_pure = bool(kwargs["zipped_preinstall_pure"])
-        # auto_install_in_site_packages
         self._auto_install_in_site_packages = bool(kwargs["auto_install_in_site_packages"])
         if not self._auto_install_in_site_packages and os.getenv("DEV_CONTAINER", "") == "1":
             self._auto_install_in_site_packages = True
@@ -102,12 +104,18 @@ class Config(metaclass=ConfigMeta):
         self._site_packages = ""
         util = Util()
 
-        self._package_location = Path(file_util.get_package_location(self._lo_identifier, True)).resolve()
-        self._is_all_users = self._get_is_all_users()
+        # self._package_location = Path(file_util.get_package_location(self._lo_identifier, True))
+        self._package_location = Path(self._extension_info.get_extension_loc(self._lo_identifier, True)).resolve()
         self._python_major_minor = self._get_python_major_minor()
+
+        self._is_user_installed = False
+        self._is_shared_installed = False
+        self._is_bundled_installed = False
+        self._set_extension_installs()
 
         if self._is_win:
             self._python_path = Path(self.join(util.config("Module"), "python.exe"))
+            self._site_packages = self._get_windows_site_packages_dir()
         elif self._is_mac:
             self._python_path = Path(self.join(util.config("Module"), "..", "Resources", "python"))
             self._site_packages = self._get_mac_site_packages_dir()
@@ -148,19 +156,25 @@ class Config(metaclass=ConfigMeta):
         else:
             raise TypeError(f"Invalid log level type: {type(log_level)}")
 
-    def _get_is_all_users(self) -> bool:
-        return str(self._package_location).startswith(self._session.share)
+    def _set_extension_installs(self) -> None:
+        details = self._extension_info.get_extension_details(self.lo_identifier)
+        if details[0] is not None:
+            self._is_user_installed = True
+        if details[1] is not None:
+            self._is_shared_installed = True
+        if details[2] is not None:
+            self._is_bundled_installed = True
 
     def _get_python_major_minor(self) -> str:
         return f"{sys.version_info.major}.{sys.version_info.minor}"
 
     def _get_default_site_packages_dir(self) -> str:
-        if self._is_all_users:
+        if self.is_shared_installed or self.is_bundled_installed:
             # if package has been installed for all users (root)
-            site_packages = site.getsitepackages()[0]
+            site_packages = Path(site.getsitepackages()[0]).resolve()
         else:
             if site.USER_SITE:
-                site_packages = Path(site.USER_SITE)
+                site_packages = Path(site.USER_SITE).resolve()
             else:
                 site_packages = Path.home() / f".local/lib/python{self.python_major_minor}/site-packages"
             site_packages.mkdir(parents=True, exist_ok=True)
@@ -177,15 +191,30 @@ class Config(metaclass=ConfigMeta):
 
     def _get_mac_site_packages_dir(self) -> str:
         # sourcery skip: class-extract-method
-        if self._is_all_users:
+        if self.is_shared_installed or self.is_bundled_installed:
             # if package has been installed for all users (root)
-            site_packages = site.getsitepackages()[0]
+            site_packages = Path(site.getsitepackages()[0]).resolve()
         else:
             if site.USER_SITE:
-                site_packages = Path(site.USER_SITE)
+                site_packages = Path(site.USER_SITE).resolve()
             else:
                 site_packages = (
                     Path.home() / f"Library/LibreOfficePython/{self.python_major_minor}/lib/python/site-packages"
+                )
+            site_packages.mkdir(parents=True, exist_ok=True)
+        return str(site_packages)
+
+    def _get_windows_site_packages_dir(self) -> str:
+        # sourcery skip: class-extract-method
+        if self.is_shared_installed or self.is_bundled_installed:
+            # if package has been installed for all users (root)
+            site_packages = Path(site.getsitepackages()[0]).resolve()
+        else:
+            if site.USER_SITE:
+                site_packages = Path(site.USER_SITE).resolve()
+            else:
+                site_packages = (
+                    Path.home() / f"'/AppData/Roaming/Python/Python{self.python_major_minor}/site-packages'"
                 )
             site_packages.mkdir(parents=True, exist_ok=True)
         return str(site_packages)
@@ -322,11 +351,25 @@ class Config(metaclass=ConfigMeta):
         return self._is_flatpak
 
     @property
-    def is_all_users(self) -> bool:
+    def is_user_installed(self) -> bool:
         """
-        Gets the flag indicating if LibreOffice is running as all users.
+        Gets the flag indicating if extension is installed as user.
         """
-        return self._is_all_users
+        return self._is_user_installed
+
+    @property
+    def is_shared_installed(self) -> bool:
+        """
+        Gets the flag indicating if extension is installed as shared.
+        """
+        return self._is_shared_installed
+
+    @property
+    def is_bundled_installed(self) -> bool:
+        """
+        Gets the flag indicating if extension is installed bundled with LibreOffice.
+        """
+        return self._is_bundled_installed
 
     @property
     def os(self) -> str:
@@ -373,8 +416,6 @@ class Config(metaclass=ConfigMeta):
     def site_packages(self) -> str:
         """
         Gets the path to the site-packages directory. May be empty string.
-
-        Is valid for ``Flatpak``, ``MAC``, ``App Image``, ``Linux``.
         """
         return self._site_packages
 
@@ -391,3 +432,10 @@ class Config(metaclass=ConfigMeta):
         Gets the LibreOffice package location.
         """
         return self._package_location
+
+    # @property
+    # def extension_info(self) -> ExtensionInfo:
+    #     """
+    #     Gets the LibreOffice extension info.
+    #     """
+    #     return self._extension_info

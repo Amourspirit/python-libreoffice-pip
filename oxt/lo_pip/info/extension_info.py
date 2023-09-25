@@ -1,11 +1,18 @@
 from __future__ import annotations
-from typing import cast, Any, Tuple
+from typing import cast, Any, Tuple, TYPE_CHECKING
+from logging import Logger
 import uno
 
 from com.sun.star.deployment import XPackageInformationProvider
+from com.sun.star.deployment import XPackage
 
 from ..meta.singleton import Singleton
-from ..oxt_logger import OxtLogger
+
+# from ..oxt_logger import OxtLogger
+from ..lo_util import Util
+
+if TYPE_CHECKING:
+    from com.sun.star.deployment import ExtensionManager  # service
 
 
 class ExtensionInfo(metaclass=Singleton):
@@ -14,9 +21,6 @@ class ExtensionInfo(metaclass=Singleton):
 
     Singleton Class.
     """
-
-    def __init__(self) -> None:
-        self._logger = OxtLogger(log_name=__name__)
 
     def get_extension_info(self, id: str) -> Tuple[str, ...]:
         """
@@ -36,7 +40,6 @@ class ExtensionInfo(metaclass=Singleton):
         for el in exts_tbl:
             if el[0] == id:
                 return el
-        self._logger.info(f"Extension {id} is not found")
         return ()
 
     def get_pip(self) -> XPackageInformationProvider:
@@ -49,22 +52,48 @@ class ExtensionInfo(metaclass=Singleton):
         Returns:
             XPackageInformationProvider: Package Information Provider
         """
-        try:
-            ctx: Any = uno.getComponentContext()
-            pip = ctx.getValueByName("/singletons/com.sun.star.deployment.PackageInformationProvider")
-            if pip is None:
-                raise Exception("Unable to get PackageInformationProvider, pip is None")
-            return cast(XPackageInformationProvider, pip)
-        except Exception as err:
-            self._logger.error(err, exc_info=True)
-            raise
+        ctx: Any = uno.getComponentContext()
+        pip = ctx.getValueByName("/singletons/com.sun.star.deployment.PackageInformationProvider")
+        if pip is None:
+            raise Exception("Unable to get PackageInformationProvider, pip is None")
+        return cast(XPackageInformationProvider, pip)
 
-    def get_extension_loc(self, id: str) -> str:
+    def get_extension_manager(self) -> ExtensionManager:
+        ctx: Any = uno.getComponentContext()
+        return ctx.getValueByName("/singletons/com.sun.star.deployment.ExtensionManager")
+
+    def get_extension_details(self, pkg_id: str) -> Tuple[XPackage, ...]:
+        """
+        Gets details for an installed extension in LibreOffice
+
+        Gets a tuple of three objects. Each object can be a XPackage or None.
+
+        - First object represents the extension that is installed in the user layer.
+        - Second object represents the extension that is installed in the shared layer.
+        - Third object represents the extension that is installed in the bundled layer.
+
+        Args:
+            pkg_id (str):  Package ID. This is usually the ``lo_identifier`` value from pyproject.toml (tool.oxt.config),
+                also found in the runtime Config class
+
+        Returns:
+            Tuple[XPackage, ...]: Return a tuple of three objects
+        """
+        mgr = self.get_extension_manager()
+        smoke = Util().create_instance("com.sun.star.deployment.test.SmoketestCommandEnvironment")
+        pip = self.get_pip()
+        filename = pip.getPackageLocation(pkg_id)
+        return mgr.getExtensionsWithSameIdentifier(pkg_id, filename, smoke)
+
+    def get_extension_loc(self, pkg_id: str, as_sys_path: bool = True) -> str:
         """
         Gets location for an installed extension in LibreOffice
 
         Args:
-            id (str): Extension id
+            pkg_id (str): This is usually the ``lo_identifier`` value from pyproject.toml (tool.oxt.config),
+                also found in the runtime Config class
+            as_sys_path (bool, optional): If True, returns the path as a system path entry otherwise ``file:///`` format.
+                Defaults to True.
 
         Returns:
             str: Extension location on success; Otherwise, an empty string
@@ -73,20 +102,39 @@ class ExtensionInfo(metaclass=Singleton):
             pip = self.get_pip()
         except Exception:
             return ""
-        return pip.getPackageLocation(id)
+        result = pip.getPackageLocation(pkg_id)
+        if not result:
+            return ""
+        return uno.fileUrlToSystemPath(result) if as_sys_path else result
 
-    def log_extensions(self) -> None:
+    def get_all_extensions(self) -> Tuple[Tuple[str, ...], ...]:
         """
-        Logs extensions to log file
+        Gets info for all installed extensions in LibreOffice
+
+        Returns:
+            Tuple[Tuple[str, ...], ...]: Extension info
         """
         try:
             pip = self.get_pip()
         except Exception:
-            self._logger.info("No package info provider found")
+            return ()
+        return pip.getExtensionList()
+
+    def log_extensions(self, logger: Logger) -> None:
+        """
+        Logs extensions to log file
+
+        Args:
+            logger (Logger): Logger instance
+        """
+        try:
+            pip = self.get_pip()
+        except Exception:
+            logger.debug("No package info provider found")
             return
         exts_tbl = pip.getExtensionList()
-        self._logger.info("Extensions:")
+        logger.debug("Extensions:")
         for i in range(len(exts_tbl)):
-            self._logger.info(f"{i+1}. ID: {exts_tbl[i][0]}")
-            self._logger.info(f"   Version: {exts_tbl[i][1]}")
-            self._logger.info(f"   Loc: {pip.getPackageLocation(exts_tbl[i][0])}")
+            logger.debug(f"{i+1}. ID: {exts_tbl[i][0]}")
+            logger.debug(f"   Version: {exts_tbl[i][1]}")
+            logger.debug(f"   Loc: {pip.getPackageLocation(exts_tbl[i][0])}")

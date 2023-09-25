@@ -1,16 +1,8 @@
 from __future__ import annotations
-import os
-import sys
 import subprocess
-from typing import Dict, List
 
 
 # import pkg_resources
-from importlib.metadata import PackageNotFoundError, version
-from pathlib import Path
-
-from ...config import Config
-from ...ver.rules.ver_rules import VerRules
 from ...oxt_logger import OxtLogger
 from .install_pkg import InstallPkg
 from .install_pkg import STARTUP_INFO

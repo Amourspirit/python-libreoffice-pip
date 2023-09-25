@@ -18,7 +18,6 @@ if TYPE_CHECKING:
     from lo_pip.oxt_logger import OxtLogger
     from lo_pip.lo_util import Session, RegisterPathKind, UnRegisterPathKind
     from lo_pip.lo_util.util import Util
-    from lo_pip.info import ExtensionInfo
 else:
     RegisterPathKind = object
     UnRegisterPathKind = object
@@ -43,7 +42,6 @@ class ___lo_implementation_name___(unohelper.Base, XJob):
             # run time
             from lo_pip.config import Config
             from lo_pip.lo_util import Util
-            from lo_pip.info import ExtensionInfo
 
             from lo_pip.lo_util import (
                 Session,
@@ -58,7 +56,6 @@ class ___lo_implementation_name___(unohelper.Base, XJob):
         # design time
         self._config = Config()
         self._util = Util()
-        self._extension_info = ExtensionInfo()
         self._logger = self._get_local_logger()
         self._logger.debug("Got OxtLogger instance")
         self._session = Session()
@@ -147,7 +144,7 @@ class ___lo_implementation_name___(unohelper.Base, XJob):
         self._log_sys_path_unregister_result(pth, result)
 
     def _add_site_package_dir_to_sys_path(self) -> None:
-        if self._config.is_all_users:
+        if self._config.is_shared_installed or self._config.is_bundled_installed:
             self._logger.debug("All users, not adding site-packages to sys.path")
             return
         if not self._config.site_packages:
@@ -199,7 +196,9 @@ class ___lo_implementation_name___(unohelper.Base, XJob):
             self._add_site_package_dir_to_sys_path()
 
             self._logger.debug(f"Config Package Location: {self._config.package_location}")
-            self._logger.debug(f"Config Is All Users: {self._config.is_all_users}")
+            self._logger.debug(f"Config Is User Installed: {self._config.is_user_installed}")
+            self._logger.debug(f"Config Is Share Installed: {self._config.is_shared_installed}")
+            self._logger.debug(f"Config Is Bundle Installed: {self._config.is_bundled_installed}")
 
             self._logger.debug(f"Session - LibreOffice Share: {self._session.share}")
             self._logger.debug(f"Session - LibreOffice Share Python: {self._session.shared_py_scripts}")
@@ -214,9 +213,7 @@ class ___lo_implementation_name___(unohelper.Base, XJob):
             self._logger.debug(f"Util.config - BasePathUserLayer: {self._util.config('BasePathUserLayer')}")
             self._logger.debug(f"Util.config - BasePathShareLayer: {self._util.config('BasePathShareLayer')}")
 
-            self._extension_info.log_extensions()
-            ext_info = self._extension_info.get_extension_info(id=self._config.lo_identifier)
-            self._logger.debug(f"Extension Info: {ext_info}")
+            # self._config.extension_info.log_extensions()
 
             if not TYPE_CHECKING:
                 # run time
