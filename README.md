@@ -1,3 +1,27 @@
+# Python LibreOffice Pip Extension Template
+
+## Introduction
+
+This project is intended to be a template for developers of LibreOffice Extensions.
+
+This project is well suited for developers who want to create a LibreOffice Extension using Python and need to Pip install.
+
+All the tools needed to develop, debug, and test are included in this template.
+A developer can use this template to create a LibreOffice Extension that uses Python and Pip install.
+
+If you need to create a LibreOffice Extension that only installs Python Packages then this template is for you.
+No coding experience is needed to use the template in this way.
+Just modify the `pyproject.toml` file to include the packages you want to install.
+
+Change a few settings and you are ready to go.
+
+This project is a work in progress and is not ready for production use.
+Many more documents to come ...
+
+
+<details>
+<summary>Original Template Readme</summary>
+
 # Live LibreOffice Python
 
 Live LibreOffice Python is a complete development environment for creating, debugging and testing python scripts. It leverages the power of [VS Code] and has [LibreOffice] baked in that can be access via the internal web browser or via your local web browser which allows for a much more pleasant and consistent debugging experience.
@@ -23,3 +47,5 @@ See the [Getting Started](https://github.com/Amourspirit/live-libreoffice-python
 [LibreOffice]:https://www.libreoffice.org/
 [GitHub CLI/CD]:https://resources.github.com/ci-cd/
 [LibreOffice Python UNO Examples]:https://github.com/Amourspirit/python-ooouno-ex
+
+</details>
