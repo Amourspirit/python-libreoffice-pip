@@ -18,6 +18,7 @@ if TYPE_CHECKING:
     from lo_pip.oxt_logger import OxtLogger
     from lo_pip.lo_util import Session, RegisterPathKind, UnRegisterPathKind
     from lo_pip.lo_util.util import Util
+    from lo_pip.info import ExtensionInfo
 else:
     RegisterPathKind = object
     UnRegisterPathKind = object
@@ -41,8 +42,8 @@ class ___lo_implementation_name___(unohelper.Base, XJob):
         if not TYPE_CHECKING:
             # run time
             from lo_pip.config import Config
-
             from lo_pip.lo_util import Util
+            from lo_pip.info import ExtensionInfo
 
             from lo_pip.lo_util import (
                 Session,
@@ -57,6 +58,7 @@ class ___lo_implementation_name___(unohelper.Base, XJob):
         # design time
         self._config = Config()
         self._util = Util()
+        self._extension_info = ExtensionInfo()
         self._logger = self._get_local_logger()
         self._logger.debug("Got OxtLogger instance")
         self._session = Session()
@@ -211,6 +213,10 @@ class ___lo_implementation_name___(unohelper.Base, XJob):
             self._logger.debug(f"Util.config - Config: {self._util.config('Config')}")
             self._logger.debug(f"Util.config - BasePathUserLayer: {self._util.config('BasePathUserLayer')}")
             self._logger.debug(f"Util.config - BasePathShareLayer: {self._util.config('BasePathShareLayer')}")
+
+            self._extension_info.log_extensions()
+            ext_info = self._extension_info.get_extension_info(id=self._config.lo_identifier)
+            self._logger.debug(f"Extension Info: {ext_info}")
 
             if not TYPE_CHECKING:
                 # run time
