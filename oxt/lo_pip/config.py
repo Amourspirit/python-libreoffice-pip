@@ -1,13 +1,17 @@
 # coding: utf-8
 from __future__ import annotations
 from pathlib import Path
-from typing import Dict
+from typing import Dict, TYPE_CHECKING
 import json
 import os
 import sys
 import platform
+import site
 
 from .input_output import file_util
+
+if TYPE_CHECKING:
+    from .lo_util import Session
 
 
 class ConfigMeta(type):
@@ -57,11 +61,16 @@ class Config(metaclass=ConfigMeta):
     def __init__(self, **kwargs):
         from .lo_util import Util
 
+        if not TYPE_CHECKING:
+            from .lo_util import Session
+        self._session = Session()
+
         log_file = str(kwargs["log_file"])
         if log_file:
             log_pth = Path(log_file)
             if not log_pth.is_absolute():
                 log_file = Path(file_util.get_user_profile_path(True), log_pth)
+
         self._log_file = str(log_file)
         # self._log_file = "D:\\tmp\\log\\py_runner.log"
         # logger.debug("Config.__init__ called")
@@ -92,6 +101,9 @@ class Config(metaclass=ConfigMeta):
         self._is_flatpak = flat_pak_id.lower() == "org.libreoffice.libreoffice"
         self._site_packages = ""
         util = Util()
+
+        self._package_location = Path(file_util.get_package_location(self._lo_identifier, True)).resolve()
+        self._is_all_users = self._get_is_all_users()
         self._python_major_minor = self._get_python_major_minor()
 
         if self._is_win:
@@ -136,15 +148,26 @@ class Config(metaclass=ConfigMeta):
         else:
             raise TypeError(f"Invalid log level type: {type(log_level)}")
 
+    def _get_is_all_users(self) -> bool:
+        return str(self._package_location).startswith(self._session.share)
+
     def _get_python_major_minor(self) -> str:
         return f"{sys.version_info.major}.{sys.version_info.minor}"
 
     def _get_default_site_packages_dir(self) -> str:
-        site_packages = Path.home() / f".local/lib/python{self.python_major_minor}/site-packages"
-        site_packages.mkdir(parents=True, exist_ok=True)
+        if self._is_all_users:
+            # if package has been installed for all users (root)
+            site_packages = site.getsitepackages()[0]
+        else:
+            if site.USER_SITE:
+                site_packages = Path(site.USER_SITE)
+            else:
+                site_packages = Path.home() / f".local/lib/python{self.python_major_minor}/site-packages"
+            site_packages.mkdir(parents=True, exist_ok=True)
         return str(site_packages)
 
     def _get_flatpak_site_packages_dir(self) -> str:
+        # should never be all users
         sand_box = os.getenv("FLATPAK_SANDBOX_DIR", "") or str(
             Path.home() / ".var/app/org.libreoffice.LibreOffice/sandbox"
         )
@@ -154,8 +177,17 @@ class Config(metaclass=ConfigMeta):
 
     def _get_mac_site_packages_dir(self) -> str:
         # sourcery skip: class-extract-method
-        site_packages = Path.home() / f"Library/LibreOfficePython/{self.python_major_minor}/lib/python/site-packages"
-        site_packages.mkdir(parents=True, exist_ok=True)
+        if self._is_all_users:
+            # if package has been installed for all users (root)
+            site_packages = site.getsitepackages()[0]
+        else:
+            if site.USER_SITE:
+                site_packages = Path(site.USER_SITE)
+            else:
+                site_packages = (
+                    Path.home() / f"Library/LibreOfficePython/{self.python_major_minor}/lib/python/site-packages"
+                )
+            site_packages.mkdir(parents=True, exist_ok=True)
         return str(site_packages)
 
     @property
@@ -290,6 +322,13 @@ class Config(metaclass=ConfigMeta):
         return self._is_flatpak
 
     @property
+    def is_all_users(self) -> bool:
+        """
+        Gets the flag indicating if LibreOffice is running as all users.
+        """
+        return self._is_all_users
+
+    @property
     def os(self) -> str:
         """
         Gets the operating system.
@@ -338,3 +377,17 @@ class Config(metaclass=ConfigMeta):
         Is valid for ``Flatpak``, ``MAC``, ``App Image``, ``Linux``.
         """
         return self._site_packages
+
+    @property
+    def session(self) -> Session:
+        """
+        Gets the LibreOffice session info.
+        """
+        return self._session
+
+    @property
+    def package_location(self) -> Path:
+        """
+        Gets the LibreOffice package location.
+        """
+        return self._package_location

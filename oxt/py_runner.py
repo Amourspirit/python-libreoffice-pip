@@ -16,6 +16,11 @@ if TYPE_CHECKING:
     from lo_pip.install.install_pip import InstallPip
     from lo_pip.install.install_pkg import InstallPkg
     from lo_pip.oxt_logger import OxtLogger
+    from lo_pip.lo_util import Session, RegisterPathKind, UnRegisterPathKind
+    from lo_pip.lo_util.util import Util
+else:
+    RegisterPathKind = object
+    UnRegisterPathKind = object
 
 implementation_name = "___lo_identifier___.___lo_implementation_name___"
 implementation_services = ("com.sun.star.task.Job",)
@@ -37,10 +42,24 @@ class ___lo_implementation_name___(unohelper.Base, XJob):
             # run time
             from lo_pip.config import Config
 
+            from lo_pip.lo_util import Util
+
+            from lo_pip.lo_util import (
+                Session,
+                RegisterPathKind as InitRegisterPathKind,
+                UnRegisterPathKind as InitUnRegisterPathKind,
+            )
+
+            global RegisterPathKind, UnRegisterPathKind
+            RegisterPathKind = InitRegisterPathKind
+            UnRegisterPathKind = InitUnRegisterPathKind
+
         # design time
         self._config = Config()
+        self._util = Util()
         self._logger = self._get_local_logger()
         self._logger.debug("Got OxtLogger instance")
+        self._session = Session()
         self._logger.debug("OooPipRunner Init Done")
 
         self._add_py_req_pkgs_to_sys_path()
@@ -70,6 +89,8 @@ class ___lo_implementation_name___(unohelper.Base, XJob):
         #     return OxtLogger(log_file=log_file, log_name=__name__)
         return OxtLogger(log_name=__name__)
 
+    # region Register/Unregister sys paths
+
     def _add_local_path_to_sys_path(self) -> None:
         # add the path of this module to the sys.path
         if self._this_pth not in sys.path:
@@ -91,10 +112,8 @@ class ___lo_implementation_name___(unohelper.Base, XJob):
         pth = Path(os.path.dirname(__file__), f"{self._config.py_pkg_dir}.zip")
         if not pth.exists():
             return
-        str_pth = str(pth)
-        if str_pth not in sys.path:
-            self._logger.debug(f"sys.path appended: {str_pth}")
-            sys.path.append(str_pth)
+        result = self._session.register_path(pth, True)
+        self._log_sys_path_register_result(pth, result)
 
     def _add_pure_pkgs_to_sys_path(self) -> None:
         # pth = os.path.join(os.path.dirname(__file__), "py_pkgs.zip")
@@ -102,10 +121,8 @@ class ___lo_implementation_name___(unohelper.Base, XJob):
         if not pth.exists():
             self._logger.debug(f"pure.zip not found: {pth}")
             return
-        str_pth = str(pth)
-        if str_pth not in sys.path:
-            self._logger.debug(f"sys.path appended: {str_pth}")
-            sys.path.append(str_pth)
+        result = self._session.register_path(pth, True)
+        self._log_sys_path_register_result(pth, result)
 
     def _add_py_req_pkgs_to_sys_path(self) -> None:
         pth = Path(os.path.dirname(__file__), f"req_{self._config.py_pkg_dir}.zip")
@@ -119,31 +136,57 @@ class ___lo_implementation_name___(unohelper.Base, XJob):
             self._logger.debug("packaging imported")
         except ModuleNotFoundError:
             self._logger.debug("packaging not found. Adding to sys.path")
-            str_pth = str(pth)
-            if str_pth not in sys.path:
-                self._logger.debug(f"sys.path appended: {str_pth}")
-                sys.path.append(str_pth)
+            result = self._session.register_path(pth, True)
+            self._log_sys_path_register_result(pth, result)
 
     def _remove_py_req_pkgs_from_sys_path(self) -> None:
         pth = Path(os.path.dirname(__file__), f"req_{self._config.py_pkg_dir}.zip")
-        str_pth = str(pth)
-        if str_pth in sys.path:
-            self._logger.debug(f"sys.path removed: {str_pth}")
-            sys.path.remove(str_pth)
+        result = self._session.unregister_path(pth)
+        self._log_sys_path_unregister_result(pth, result)
 
     def _add_site_package_dir_to_sys_path(self) -> None:
+        if self._config.is_all_users:
+            self._logger.debug("All users, not adding site-packages to sys.path")
+            return
         if not self._config.site_packages:
             return
-        if self._config.site_packages not in sys.path:
-            sys.path.append(self._config.site_packages)
-            self._logger.debug(f"sys.path appended: {self._config.site_packages}")
+        result = self._session.register_path(self._config.site_packages, True)
+        self._log_sys_path_register_result(self._config.site_packages, result)
+
+    def _log_sys_path_register_result(self, pth: Path | str, result: RegisterPathKind) -> None:
+        if not isinstance(pth, str):
+            pth = str(pth)
+        if result == RegisterPathKind.NOT_REGISTERED:
+            if not pth:
+                self._logger.debug("Path not registered. Can't register empty string")
+            else:
+                self._logger.debug(f"Path Not Registered, unknown reason: {pth}")
+        elif result == RegisterPathKind.ALREADY_REGISTERED:
+            self._logger.debug(f"Path already registered: {pth}")
         else:
-            self._logger.debug(f"sys.path already contains: {self._config.site_packages}")
+            self._logger.debug(f"Path registered: {pth}")
+
+    def _log_sys_path_unregister_result(self, pth: Path | str, result: UnRegisterPathKind) -> None:
+        if not isinstance(pth, str):
+            pth = str(pth)
+        if result == UnRegisterPathKind.NOT_UN_REGISTERED:
+            if not pth:
+                self._logger.debug("Path not unregistered. Can't unregister empty string")
+            else:
+                self._logger.debug(f"Path Not unregistered, unknown reason: {pth}")
+        elif result == UnRegisterPathKind.ALREADY_UN_REGISTERED:
+            self._logger.debug(f"Path already unregistered: {pth}")
+        else:
+            self._logger.debug(f"Path unregistered: {pth}")
+
+    # endregion Register/Unregister sys paths
 
     def execute(self, *args):
         # make sure our pythonpath is in sys.path
         self._logger.debug("OooPipRunner executing")
         start_time = time.time()
+        # if args:
+        #     self._logger.debug(f"args: {args}")
 
         # logger = None
         try:
@@ -152,6 +195,22 @@ class ___lo_implementation_name___(unohelper.Base, XJob):
             self._add_py_req_pkgs_to_sys_path()
             self._add_pure_pkgs_to_sys_path()
             self._add_site_package_dir_to_sys_path()
+
+            self._logger.debug(f"Config Package Location: {self._config.package_location}")
+            self._logger.debug(f"Config Is All Users: {self._config.is_all_users}")
+
+            self._logger.debug(f"Session - LibreOffice Share: {self._session.share}")
+            self._logger.debug(f"Session - LibreOffice Share Python: {self._session.shared_py_scripts}")
+            self._logger.debug(f"Session - LibreOffice Share Scripts: {self._session.shared_scripts}")
+            self._logger.debug(f"Session - LibreOffice Username: {self._session.user_name}")
+            self._logger.debug(f"Session - LibreOffice User Profile: {self._session.user_profile}")
+            self._logger.debug(f"Session - LibreOffice User Scripts: {self._session.user_scripts}")
+
+            self._logger.debug(f"Util.config - Module: {self._util.config('Module')}")
+            self._logger.debug(f"Util.config - UserConfig: {self._util.config('UserConfig')}")
+            self._logger.debug(f"Util.config - Config: {self._util.config('Config')}")
+            self._logger.debug(f"Util.config - BasePathUserLayer: {self._util.config('BasePathUserLayer')}")
+            self._logger.debug(f"Util.config - BasePathShareLayer: {self._util.config('BasePathShareLayer')}")
 
             if not TYPE_CHECKING:
                 # run time

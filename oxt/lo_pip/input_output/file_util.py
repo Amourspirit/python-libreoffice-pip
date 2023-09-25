@@ -3,7 +3,6 @@ import os
 import shutil
 from pathlib import Path
 from typing import Any, Iterable, List
-import os
 from shutil import which
 from contextlib import contextmanager
 import uno
@@ -218,13 +217,14 @@ def get_package_location(pkg_id: str, as_sys_path: bool = True, ctx: Any = None)
     Something link this: 'file:///home/user/.config/libreoffice/4/user/uno_packages/cache/uno_packages/lu323960zf5pw.tmp_/OooPip.oxt'
 
     Args:
-        pkg_id (str): _description_
+        pkg_id (str): Package ID. This is usually the ``lo_identifier`` value from pyproject.toml (tool.oxt.config),
+            also found in the runtime Config class
         as_sys_path (bool, optional): If True, returns the path as a system path entry otherwise ``file:///`` format.
             Defaults to True.
         ctx (Any, optional): The context to use. Defaults to None.
 
     Returns:
-        str: _description_
+        str: File location as a string.
     """
     # sourcery skip: reintroduce-else, swap-if-else-branches, use-named-expression
     if ctx is None:

@@ -1,9 +1,10 @@
 from __future__ import annotations
 import sys
+import subprocess
+from pathlib import Path
 
 from ...config import Config
 from ...oxt_logger import OxtLogger
-
 from .base_installer import BaseInstaller
 
 
@@ -40,3 +41,24 @@ class FlatpakInstaller(BaseInstaller):
             self._logger.error(err)
             return result
         return result
+
+    def _install_pip(self, filename: Path):
+        self._logger.info("Starting PIP installation…")
+        cfg = Config()
+        try:
+            cmd = [str(self.path_python), f"{filename}", "--user"]
+            process = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, env=self._get_env())
+            _, stderr = process.communicate()
+            str_stderr = stderr.decode("utf-8")
+            if process.returncode != 0:
+                # "PIP installation has failed, see log"
+                self._logger.error("PIP installation has failed")
+                if str_stderr:
+                    self._logger.error(str_stderr)
+                return False
+        except Exception as err:
+            # "PIP installation has failed, see log"
+            self._logger.error("PIP installation has failed")
+            self._logger.error(err)
+            return False
+        return True

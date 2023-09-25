@@ -79,7 +79,10 @@ class InstallPkg:
         if auto_target:
             cmd = ["install", "--upgrade", f"--target={self.config.site_packages}"]
         else:
-            cmd = ["install", "--upgrade", "--user"]
+            if self.config.is_all_users:
+                cmd = ["install", "--upgrade"]
+            else:
+                cmd = ["install", "--upgrade", "--user"]
         pkg_cmd = f"{pkg}{ver}" if ver else pkg
         cmd = self._cmd_pip(*[*cmd, pkg_cmd])
         self._logger.debug(f"Running command {cmd}")

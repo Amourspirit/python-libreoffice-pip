@@ -42,8 +42,12 @@ class BaseInstaller:
 
     def _install_pip(self, filename: Path):
         self._logger.info("Starting PIP installation…")
+        cfg = Config()
         try:
-            cmd = [str(self.path_python), f"{filename}", "--user"]
+            if cfg.is_all_users:
+                cmd = [str(self.path_python), f"{filename}"]
+            else:
+                cmd = [str(self.path_python), f"{filename}", "--user"]
             if STARTUP_INFO:
                 process = subprocess.Popen(
                     cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, env=self._get_env(), startupinfo=STARTUP_INFO
