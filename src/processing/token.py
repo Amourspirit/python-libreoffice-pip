@@ -1,5 +1,5 @@
 from __future__ import annotations
-from typing import cast, Dict
+from typing import cast, Any, Dict, List
 import toml
 from ..meta.singleton import Singleton
 from .. import file_util
@@ -22,6 +22,7 @@ class Token(metaclass=Singleton):
         self._tokens["___dist_dir___"] = str(cfg["tool"]["oxt"]["config"]["dist_dir"])
         self._tokens["___update_file___"] = str(cfg["tool"]["oxt"]["config"]["update_file"])
         self._tokens["___py_pkg_dir___"] = str(cfg["tool"]["oxt"]["config"]["py_pkg_dir"])
+        self._tokens["___authors___"] = self._get_authors(cfg)
         for token, replacement in self._tokens.items():
             self._tokens[token] = self.process(replacement)
         self._validate()
@@ -55,6 +56,23 @@ class Token(metaclass=Singleton):
             text = text.replace(token, replacement)
 
         return text
+
+    def get_token_value(self, token: str) -> str:
+        """
+        Returns the value of the given token.
+
+        Args:
+            token (str): The token in normal form (without '___' at the beginning and end).
+        """
+        return self._tokens.get(f"___{token}___", "")
+
+    def _get_authors(self, cfg: Dict[str, Any]) -> str:
+        """Returns the authors."""
+        authors = cast(List[str], cfg["tool"]["poetry"]["authors"])
+        results: List[str] = []
+        for author in authors:
+            results.append(author.split("<")[0].strip())
+        return ", ".join(results)
 
     # endregion Methods
 
