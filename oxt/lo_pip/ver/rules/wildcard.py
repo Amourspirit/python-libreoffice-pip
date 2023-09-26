@@ -39,8 +39,8 @@ class Wildcard(VerRuleBase):
 
     def get_is_match(self) -> bool:
         """Check if the version matches the given string."""
-        vlen = len(self.vstr)
-        if vlen == 0:
+        vl_en = len(self.vstr)
+        if vl_en == 0:
             return False
         if not self._starts_with_equal(self.vstr):
             return False
@@ -95,7 +95,7 @@ class Wildcard(VerRuleBase):
             check_ver = ReqVersion(f"=={check_version}")
             versions = self.get_versions()
             if len(versions) == 1:
-                # in this instance a sigle version is returned, with a value of >=0.0.0
+                # in this instance a single version is returned, with a value of >=0.0.0
                 return 0
             v1 = versions[0]
             v2 = versions[1]

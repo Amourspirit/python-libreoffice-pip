@@ -37,8 +37,8 @@ class NotEquals(VerRuleBase):
 
     def get_is_match(self) -> bool:
         """Check if the version matches the given string."""
-        vlen = len(self.vstr)
-        if vlen < 3:
+        v_len = len(self.vstr)
+        if v_len < 3:
             return False
         if not self._starts_with_not_equal(self.vstr):
             return False
@@ -62,7 +62,7 @@ class NotEquals(VerRuleBase):
         Gets the list of versions as strings.
         In this case in the form of ``!= 1.2.3`` or ``<> 1.2.3``.
 
-        Retruns:
+        Returns:
             str: The version as a string or an empty string if the version is invalid.
         """
         versions = self.get_versions()

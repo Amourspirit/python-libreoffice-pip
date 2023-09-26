@@ -16,7 +16,7 @@ class ReqVersion(Version):
         Raises:
             InvalidVersion: If the ``version`` does not conform to PEP 440 in any way then this exception will be raised.
         """
-        ver = self._process_full_verion(version)
+        ver = self._process_full_version(version)
         super().__init__(ver)
 
     def __repr__(self) -> str:
@@ -27,7 +27,7 @@ class ReqVersion(Version):
         """
         return f"<ReqVersion('{self}')>"
 
-    def _process_full_verion(self, version: str) -> str:
+    def _process_full_version(self, version: str) -> str:
         match = re.search(r"\d", version)
         if match:
             prefix = version[: match.start()].strip() or "=="

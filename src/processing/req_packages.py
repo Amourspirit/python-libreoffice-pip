@@ -9,7 +9,7 @@ class ReqPackages(Packages):
     Required Packages Singleton Class.
 
     Windows does not have ``packaging`` installed by default.
-    This class is used to ensure that ``packaging`` is availale as it is required for this projects versioning classes.
+    This class is used to ensure that ``packaging`` is available as it is required for this projects versioning classes.
     """
 
     # region Method Overrides

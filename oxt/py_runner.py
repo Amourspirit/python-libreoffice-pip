@@ -264,7 +264,7 @@ class ___lo_implementation_name___(unohelper.Base, XJob):
 
 
 g_TypeTable = {}
-# pythonloader looks for a static g_ImplementationHelper variable
+# python loader looks for a static g_ImplementationHelper variable
 g_ImplementationHelper = unohelper.ImplementationHelper()
 
 # add the FormatFactory class to the implementation container,

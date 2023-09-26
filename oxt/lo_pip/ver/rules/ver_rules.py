@@ -49,7 +49,7 @@ class VerRules:
 
     def unregister_rule(self, rule: Type[VerProto]):
         """
-        Unregisters Rule
+        Unregister Rule
 
         Args:
             rule (VerProto): Rule to unregister
@@ -89,7 +89,7 @@ class VerRules:
         clean_str = string.replace(";", ",")
         return [s.strip() for s in clean_str.split(",")]
 
-    def get_partical_matched_rules(self, vstr: str) -> List[VerProto]:
+    def get_partial_matched_rules(self, vstr: str) -> List[VerProto]:
         """
         Get matched rules
 
@@ -99,12 +99,12 @@ class VerRules:
         Returns:
             List[VerProto]: List of matched rules
         """
-        resuts: List[VerProto] = []
+        results: List[VerProto] = []
         for rule in self._rules:
             inst = rule(vstr=vstr)
             if inst.get_is_match():
-                resuts.append(inst)
-        return resuts
+                results.append(inst)
+        return results
 
     def get_matched_rules(self, vstr: str) -> List[VerProto]:
         """
@@ -118,11 +118,11 @@ class VerRules:
         """
         ver_strings = self.split_and_strip(vstr)
 
-        resuts: List[VerProto] = []
+        results: List[VerProto] = []
 
         for ver_str in ver_strings:
-            resuts.extend(self.get_partical_matched_rules(ver_str))
-        return resuts
+            results.extend(self.get_partial_matched_rules(ver_str))
+        return results
 
     def get_installed_is_valid(self, vstr: str, check_version: str) -> bool:
         """

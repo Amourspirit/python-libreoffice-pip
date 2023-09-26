@@ -15,7 +15,9 @@
         "soffice",
         "sourcery",
         "startupinfo",
-        "unohelper"
+        "unohelper",
+        "verr",
+        "vstr"
     ],
     "ignoreWords": [],
     "import": []
