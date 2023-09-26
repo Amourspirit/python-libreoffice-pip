@@ -25,9 +25,15 @@ class JsonConfig(metaclass=Singleton):
         except Exception:
             self._pip_wheel_url = ""
         try:
-            self._auto_install_in_site_packages = cast(bool, str(cfg["tool"]["oxt"]["config"]["v"]))
+            self._auto_install_in_site_packages = cast(
+                bool, cfg["tool"]["oxt"]["config"]["auto_install_in_site_packages"]
+            )
         except Exception:
             self._auto_install_in_site_packages = False
+        try:
+            self._install_wheel = cast(bool, cfg["tool"]["oxt"]["config"]["install_wheel"])
+        except Exception:
+            self._install_wheel = False
 
     def update_json_config(self, json_config_path: Path) -> None:
         """Read and updates the config.json file."""
@@ -46,6 +52,7 @@ class JsonConfig(metaclass=Singleton):
         json_config["zipped_preinstall_pure"] = self._zip_preinstall_pure
         json_config["pip_wheel_url"] = self._pip_wheel_url
         json_config["auto_install_in_site_packages"] = self._auto_install_in_site_packages
+        json_config["install_wheel"] = self._install_wheel
         # update the requirements
         json_config["requirements"] = self._requirements
 

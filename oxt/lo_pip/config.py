@@ -43,6 +43,7 @@ class ConfigMeta(type):
                     "requirements": {},
                     "zipped_preinstall_pure": False,
                     "auto_install_in_site_packages": False,
+                    "install_wheel": False,
                 }
                 # logger.debug("Configuration: no config.json, using defaults")
 
@@ -86,6 +87,7 @@ class Config(metaclass=ConfigMeta):
         self._lo_implementation_name = str(kwargs["lo_implementation_name"])
         self._zipped_preinstall_pure = bool(kwargs["zipped_preinstall_pure"])
         self._auto_install_in_site_packages = bool(kwargs["auto_install_in_site_packages"])
+        self._install_wheel = bool(kwargs["install_wheel"])
         if not self._auto_install_in_site_packages and os.getenv("DEV_CONTAINER", "") == "1":
             self._auto_install_in_site_packages = True
         if "requirements" not in kwargs:
@@ -388,6 +390,13 @@ class Config(metaclass=ConfigMeta):
         return self._pip_wheel_url
 
     @property
+    def install_wheel(self) -> bool:
+        """
+        Gets the flag indicating if wheel should be installed.
+        """
+        return self._install_wheel
+
+    @property
     def lo_identifier(self) -> str:
         """
         Gets the LibreOffice identifier, such as, ``org.openoffice.extensions.ooopip``
@@ -433,9 +442,9 @@ class Config(metaclass=ConfigMeta):
         """
         return self._package_location
 
-    # @property
-    # def extension_info(self) -> ExtensionInfo:
-    #     """
-    #     Gets the LibreOffice extension info.
-    #     """
-    #     return self._extension_info
+    @property
+    def extension_info(self) -> ExtensionInfo:
+        """
+        Gets the LibreOffice extension info.
+        """
+        return self._extension_info

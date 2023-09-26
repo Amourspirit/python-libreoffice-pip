@@ -58,6 +58,18 @@ class ___lo_implementation_name___(unohelper.Base, XJob):
         self._util = Util()
         self._logger = self._get_local_logger()
         self._logger.debug("Got OxtLogger instance")
+
+        # create an environment variable for the log file path.
+        # This is used to give end users another way to find the log file via python.
+        # Environment variable something like: ORG_OPENOFFICE_EXTENSIONS_OOOPIP_LOG_FILE, this will change for your extension.
+        # The variable is determined by the lo_identifier in the pyproject.toml file, tool.oxt.token section.
+        # To get the log file path in python: os.environ["ORG_OPENOFFICE_EXTENSIONS_OOOPIP_LOG_FILE"]
+        # A Log file will only be created if log_file is set and log_level is not NONE, set in pyproject.toml file, tool.oxt.token section.
+        if self._logger.log_file:
+            log_env_name = self._config.lo_identifier.upper().replace(".", "_") + "_LOG_FILE"
+            self._logger.debug(f"Log Path Environment Name: {log_env_name}")
+            os.environ[log_env_name] = self._logger.log_file
+
         self._session = Session()
         self._logger.debug("OooPipRunner Init Done")
 
@@ -180,6 +192,21 @@ class ___lo_implementation_name___(unohelper.Base, XJob):
 
     # endregion Register/Unregister sys paths
 
+    def _install_wheel(self) -> None:
+        if not self._config.install_wheel:
+            self._logger.debug("Install wheel is set to False. Skipping wheel installation.")
+            return
+        self._logger.debug("Install wheel is set to True. Installing wheel.")
+        try:
+            from lo_pip.install.install_wheel import InstallWheel
+
+            installer = InstallWheel()
+            installer.install()
+        except Exception as err:
+            self._logger.error(f"Unable to install wheel: {err}", exc_info=True)
+            return
+        self._logger.debug("Install wheel done.")
+
     def execute(self, *args):
         # make sure our pythonpath is in sys.path
         self._logger.debug("OooPipRunner executing")
@@ -195,25 +222,9 @@ class ___lo_implementation_name___(unohelper.Base, XJob):
             self._add_pure_pkgs_to_sys_path()
             self._add_site_package_dir_to_sys_path()
 
-            self._logger.debug(f"Config Package Location: {self._config.package_location}")
-            self._logger.debug(f"Config Is User Installed: {self._config.is_user_installed}")
-            self._logger.debug(f"Config Is Share Installed: {self._config.is_shared_installed}")
-            self._logger.debug(f"Config Is Bundle Installed: {self._config.is_bundled_installed}")
-
-            self._logger.debug(f"Session - LibreOffice Share: {self._session.share}")
-            self._logger.debug(f"Session - LibreOffice Share Python: {self._session.shared_py_scripts}")
-            self._logger.debug(f"Session - LibreOffice Share Scripts: {self._session.shared_scripts}")
-            self._logger.debug(f"Session - LibreOffice Username: {self._session.user_name}")
-            self._logger.debug(f"Session - LibreOffice User Profile: {self._session.user_profile}")
-            self._logger.debug(f"Session - LibreOffice User Scripts: {self._session.user_scripts}")
-
-            self._logger.debug(f"Util.config - Module: {self._util.config('Module')}")
-            self._logger.debug(f"Util.config - UserConfig: {self._util.config('UserConfig')}")
-            self._logger.debug(f"Util.config - Config: {self._util.config('Config')}")
-            self._logger.debug(f"Util.config - BasePathUserLayer: {self._util.config('BasePathUserLayer')}")
-            self._logger.debug(f"Util.config - BasePathShareLayer: {self._util.config('BasePathShareLayer')}")
-
-            # self._config.extension_info.log_extensions()
+            if self._config.log_level < 20:  # Less than INFO
+                self._show_extra_debug_info()
+                # self._config.extension_info.log_extensions(self._logger)
 
             if not TYPE_CHECKING:
                 # run time
@@ -245,12 +256,14 @@ class ___lo_implementation_name___(unohelper.Base, XJob):
                     self._logger.info("Pip was not successfully installed")
                     return
 
+            # install wheel if needed
+            self._install_wheel()
             # install any packages that are not installed
             pkg_installer = InstallPkg()
             self._logger.debug("Created InstallPkg instance")
             pkg_installer.install()
 
-            self._logger.info("___lo_implementation_name___ execute Done!")
+            self._logger.info(f"{self._config.lo_implementation_name} execute Done!")
         except Exception as err:
             if self._logger:
                 self._logger.error(err)
@@ -259,8 +272,28 @@ class ___lo_implementation_name___(unohelper.Base, XJob):
             self._remove_py_req_pkgs_from_sys_path()
         end_time = time.time()
         if self._logger:
-            self._logger.info(f"___lo_implementation_name___ execution time: {end_time - start_time} seconds")
+            self._logger.info(f"{self._config.lo_implementation_name} execution time: {end_time - start_time} seconds")
         return
+
+    # TODO Rename this here and in `execute`
+    def _show_extra_debug_info(self):
+        self._logger.debug(f"Config Package Location: {self._config.package_location}")
+        self._logger.debug(f"Config Is User Installed: {self._config.is_user_installed}")
+        self._logger.debug(f"Config Is Share Installed: {self._config.is_shared_installed}")
+        self._logger.debug(f"Config Is Bundle Installed: {self._config.is_bundled_installed}")
+
+        self._logger.debug(f"Session - LibreOffice Share: {self._session.share}")
+        self._logger.debug(f"Session - LibreOffice Share Python: {self._session.shared_py_scripts}")
+        self._logger.debug(f"Session - LibreOffice Share Scripts: {self._session.shared_scripts}")
+        self._logger.debug(f"Session - LibreOffice Username: {self._session.user_name}")
+        self._logger.debug(f"Session - LibreOffice User Profile: {self._session.user_profile}")
+        self._logger.debug(f"Session - LibreOffice User Scripts: {self._session.user_scripts}")
+
+        self._logger.debug(f"Util.config - Module: {self._util.config('Module')}")
+        self._logger.debug(f"Util.config - UserConfig: {self._util.config('UserConfig')}")
+        self._logger.debug(f"Util.config - Config: {self._util.config('Config')}")
+        self._logger.debug(f"Util.config - BasePathUserLayer: {self._util.config('BasePathUserLayer')}")
+        self._logger.debug(f"Util.config - BasePathShareLayer: {self._util.config('BasePathShareLayer')}")
 
 
 g_TypeTable = {}

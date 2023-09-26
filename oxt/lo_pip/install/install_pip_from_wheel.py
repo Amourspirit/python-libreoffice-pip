@@ -6,27 +6,30 @@ from ..config import Config
 from .download import Download
 from ..oxt_logger import OxtLogger
 from ..input_output import file_util
+from .install_pkg import InstallPkg
 
 
-class InstallPipWheel:
+class InstallPipFromWheel:
     """Download and install PIP from wheel url"""
 
     def __init__(self) -> None:
         self._config = Config()
         self._logger = OxtLogger(log_name=__name__)
 
-    def install_pip_wheel(self, dst: str | Path = "") -> None:
+    def install(self, dst: str | Path = "") -> None:
         """
-        Installs a pip wheel file.
+        Install pip from wheel file.
+
+        Downloads the pip wheel file from the url provided in the config file and unzips it to the destination directory.
 
         Args:
             dst (str | Path, Optional): The destination directory where the pip wheel file will be installed. If not provided, the ``pythonpath`` location will be used.
 
         Returns:
-            None
+            None:
 
         Raises:
-            None
+            None:
         """
         url = self._config.pip_wheel_url
         if not url:
@@ -56,10 +59,16 @@ class InstallPipWheel:
                 self._logger.error("PIP wheel file has not been saved")
                 return
 
-            self._unzip_wheel(filename=filename, dst=dst)
+            try:
+                self._unzip_wheel(filename=filename, dst=dst)
+            except Exception:
+                return
+            # now that pip has been installed from wheel force a reinstall to ensure it is the latest version
+            self._force_install_pip()
 
     def _unzip_wheel(self, filename: Path, dst: str | Path) -> None:
         """Unzip the downloaded wheel file"""
+        # sourcery skip: raise-specific-error
         if isinstance(dst, str):
             dst = Path(dst)
         try:
@@ -68,7 +77,16 @@ class InstallPipWheel:
                 self._logger.debug(f"PIP wheel file has been unzipped to {dst}")
             else:
                 self._logger.error("PIP wheel file has not been unzipped")
-                return
+                raise Exception("PIP wheel file has not been unzipped")
         except Exception as err:
-            self._logger.error("Unable to unzip wheel file", exc_info=True)
-            return
+            self._logger.error(f"Unable to unzip wheel file: {err}", exc_info=True)
+            raise
+
+    def _force_install_pip(self) -> None:
+        """Now that pip has been installed, force reinstall it to ensure it is the latest version"""
+        installer = InstallPkg()
+        ver = installer.get_package_version("pip")
+        if ver:
+            ver = f">={ver}"
+
+        installer.install(req={"pip": ver}, force=True)

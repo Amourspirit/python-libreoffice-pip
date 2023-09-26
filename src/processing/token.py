@@ -45,7 +45,7 @@ class Token(metaclass=Singleton):
                 raise ValueError(f"Token '{key}' is empty")
         if "___log_level___" not in self._tokens:
             raise ValueError("Token 'log_level' not found")
-        levels = {"debug", "info", "warning", "error", "critical"}
+        levels = {"none", "debug", "info", "warning", "error", "critical"}
         if self._tokens["___log_level___"].lower() not in levels:
             raise ValueError(f"Token 'log_level' is invalid: {self._tokens['___log_level___']}")
 
