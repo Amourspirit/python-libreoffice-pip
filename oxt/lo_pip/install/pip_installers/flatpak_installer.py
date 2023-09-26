@@ -33,11 +33,11 @@ class FlatpakInstaller(BaseInstaller):
     def _install_wheel(self) -> bool:
         cfg = Config()
         result = False
-        from ..install_pip_wheel import InstallPipWheel
+        from ..install_pip_from_wheel import InstallPipFromWheel
 
-        installer = InstallPipWheel()
+        installer = InstallPipFromWheel()
         try:
-            installer.install_pip_wheel(cfg.site_packages)
+            installer.install(cfg.site_packages)
             if cfg.site_packages not in sys.path:
                 sys.path.append(cfg.site_packages)
             result = True

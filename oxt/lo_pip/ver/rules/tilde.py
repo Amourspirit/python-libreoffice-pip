@@ -34,8 +34,8 @@ class Tilde(VerRuleBase):
 
     def get_is_match(self) -> bool:
         """Check if the version matches the given string."""
-        vlen = len(self.vstr)
-        if vlen < 3:
+        v_len = len(self.vstr)
+        if v_len < 3:
             return False
         if not self.vstr.startswith("~="):
             return False

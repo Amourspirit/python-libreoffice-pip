@@ -14,13 +14,17 @@ class InstallPkgFlatpak(InstallPkg):
     def _get_logger(self) -> OxtLogger:
         return OxtLogger(log_name=__name__)
 
-    def _install_pkg(self, pkg: str, ver: str) -> None:
+    def _install_pkg(self, pkg: str, ver: str, force: bool) -> None:
         """
         Install a package.
 
         Args:
             pkg (str): The name of the package to install.
             ver (str): The version of the package to install.
+            force (bool): Force install even if package is already installed.
+
+        Returns:
+            None:
         """
 
         if not self.config.site_packages:
@@ -29,6 +33,10 @@ class InstallPkgFlatpak(InstallPkg):
             )
             return
         cmd = ["install", "--upgrade", f"--target={self.config.site_packages}"]
+
+        if force:
+            cmd.append("--force-reinstall")
+
         pkg_cmd = f"{pkg}{ver}" if ver else pkg
         cmd = self._cmd_pip(*[*cmd, pkg_cmd])
         self._logger.debug(f"Running command {cmd}")

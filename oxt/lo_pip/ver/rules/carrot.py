@@ -18,8 +18,8 @@ class Carrot(VerRuleBase):
 
     def get_is_match(self) -> bool:
         """Check if the version matches the given string."""
-        vlen = len(self.vstr)
-        if vlen < 2:
+        v_len = len(self.vstr)
+        if v_len < 2:
             return False
         # return vstr.startswith("^")
         if not self.vstr.startswith("^"):

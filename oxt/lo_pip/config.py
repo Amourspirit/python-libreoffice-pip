@@ -1,4 +1,5 @@
 # coding: utf-8
+# region Imports
 from __future__ import annotations
 from pathlib import Path
 from typing import Dict, TYPE_CHECKING
@@ -15,9 +16,10 @@ if TYPE_CHECKING:
     from .lo_util import Util
     from lo_pip.info import ExtensionInfo
 
-    # from .info.extension_info import ExtensionInfo
+# endregion Imports
 
 
+# region Config Meta Class
 class ConfigMeta(type):
     _instance = None
 
@@ -43,6 +45,7 @@ class ConfigMeta(type):
                     "requirements": {},
                     "zipped_preinstall_pure": False,
                     "auto_install_in_site_packages": False,
+                    "install_wheel": False,
                 }
                 # logger.debug("Configuration: no config.json, using defaults")
 
@@ -50,9 +53,17 @@ class ConfigMeta(type):
         return cls._instance
 
 
+# endregion Config Meta Class
+
+# region Constants
+
 OS = platform.system()
 IS_WIN = OS == "Windows"
 IS_MAC = OS == "Darwin"
+
+# endregion Constants
+
+# region Config Class
 
 
 class Config(metaclass=ConfigMeta):
@@ -61,6 +72,8 @@ class Config(metaclass=ConfigMeta):
 
     Generally speaking this class is only used internally.
     """
+
+    # region Init
 
     def __init__(self, **kwargs):
         if not TYPE_CHECKING:
@@ -86,6 +99,7 @@ class Config(metaclass=ConfigMeta):
         self._lo_implementation_name = str(kwargs["lo_implementation_name"])
         self._zipped_preinstall_pure = bool(kwargs["zipped_preinstall_pure"])
         self._auto_install_in_site_packages = bool(kwargs["auto_install_in_site_packages"])
+        self._install_wheel = bool(kwargs["install_wheel"])
         if not self._auto_install_in_site_packages and os.getenv("DEV_CONTAINER", "") == "1":
             self._auto_install_in_site_packages = True
         if "requirements" not in kwargs:
@@ -129,7 +143,9 @@ class Config(metaclass=ConfigMeta):
             else:
                 self._site_packages = self._get_default_site_packages_dir()
 
-        # logger.debug("Config.__init__ completed")
+    # endregion Init
+
+    # region Methods
 
     def join(self, *paths: str):
         return str(Path(paths[0]).joinpath(*paths[1:]))
@@ -218,6 +234,10 @@ class Config(metaclass=ConfigMeta):
                 )
             site_packages.mkdir(parents=True, exist_ok=True)
         return str(site_packages)
+
+    # endregion Methods
+
+    # region Properties
 
     @property
     def url_pip(self) -> str:
@@ -388,6 +408,13 @@ class Config(metaclass=ConfigMeta):
         return self._pip_wheel_url
 
     @property
+    def install_wheel(self) -> bool:
+        """
+        Gets the flag indicating if wheel should be installed.
+        """
+        return self._install_wheel
+
+    @property
     def lo_identifier(self) -> str:
         """
         Gets the LibreOffice identifier, such as, ``org.openoffice.extensions.ooopip``
@@ -433,9 +460,14 @@ class Config(metaclass=ConfigMeta):
         """
         return self._package_location
 
-    # @property
-    # def extension_info(self) -> ExtensionInfo:
-    #     """
-    #     Gets the LibreOffice extension info.
-    #     """
-    #     return self._extension_info
+    @property
+    def extension_info(self) -> ExtensionInfo:
+        """
+        Gets the LibreOffice extension info.
+        """
+        return self._extension_info
+
+    # endregion Properties
+
+
+# endregion Config Class

@@ -12,7 +12,7 @@ class OxtLogger(Logger):
         self.formatter = logging.Formatter(self.config.log_format)
         if not log_file:
             log_file = self.config.log_file
-        self.log_file = log_file
+        self._log_file = log_file
         if not log_name:
             log_name = self.config.log_name
         self.log_name = log_name
@@ -20,7 +20,7 @@ class OxtLogger(Logger):
         # Logger.__init__(self, name=log_name, level=cfg.log_level)
         super().__init__(name=log_name, level=self.config.log_level)
 
-        if self.log_file:
+        if self._log_file and self.config.log_level >= 10:  # DEBUG
             self.addHandler(self.get_file_handler())
         else:
             self.addHandler(self.get_console_handler())
@@ -34,7 +34,7 @@ class OxtLogger(Logger):
         return console_handler
 
     def get_file_handler(self):
-        log_file = self.log_file
+        log_file = self._log_file
         file_handler = TimedRotatingFileHandler(
             log_file, when="W0", interval=1, backupCount=3, encoding="utf8", delay=True
         )
@@ -42,3 +42,8 @@ class OxtLogger(Logger):
         file_handler.setFormatter(self.formatter)
         file_handler.setLevel(self.config.log_level)
         return file_handler
+
+    @property
+    def log_file(self):
+        """Log file path."""
+        return self._log_file
