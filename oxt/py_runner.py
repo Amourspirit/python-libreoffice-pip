@@ -164,6 +164,13 @@ class ___lo_implementation_name___(unohelper.Base, XJob):
 
     # endregion execute
 
+    # region Destructor
+    def __del__(self):
+        if "lo_pip" in sys.modules:
+            # clean up by removing the lo_pip module from sys.modules
+            del sys.modules["lo_pip"]
+
+    # endregion Destructor
     # endregion XJob
 
     # region Install
