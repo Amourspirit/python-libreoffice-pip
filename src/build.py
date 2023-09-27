@@ -31,6 +31,7 @@ class Build:
             self.clean()
         # self._ensure_build()
         self._copy_src_dest()
+        self._rename_lo_pip()
         if self._args.process_tokens:
             self._process_tokens()
 
@@ -67,6 +68,15 @@ class Build:
         if self._build_path.exists():
             shutil.rmtree(self._build_path)
 
+    def _rename_lo_pip(self) -> None:
+        """Renames the lo_pip folder."""
+        token = Token()
+        lo_pip = self._build_path / "___lo_pip___"
+        if not lo_pip.exists():
+            raise FileNotFoundError(f"lo_pip folder '{lo_pip}' not found")
+        new_lo_pip = self._build_path / token.get_token_value("lo_pip")
+        os.rename(lo_pip, new_lo_pip)
+
     def _ensure_build(self) -> None:
         """Ensures the build directory exists."""
         if not self._build_path.exists():
@@ -92,7 +102,8 @@ class Build:
             file_util.write_string_to_file(py_file, text)
 
     def _process_config(self) -> None:
-        config_file = self._build_path / "lo_pip" / "config.json"
+        token = Token()
+        config_file = self._build_path / token.get_token_value("lo_pip") / "config.json"
         json_config = JsonConfig()
         json_config.update_json_config(config_file)
 

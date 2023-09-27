@@ -5,8 +5,8 @@ if __name__ == "__main__":
     pytest.main([__file__])
 
 
-from oxt.lo_pip.ver.rules.ver_rules import VerRules
-from oxt.lo_pip.ver.req_version import ReqVersion
+from oxt.___lo_pip___.ver.rules.ver_rules import VerRules
+from oxt.___lo_pip___.ver.req_version import ReqVersion
 
 
 @pytest.mark.parametrize(

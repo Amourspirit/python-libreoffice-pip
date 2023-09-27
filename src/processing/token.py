@@ -37,6 +37,7 @@ class Token(metaclass=Singleton):
             "publisher_en_us",
             "url_pip",
             "log_format",
+            "lo_pip",
         }
         for key in keys:
             str_key = f"___{key}___"
@@ -49,6 +50,21 @@ class Token(metaclass=Singleton):
         levels = {"none", "debug", "info", "warning", "error", "critical"}
         if self._tokens["___log_level___"].lower() not in levels:
             raise ValueError(f"Token 'log_level' is invalid: {self._tokens['___log_level___']}")
+        lo_identifier = self.get_token_value("lo_identifier")
+        if lo_identifier != "org.openoffice.extensions.ooopip":
+            if self.get_token_value("lo_implementation_name") == "OooPipRunner":
+                raise ValueError(
+                    "Token 'lo_implementation_name' value is invalid and must be renamed in tool.oxt.token in pyproject.toml. Every project must have unique lo_implementation_name value."
+                )
+            if self.get_token_value("lo_pip") == "lo_pip":
+                raise ValueError(
+                    "Token 'lo_pip' value is invalid and must be renamed in tool.oxt.token in pyproject.toml. Every project must have unique lo_pip value."
+                )
+            log_file = self.get_token_value("log_file")
+            if log_file == "pip_install.log":
+                raise ValueError(
+                    "Token 'log_file' value is invalid and must be renamed in tool.oxt.token in pyproject.toml. Every project must have unique log_file value or set to empty string for no logging."
+                )
 
     def process(self, text: str) -> str:
         """Processes the given text."""

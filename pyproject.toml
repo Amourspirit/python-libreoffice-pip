@@ -34,6 +34,7 @@ log_name = "OOO PIP Installer"
 log_level = "DEBUG" # NONE, DEBUG, INFO, WARNING, ERROR, CRITICAL
 log_format = "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
 # log_format = "%(levelname)s [%(module)s.py][%(funcName)s::%(lineno)d] %(message)s"
+lo_pip = "lo_pip"
 
 [tool.oxt.requirements]
 # https://python-poetry.org/docs/dependency-specification/

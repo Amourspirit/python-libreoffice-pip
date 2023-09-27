@@ -5,7 +5,7 @@ if __name__ == "__main__":
     pytest.main([__file__])
 
 
-from oxt.lo_pip.ver.rules.greater import Greater
+from oxt.___lo_pip___.ver.rules.greater import Greater
 
 
 @pytest.mark.parametrize(

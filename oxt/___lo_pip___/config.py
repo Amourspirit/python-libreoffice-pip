@@ -14,7 +14,7 @@ from .input_output import file_util
 if TYPE_CHECKING:
     from .lo_util import Session
     from .lo_util import Util
-    from lo_pip.info import ExtensionInfo
+    from .info import ExtensionInfo
 
 # endregion Imports
 
@@ -80,7 +80,7 @@ class Config(metaclass=ConfigMeta):
     def __init__(self, **kwargs):
         if not TYPE_CHECKING:
             from .lo_util import Session
-            from lo_pip.info import ExtensionInfo
+            from .info import ExtensionInfo
             from .lo_util import Util
 
         log_file = str(kwargs["log_file"])

@@ -13,12 +13,12 @@ from com.sun.star.task import XJob
 
 if TYPE_CHECKING:
     # just for design time
-    from lo_pip.config import Config
-    from lo_pip.install.install_pip import InstallPip
-    from lo_pip.install.install_pkg import InstallPkg
-    from lo_pip.oxt_logger import OxtLogger
-    from lo_pip.lo_util import Session, RegisterPathKind, UnRegisterPathKind
-    from lo_pip.lo_util.util import Util
+    from ___lo_pip___.config import Config
+    from ___lo_pip___.install.install_pip import InstallPip
+    from ___lo_pip___.install.install_pkg import InstallPkg
+    from ___lo_pip___.oxt_logger import OxtLogger
+    from ___lo_pip___.lo_util import Session, RegisterPathKind, UnRegisterPathKind
+    from ___lo_pip___.lo_util.util import Util
 else:
     RegisterPathKind = object
     UnRegisterPathKind = object
@@ -52,10 +52,10 @@ class ___lo_implementation_name___(unohelper.Base, XJob):
         self._add_local_path_to_sys_path()
         if not TYPE_CHECKING:
             # run time
-            from lo_pip.config import Config
-            from lo_pip.lo_util import Util
+            from ___lo_pip___.config import Config
+            from ___lo_pip___.lo_util import Util
 
-            from lo_pip.lo_util import (
+            from ___lo_pip___.lo_util import (
                 Session,
                 RegisterPathKind as InitRegisterPathKind,
                 UnRegisterPathKind as InitUnRegisterPathKind,
@@ -112,10 +112,10 @@ class ___lo_implementation_name___(unohelper.Base, XJob):
 
             if not TYPE_CHECKING:
                 # run time
-                from lo_pip.install.install_pip import InstallPip
+                from ___lo_pip___.install.install_pip import InstallPip
 
                 self._logger.debug("Imported InstallPip")
-                from lo_pip.install.install_pkg import InstallPkg
+                from ___lo_pip___.install.install_pkg import InstallPkg
 
             self._logger.debug("Created config instance")
             if self._config.py_pkg_dir:
@@ -166,9 +166,9 @@ class ___lo_implementation_name___(unohelper.Base, XJob):
 
     # region Destructor
     def __del__(self):
-        if "lo_pip" in sys.modules:
-            # clean up by removing the lo_pip module from sys.modules
-            del sys.modules["lo_pip"]
+        if "___lo_pip___" in sys.modules:
+            # clean up by removing the ___lo_pip___ module from sys.modules
+            del sys.modules["___lo_pip___"]
 
     # endregion Destructor
     # endregion XJob
@@ -181,7 +181,7 @@ class ___lo_implementation_name___(unohelper.Base, XJob):
             return
         self._logger.debug("Install wheel is set to True. Installing wheel.")
         try:
-            from lo_pip.install.install_wheel import InstallWheel
+            from ___lo_pip___.install.install_wheel import InstallWheel
 
             installer = InstallWheel()
             installer.install()
@@ -308,7 +308,7 @@ class ___lo_implementation_name___(unohelper.Base, XJob):
     # region Logging
 
     def _get_local_logger(self) -> OxtLogger:
-        from lo_pip.oxt_logger import OxtLogger
+        from ___lo_pip___.oxt_logger import OxtLogger
 
         # if self._user_path:
         #     log_file = os.path.join(self._user_path, "py_runner.log")
