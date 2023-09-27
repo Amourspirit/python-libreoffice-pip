@@ -19,6 +19,9 @@ class FlatpakInstaller(BaseInstaller):
         if self.is_pip_installed():
             self._logger.info("PIP is already installed")
             return
+        if not self.is_internet:
+            self._logger.error("No internet connection")
+            return
         if self._install_wheel():
             if self.is_pip_installed():
                 self._logger.info("PIP was installed successfully")

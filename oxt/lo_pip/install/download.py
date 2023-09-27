@@ -9,6 +9,7 @@ from urllib.error import URLError, HTTPError
 
 from ..meta.singleton import Singleton
 from ..oxt_logger import OxtLogger
+from ..config import Config
 
 
 class Download(metaclass=Singleton):
@@ -40,6 +41,11 @@ class Download(metaclass=Singleton):
         """
         if headers is None:
             headers = {}
+        if not self.is_internet:
+            err = "No internet connection!"
+            self._logger.error(err)
+            return None, {}, err
+
         result = None
         err = ""
         req = Request(url)
@@ -82,3 +88,35 @@ class Download(metaclass=Singleton):
         if isinstance(pth, str):
             pth = Path(pth)
         return bool(pth.write_bytes(data))
+
+    def check_internet_connection(self, url: str = "") -> bool:
+        """
+        Gets if there is an internet connection.
+
+        If url is not provided then it will use the url from the config.
+        If the config url is not provided then ``True`` will be returned.
+
+        Args:
+            url (str, optional): Test Url. Defaults to `Config().test_internet_url`.
+
+        Returns:
+            bool: ``True`` if there is an internet connection. ``False`` if no internet connection or if no url is provided.
+        """
+        try:
+            if not url:
+                url = Config().test_internet_url
+            if not url:
+                return False
+            _ = urlopen(url=url, timeout=5.0)
+            return True
+        except URLError:
+            return False
+
+    @property
+    def is_internet(self) -> bool:
+        """Gets if there is an internet connection."""
+        try:
+            return self._is_internet
+        except AttributeError:
+            self._is_internet = self.check_internet_connection()
+            return self._is_internet

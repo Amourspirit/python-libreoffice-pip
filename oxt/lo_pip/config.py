@@ -46,6 +46,8 @@ class ConfigMeta(type):
                     "zipped_preinstall_pure": False,
                     "auto_install_in_site_packages": False,
                     "install_wheel": False,
+                    "test_internet_url": "",
+                    "log_pip_installs": True,
                 }
                 # logger.debug("Configuration: no config.json, using defaults")
 
@@ -97,10 +99,13 @@ class Config(metaclass=ConfigMeta):
         self._py_pkg_dir = str(kwargs["py_pkg_dir"])
         self._lo_identifier = str(kwargs["lo_identifier"])
         self._lo_implementation_name = str(kwargs["lo_implementation_name"])
+        self._test_internet_url = str(kwargs["test_internet_url"])
         self._zipped_preinstall_pure = bool(kwargs["zipped_preinstall_pure"])
         self._auto_install_in_site_packages = bool(kwargs["auto_install_in_site_packages"])
         self._install_wheel = bool(kwargs["install_wheel"])
+        self._log_pip_installs = bool(kwargs["log_pip_installs"])
         if not self._auto_install_in_site_packages and os.getenv("DEV_CONTAINER", "") == "1":
+            # if running in a dev container (Codespace)
             self._auto_install_in_site_packages = True
         if "requirements" not in kwargs:
             kwargs["requirements"] = {}
@@ -241,13 +246,21 @@ class Config(metaclass=ConfigMeta):
 
     @property
     def url_pip(self) -> str:
+        """
+        String path such as ``https://bootstrap.pypa.io/get-pip.py``
+
+        The value for this property can be set in pyproject.toml (tool.oxt.token.url_pip)
+        """
         return self._url_pip
 
-    """
-    String path such as ``https://bootstrap.pypa.io/get-pip.py``
+    @property
+    def test_internet_url(self) -> str:
+        """
+        String path such as ``https://www.google.com``
 
-    The value for this property can be set in pyproject.toml (tool.oxt.token.url_pip)
-    """
+        The value for this property can be set in pyproject.toml (tool.oxt.token.test_internet_url)
+        """
+        return self._test_internet_url
 
     @property
     def python_path(self) -> Path:
@@ -466,6 +479,13 @@ class Config(metaclass=ConfigMeta):
         Gets the LibreOffice extension info.
         """
         return self._extension_info
+
+    @property
+    def log_pip_installs(self) -> bool:
+        """
+        Gets the flag indicating if pip installs should be logged.
+        """
+        return self._log_pip_installs
 
     # endregion Properties
 

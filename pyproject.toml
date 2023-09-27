@@ -11,6 +11,8 @@ pip_wheel_url = "https://files.pythonhosted.org/packages/50/c2/e06851e8cc28dcad7
 install_wheel = true
 zip_preinstall_pure = true
 auto_install_in_site_packages = true
+test_internet_url="https://duckduckgo.com"
+log_pip_installs = true
 
 
 

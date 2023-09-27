@@ -12,6 +12,7 @@ from pathlib import Path
 from ...config import Config
 from ...ver.rules.ver_rules import VerRules, VerProto
 from ...oxt_logger import OxtLogger
+from ..download import Download
 
 
 # https://docs.python.org/3.8/library/importlib.metadata.html#module-importlib.metadata
@@ -55,6 +56,11 @@ class InstallPkg:
 
     def _cmd_pip(self, *args: str) -> List[str]:
         cmd: List[str] = [str(self.path_python), "-m", "pip", *args]
+        if self._config.log_pip_installs and self._config.log_file:
+            log_file = self._config.log_file
+            if " " in log_file:
+                log_file = f'"{log_file}"'
+            cmd.append(f"--log={log_file}")
         return cmd
 
     def _install_pkg(self, pkg: str, ver: str, force: bool) -> None:
@@ -133,17 +139,23 @@ class InstallPkg:
             None:
         """
         self._logger.info("Installing packages…")
+
         req = req or self._config.requirements
 
         if not req:
             self._logger.warning("No packages to install.")
             return
+
         for name, ver in req.items():
             valid, rules = self._is_valid_version(name, ver, force)
             if force:
                 valid = 0
             if valid == 1:
                 continue
+
+            if not self.is_internet:
+                self._logger.error("No internet connection!")
+                break
 
             ver_lst: List[str] = [rule.get_versions_str() for rule in rules]
             self._install_pkg(name, ",".join(ver_lst), force)
@@ -188,3 +200,12 @@ class InstallPkg:
     @property
     def config(self) -> Config:
         return self._config
+
+    @property
+    def is_internet(self) -> bool:
+        """Gets if there is an internet connection."""
+        try:
+            return self._is_internet
+        except AttributeError:
+            self._is_internet = Download().is_internet
+            return self._is_internet

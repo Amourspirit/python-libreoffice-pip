@@ -133,6 +133,9 @@ class ___lo_implementation_name___(unohelper.Base, XJob):
                 self._logger.info("Pip is already installed")
             else:
                 self._logger.info("Pip is not installed. Attempting to install")
+                if not pip_installer.is_internet:
+                    self._logger.error("No internet connection!")
+                    return
                 pip_installer.install_pip()
                 if pip_installer.is_pip_installed():
                     self._logger.info("Pip has been installed")
