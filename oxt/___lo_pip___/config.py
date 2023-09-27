@@ -189,10 +189,21 @@ class Config(metaclass=ConfigMeta):
     def _get_python_major_minor(self) -> str:
         return f"{sys.version_info.major}.{sys.version_info.minor}"
 
+    def _get_shared_site_packages_dir(self) -> Path:
+        # sourcery skip: class-extract-method
+        packages = site.getsitepackages()
+        for pkg in packages:
+            if pkg.endswith("site-packages"):
+                return Path(pkg).resolve()
+        for pkg in packages:
+            if pkg.endswith("dist-packages"):
+                return Path(pkg).resolve()
+        return Path(packages[0]).resolve()
+
     def _get_default_site_packages_dir(self) -> str:
         if self.is_shared_installed or self.is_bundled_installed:
             # if package has been installed for all users (root)
-            site_packages = Path(site.getsitepackages()[0]).resolve()
+            site_packages = self._get_shared_site_packages_dir()
         else:
             if site.USER_SITE:
                 site_packages = Path(site.USER_SITE).resolve()
@@ -214,7 +225,7 @@ class Config(metaclass=ConfigMeta):
         # sourcery skip: class-extract-method
         if self.is_shared_installed or self.is_bundled_installed:
             # if package has been installed for all users (root)
-            site_packages = Path(site.getsitepackages()[0]).resolve()
+            site_packages = self._get_shared_site_packages_dir()
         else:
             if site.USER_SITE:
                 site_packages = Path(site.USER_SITE).resolve()
@@ -229,7 +240,7 @@ class Config(metaclass=ConfigMeta):
         # sourcery skip: class-extract-method
         if self.is_shared_installed or self.is_bundled_installed:
             # if package has been installed for all users (root)
-            site_packages = Path(site.getsitepackages()[0]).resolve()
+            site_packages = self._get_shared_site_packages_dir()
         else:
             if site.USER_SITE:
                 site_packages = Path(site.USER_SITE).resolve()
