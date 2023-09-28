@@ -32,8 +32,8 @@ class InstallPkg:
 
     def __init__(self) -> None:
         self._config = Config()
-        self.path_python = Path(self._config.python_path)
-        self.ver_rules = VerRules()
+        self._path_python = Path(self._config.python_path)
+        self._ver_rules = VerRules()
         self._logger = self._get_logger()
 
     def _get_logger(self) -> OxtLogger:
@@ -55,7 +55,7 @@ class InstallPkg:
             return ""
 
     def _cmd_pip(self, *args: str) -> List[str]:
-        cmd: List[str] = [str(self.path_python), "-m", "pip", *args]
+        cmd: List[str] = [str(self._path_python), "-m", "pip", *args]
         if self._config.log_pip_installs and self._config.log_file:
             log_file = self._config.log_file
             if " " in log_file:
@@ -165,6 +165,11 @@ class InstallPkg:
         """
         Check if the version of the package is valid.
 
+        Args:
+            name (str): The name of the package such as ``verr``. If empty string the version is converted to ``>=0.0.0``
+            ver (str): The version of the package such as ``>=1.0.0``
+            force (bool, optional): Force the package to install even if it is already installed. Defaults to False.
+
         Returns:
             Tuple[int, List[VerProto]]: int is 0 if valid, 1 if not valid, -1 if not installed
         """
@@ -172,7 +177,7 @@ class InstallPkg:
             # set default version to >=0.0.0
             ver = "==*"
         pkg_ver = self.get_package_version(name)
-        rules = self.ver_rules.get_matched_rules(ver)
+        rules = self._ver_rules.get_matched_rules(ver)
         if not pkg_ver:
             self._logger.debug(f"Package {name} not installed. Setting Install flags.")
             return 0, rules
@@ -185,7 +190,7 @@ class InstallPkg:
                 self._logger.error(f"Unable to Install. Unable to find rules for {name} {ver}")
             return 1, rules
 
-        rules_pass = self.ver_rules.get_installed_is_valid_by_rules(rules=rules, check_version=pkg_ver)
+        rules_pass = self._ver_rules.get_installed_is_valid_by_rules(rules=rules, check_version=pkg_ver)
         if rules_pass == False:
             self._logger.info(
                 f"Package {name} {pkg_ver} already installed. It does not meet requirements specified by: {ver}, but will be upgraded."
@@ -209,3 +214,7 @@ class InstallPkg:
         except AttributeError:
             self._is_internet = Download().is_internet
             return self._is_internet
+
+    @property
+    def python_path(self) -> Path:
+        return self._path_python
