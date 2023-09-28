@@ -14,7 +14,7 @@ from .input_output import file_util
 if TYPE_CHECKING:
     from .lo_util import Session
     from .lo_util import Util
-    from lo_pip.info import ExtensionInfo
+    from .info import ExtensionInfo
 
 # endregion Imports
 
@@ -46,6 +46,8 @@ class ConfigMeta(type):
                     "zipped_preinstall_pure": False,
                     "auto_install_in_site_packages": False,
                     "install_wheel": False,
+                    "test_internet_url": "",
+                    "log_pip_installs": True,
                 }
                 # logger.debug("Configuration: no config.json, using defaults")
 
@@ -78,7 +80,7 @@ class Config(metaclass=ConfigMeta):
     def __init__(self, **kwargs):
         if not TYPE_CHECKING:
             from .lo_util import Session
-            from lo_pip.info import ExtensionInfo
+            from .info import ExtensionInfo
             from .lo_util import Util
 
         log_file = str(kwargs["log_file"])
@@ -97,10 +99,13 @@ class Config(metaclass=ConfigMeta):
         self._py_pkg_dir = str(kwargs["py_pkg_dir"])
         self._lo_identifier = str(kwargs["lo_identifier"])
         self._lo_implementation_name = str(kwargs["lo_implementation_name"])
+        self._test_internet_url = str(kwargs["test_internet_url"])
         self._zipped_preinstall_pure = bool(kwargs["zipped_preinstall_pure"])
         self._auto_install_in_site_packages = bool(kwargs["auto_install_in_site_packages"])
         self._install_wheel = bool(kwargs["install_wheel"])
+        self._log_pip_installs = bool(kwargs["log_pip_installs"])
         if not self._auto_install_in_site_packages and os.getenv("DEV_CONTAINER", "") == "1":
+            # if running in a dev container (Codespace)
             self._auto_install_in_site_packages = True
         if "requirements" not in kwargs:
             kwargs["requirements"] = {}
@@ -184,10 +189,21 @@ class Config(metaclass=ConfigMeta):
     def _get_python_major_minor(self) -> str:
         return f"{sys.version_info.major}.{sys.version_info.minor}"
 
+    def _get_shared_site_packages_dir(self) -> Path:
+        # sourcery skip: class-extract-method
+        packages = site.getsitepackages()
+        for pkg in packages:
+            if pkg.endswith("site-packages"):
+                return Path(pkg).resolve()
+        for pkg in packages:
+            if pkg.endswith("dist-packages"):
+                return Path(pkg).resolve()
+        return Path(packages[0]).resolve()
+
     def _get_default_site_packages_dir(self) -> str:
         if self.is_shared_installed or self.is_bundled_installed:
             # if package has been installed for all users (root)
-            site_packages = Path(site.getsitepackages()[0]).resolve()
+            site_packages = self._get_shared_site_packages_dir()
         else:
             if site.USER_SITE:
                 site_packages = Path(site.USER_SITE).resolve()
@@ -209,7 +225,7 @@ class Config(metaclass=ConfigMeta):
         # sourcery skip: class-extract-method
         if self.is_shared_installed or self.is_bundled_installed:
             # if package has been installed for all users (root)
-            site_packages = Path(site.getsitepackages()[0]).resolve()
+            site_packages = self._get_shared_site_packages_dir()
         else:
             if site.USER_SITE:
                 site_packages = Path(site.USER_SITE).resolve()
@@ -224,7 +240,7 @@ class Config(metaclass=ConfigMeta):
         # sourcery skip: class-extract-method
         if self.is_shared_installed or self.is_bundled_installed:
             # if package has been installed for all users (root)
-            site_packages = Path(site.getsitepackages()[0]).resolve()
+            site_packages = self._get_shared_site_packages_dir()
         else:
             if site.USER_SITE:
                 site_packages = Path(site.USER_SITE).resolve()
@@ -241,13 +257,21 @@ class Config(metaclass=ConfigMeta):
 
     @property
     def url_pip(self) -> str:
+        """
+        String path such as ``https://bootstrap.pypa.io/get-pip.py``
+
+        The value for this property can be set in pyproject.toml (tool.oxt.token.url_pip)
+        """
         return self._url_pip
 
-    """
-    String path such as ``https://bootstrap.pypa.io/get-pip.py``
+    @property
+    def test_internet_url(self) -> str:
+        """
+        String path such as ``https://www.google.com``
 
-    The value for this property can be set in pyproject.toml (tool.oxt.token.url_pip)
-    """
+        The value for this property can be set in pyproject.toml (tool.oxt.token.test_internet_url)
+        """
+        return self._test_internet_url
 
     @property
     def python_path(self) -> Path:
@@ -466,6 +490,13 @@ class Config(metaclass=ConfigMeta):
         Gets the LibreOffice extension info.
         """
         return self._extension_info
+
+    @property
+    def log_pip_installs(self) -> bool:
+        """
+        Gets the flag indicating if pip installs should be logged.
+        """
+        return self._log_pip_installs
 
     # endregion Properties
 

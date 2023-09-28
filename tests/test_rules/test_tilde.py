@@ -5,7 +5,7 @@ if __name__ == "__main__":
     pytest.main([__file__])
 
 
-from oxt.lo_pip.ver.rules.tilde import Tilde
+from oxt.___lo_pip___.ver.rules.tilde import Tilde
 
 
 @pytest.mark.parametrize(

@@ -6,6 +6,7 @@ from typing import Dict
 
 from ..config import Config
 from ..oxt_logger import OxtLogger
+from .download import Download
 
 from .pip_installers.base_installer import STARTUP_INFO
 
@@ -16,6 +17,7 @@ class InstallPip:
     def __init__(self) -> None:
         self._config = Config()
         self._logger = OxtLogger(log_name=__name__)
+        self._download = Download()
 
     def install_pip(self) -> None:
         if self._config.is_flatpak:
@@ -61,3 +63,8 @@ class InstallPip:
         else:
             result = subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, env=self._get_env())
         return result.returncode == 0
+
+    @property
+    def is_internet(self) -> bool:
+        """Gets if there is an internet connection."""
+        return self._download.is_internet

@@ -36,6 +36,10 @@ class InstallPipFromWheel:
             self._logger.error("PIP installation has failed - No wheel url")
             return
 
+        if not self.is_internet:
+            self._logger.error("No internet connection!")
+            return
+
         if not dst:
             root_pth = Path(file_util.get_package_location(self._config.lo_identifier))
             dst = root_pth / "pythonpath"
@@ -90,3 +94,12 @@ class InstallPipFromWheel:
             ver = f">={ver}"
 
         installer.install(req={"pip": ver}, force=True)
+
+    @property
+    def is_internet(self) -> bool:
+        """Gets if there is an internet connection."""
+        try:
+            return self._is_internet
+        except AttributeError:
+            self._is_internet = Download().is_internet
+            return self._is_internet

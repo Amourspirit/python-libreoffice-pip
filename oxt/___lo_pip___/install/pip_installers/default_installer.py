@@ -17,9 +17,9 @@ class DefaultInstaller(BaseInstaller):
         return OxtLogger(log_name=__name__)
 
     def install_pip(self) -> None:
-        # if detect.is_flatpak():
-        #     self._logger.error("PIP installation has failed - Flatpak")
-        #     return
+        if not self.is_internet:
+            self._logger.error("No internet connection")
+            return
         pip_installed = False
         cfg = Config()
         with tempfile.TemporaryDirectory() as temp_dir:

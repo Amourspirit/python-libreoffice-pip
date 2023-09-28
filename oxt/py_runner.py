@@ -13,12 +13,12 @@ from com.sun.star.task import XJob
 
 if TYPE_CHECKING:
     # just for design time
-    from lo_pip.config import Config
-    from lo_pip.install.install_pip import InstallPip
-    from lo_pip.install.install_pkg import InstallPkg
-    from lo_pip.oxt_logger import OxtLogger
-    from lo_pip.lo_util import Session, RegisterPathKind, UnRegisterPathKind
-    from lo_pip.lo_util.util import Util
+    from ___lo_pip___.config import Config
+    from ___lo_pip___.install.install_pip import InstallPip
+    from ___lo_pip___.install.install_pkg import InstallPkg
+    from ___lo_pip___.oxt_logger import OxtLogger
+    from ___lo_pip___.lo_util import Session, RegisterPathKind, UnRegisterPathKind
+    from ___lo_pip___.lo_util.util import Util
 else:
     RegisterPathKind = object
     UnRegisterPathKind = object
@@ -42,7 +42,8 @@ class ___lo_implementation_name___(unohelper.Base, XJob):
     def __init__(self, ctx):
         self._this_pth = os.path.dirname(__file__)
         self._path_added = False
-        # logger.debug("OooPipRunner Init")
+        self._added_packaging = False
+        # logger.debug("___lo_implementation_name___ Init")
         self.ctx = ctx
         self._user_path = ""
         with contextlib.suppress(Exception):
@@ -52,10 +53,10 @@ class ___lo_implementation_name___(unohelper.Base, XJob):
         self._add_local_path_to_sys_path()
         if not TYPE_CHECKING:
             # run time
-            from lo_pip.config import Config
-            from lo_pip.lo_util import Util
+            from ___lo_pip___.config import Config
+            from ___lo_pip___.lo_util import Util
 
-            from lo_pip.lo_util import (
+            from ___lo_pip___.lo_util import (
                 Session,
                 RegisterPathKind as InitRegisterPathKind,
                 UnRegisterPathKind as InitUnRegisterPathKind,
@@ -83,7 +84,7 @@ class ___lo_implementation_name___(unohelper.Base, XJob):
             os.environ[log_env_name] = self._logger.log_file
 
         self._session = Session()
-        self._logger.debug("OooPipRunner Init Done")
+        self._logger.debug("___lo_implementation_name___ Init Done")
 
         self._add_py_req_pkgs_to_sys_path()
 
@@ -93,7 +94,7 @@ class ___lo_implementation_name___(unohelper.Base, XJob):
 
     def execute(self, *args):
         # make sure our pythonpath is in sys.path
-        self._logger.debug("OooPipRunner executing")
+        self._logger.debug("___lo_implementation_name___ executing")
         start_time = time.time()
         # if args:
         #     self._logger.debug(f"args: {args}")
@@ -112,10 +113,10 @@ class ___lo_implementation_name___(unohelper.Base, XJob):
 
             if not TYPE_CHECKING:
                 # run time
-                from lo_pip.install.install_pip import InstallPip
+                from ___lo_pip___.install.install_pip import InstallPip
 
                 self._logger.debug("Imported InstallPip")
-                from lo_pip.install.install_pkg import InstallPkg
+                from ___lo_pip___.install.install_pkg import InstallPkg
 
             self._logger.debug("Created config instance")
             if self._config.py_pkg_dir:
@@ -133,6 +134,9 @@ class ___lo_implementation_name___(unohelper.Base, XJob):
                 self._logger.info("Pip is already installed")
             else:
                 self._logger.info("Pip is not installed. Attempting to install")
+                if not pip_installer.is_internet:
+                    self._logger.error("No internet connection!")
+                    return
                 pip_installer.install_pip()
                 if pip_installer.is_pip_installed():
                     self._logger.info("Pip has been installed")
@@ -161,6 +165,17 @@ class ___lo_implementation_name___(unohelper.Base, XJob):
 
     # endregion execute
 
+    # region Destructor
+    def __del__(self):
+        if self._added_packaging:
+            if "packaging" in sys.modules:
+                # clean up by removing the packaging module from sys.modules
+                del sys.modules["packaging"]
+        if "___lo_pip___" in sys.modules:
+            # clean up by removing the ___lo_pip___ module from sys.modules
+            del sys.modules["___lo_pip___"]
+
+    # endregion Destructor
     # endregion XJob
 
     # region Install
@@ -171,7 +186,7 @@ class ___lo_implementation_name___(unohelper.Base, XJob):
             return
         self._logger.debug("Install wheel is set to True. Installing wheel.")
         try:
-            from lo_pip.install.install_wheel import InstallWheel
+            from ___lo_pip___.install.install_wheel import InstallWheel
 
             installer = InstallWheel()
             installer.install()
@@ -201,7 +216,6 @@ class ___lo_implementation_name___(unohelper.Base, XJob):
         self._path_added = False
 
     def _add_py_pkgs_to_sys_path(self) -> None:
-        # pth = os.path.join(os.path.dirname(__file__), "py_pkgs.zip")
         pth = Path(os.path.dirname(__file__), f"{self._config.py_pkg_dir}.zip")
         if not pth.exists():
             return
@@ -209,10 +223,9 @@ class ___lo_implementation_name___(unohelper.Base, XJob):
         self._log_sys_path_register_result(pth, result)
 
     def _add_pure_pkgs_to_sys_path(self) -> None:
-        # pth = os.path.join(os.path.dirname(__file__), "py_pkgs.zip")
         pth = Path(os.path.dirname(__file__), "pure.zip")
         if not pth.exists():
-            self._logger.debug(f"pure.zip not found: {pth}")
+            self._logger.debug(f"pure.zip not found.")
             return
         result = self._session.register_path(pth, True)
         self._log_sys_path_register_result(pth, result)
@@ -231,6 +244,8 @@ class ___lo_implementation_name___(unohelper.Base, XJob):
             self._logger.debug("packaging not found. Adding to sys.path")
             result = self._session.register_path(pth, True)
             self._log_sys_path_register_result(pth, result)
+            if result == RegisterPathKind.REGISTERED:
+                self._added_packaging = True
 
     def _remove_py_req_pkgs_from_sys_path(self) -> None:
         pth = Path(os.path.dirname(__file__), f"req_{self._config.py_pkg_dir}.zip")
@@ -298,7 +313,7 @@ class ___lo_implementation_name___(unohelper.Base, XJob):
     # region Logging
 
     def _get_local_logger(self) -> OxtLogger:
-        from lo_pip.oxt_logger import OxtLogger
+        from ___lo_pip___.oxt_logger import OxtLogger
 
         # if self._user_path:
         #     log_file = os.path.join(self._user_path, "py_runner.log")

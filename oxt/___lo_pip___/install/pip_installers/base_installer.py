@@ -32,6 +32,7 @@ class BaseInstaller:
         self._logger = self._get_logger()
         self.path_python = cfg.python_path
         self._logger.debug(f"Python path: {self.path_python}")
+        self._download = Download()
 
     def _get_logger(self) -> OxtLogger:
         return OxtLogger(log_name=__name__)
@@ -156,3 +157,8 @@ class BaseInstaller:
         else:
             result = subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, env=self._get_env())
         return result.returncode == 0
+
+    @property
+    def is_internet(self) -> bool:
+        """Gets if there is an internet connection."""
+        return self._download.is_internet
