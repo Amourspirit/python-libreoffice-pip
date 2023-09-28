@@ -107,7 +107,12 @@ class Download(metaclass=Singleton):
                 url = Config().test_internet_url
             if not url:
                 return False
-            _ = urlopen(url=url, timeout=5.0)
+            if url.startswith("https"):
+                # do not verify sss
+                context = ssl._create_unverified_context()
+                _ = urlopen(url=url, timeout=5.0, context=context)
+            else:
+                _ = urlopen(url=url, timeout=5.0)
             return True
         except URLError:
             return False

@@ -8,8 +8,7 @@ from com.sun.star.deployment import XPackage
 
 from ..meta.singleton import Singleton
 
-# from ..oxt_logger import OxtLogger
-from ..lo_util import Util
+# from ..lo_util import Util
 
 if TYPE_CHECKING:
     from com.sun.star.deployment import ExtensionManager  # service
@@ -79,11 +78,18 @@ class ExtensionInfo(metaclass=Singleton):
         Returns:
             Tuple[XPackage, ...]: Return a tuple of three objects
         """
-        mgr = self.get_extension_manager()
-        smoke = Util().create_instance("com.sun.star.deployment.test.SmoketestCommandEnvironment")
+        # The last arg of getExtensionsWithSameIdentifier() should be XCommandEnvironment implementation.
+        # It seems SmoketestCommandEnvironment fits the bill.
+        # However, it will cause an error if Java (JRE) is not available. Simply put LibreOffice will show a popup dialog asking if you want to enable Java.
+        # On an older Mac, It say that Java is corrupted and a new version needs to be installed.
+        # Setting smoke to None seems to work fine.
+        # This next line can break the extension due to Java requirement.
+        # smoke = Util().create_instance("com.sun.star.deployment.test.SmoketestCommandEnvironment")
+        smoke = None
         pip = self.get_pip()
         filename = pip.getPackageLocation(pkg_id)
-        return mgr.getExtensionsWithSameIdentifier(pkg_id, filename, smoke)
+        mgr = self.get_extension_manager()
+        return mgr.getExtensionsWithSameIdentifier(pkg_id, filename, smoke)  # type: ignore
 
     def get_extension_loc(self, pkg_id: str, as_sys_path: bool = True) -> str:
         """

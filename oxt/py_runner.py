@@ -19,6 +19,7 @@ if TYPE_CHECKING:
     from ___lo_pip___.oxt_logger import OxtLogger
     from ___lo_pip___.lo_util import Session, RegisterPathKind, UnRegisterPathKind
     from ___lo_pip___.lo_util.util import Util
+    from ___lo_pip___.install.requirements_check import RequirementsCheck
 else:
     RegisterPathKind = object
     UnRegisterPathKind = object
@@ -56,6 +57,8 @@ class ___lo_implementation_name___(unohelper.Base, XJob):
             from ___lo_pip___.config import Config
             from ___lo_pip___.lo_util import Util
 
+            # from ___lo_pip___.install.requirements_check import RequirementsCheck
+
             from ___lo_pip___.lo_util import (
                 Session,
                 RegisterPathKind as InitRegisterPathKind,
@@ -87,6 +90,11 @@ class ___lo_implementation_name___(unohelper.Base, XJob):
         self._logger.debug("___lo_implementation_name___ Init Done")
 
         self._add_py_req_pkgs_to_sys_path()
+        if not TYPE_CHECKING:
+            # run time
+            # must be after self._add_py_req_pkgs_to_sys_path()
+            from ___lo_pip___.install.requirements_check import RequirementsCheck
+        self._requirements_check = RequirementsCheck()
 
     # endregion Init
 
@@ -111,6 +119,13 @@ class ___lo_implementation_name___(unohelper.Base, XJob):
                 self._show_extra_debug_info()
                 # self._config.extension_info.log_extensions(self._logger)
 
+            if self._requirements_check.check_requirements() is True:
+                # This will be True if all requirements in tool.oxt.requirements of pyproject.toml are met.
+                # Also, This speeds up the loading of the extension considerably if no requirements need installing.
+
+                self._logger.debug("Requirements are met. Nothing more to do.")
+                return
+
             if not TYPE_CHECKING:
                 # run time
                 from ___lo_pip___.install.install_pip import InstallPip
@@ -118,7 +133,6 @@ class ___lo_implementation_name___(unohelper.Base, XJob):
                 self._logger.debug("Imported InstallPip")
                 from ___lo_pip___.install.install_pkg import InstallPkg
 
-            self._logger.debug("Created config instance")
             if self._config.py_pkg_dir:
                 # add package zip file to the sys.path
                 pth = os.path.join(os.path.dirname(__file__), f"{self._config.py_pkg_dir}.zip")
@@ -158,10 +172,7 @@ class ___lo_implementation_name___(unohelper.Base, XJob):
         finally:
             self._remove_local_path_from_sys_path()
             self._remove_py_req_pkgs_from_sys_path()
-        end_time = time.time()
-        if self._logger:
-            self._logger.info(f"{self._config.lo_implementation_name} execution time: {end_time - start_time} seconds")
-        return
+            self._log_ex_time(start_time)
 
     # endregion execute
 
@@ -176,7 +187,6 @@ class ___lo_implementation_name___(unohelper.Base, XJob):
             del sys.modules["___lo_pip___"]
 
     # endregion Destructor
-    # endregion XJob
 
     # region Install
 
@@ -291,6 +301,13 @@ class ___lo_implementation_name___(unohelper.Base, XJob):
 
     # region other methods
 
+    def _log_ex_time(self, start_time: float, msg: str = "") -> None:
+        if not self._logger:
+            return
+        end_time = time.time()
+        total_time = end_time - start_time
+        self._logger.info(f"{self._config.lo_implementation_name} execution time: {total_time:.3f} seconds")
+
     def _get_user_profile_path(self, as_sys_path: bool = True, ctx: Any = None) -> str:
         """
         Returns the path to the user profile directory.
@@ -345,6 +362,8 @@ class ___lo_implementation_name___(unohelper.Base, XJob):
 
     # endregion Debug
 
+
+# endregion XJob
 
 # region Implementation
 
