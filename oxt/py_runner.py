@@ -306,7 +306,7 @@ class ___lo_implementation_name___(unohelper.Base, XJob):
             return
         end_time = time.time()
         total_time = end_time - start_time
-        self._logger.info(f"{self._config.lo_implementation_name} execution time: {total_time:.2f} seconds")
+        self._logger.info(f"{self._config.lo_implementation_name} execution time: {total_time:.3f} seconds")
 
     def _get_user_profile_path(self, as_sys_path: bool = True, ctx: Any = None) -> str:
         """
