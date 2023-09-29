@@ -4,19 +4,28 @@
 
 This project is intended to be a template for developers of LibreOffice Extensions.
 
-This project is well suited for developers who want to create a LibreOffice Extension using Python and need to Pip install.
+Need to create a quick cross platform extension that installs python packages requirements? If so you found the correct template.
+
+If you only need to create an extension that installs one or more Python Packages into LibreOffice the no code experience is needed. Simply make a repo from the current template, change configuration, build and your done. A new LibreOffice extension has been generated that will install your python packages when it is installed into LibreOffice. See the [Quick Start](https://github.com/Amourspirit/python-libreoffice-pip/wiki/Quick-Start) in the Wiki.
+
+This project is also well suited for developers who want to create a LibreOffice Extension using Python and need to Pip install one or more requirements.
 
 All the tools needed to develop, debug, and test are included in this template.
 A developer can use this template to create a LibreOffice Extension that uses Python and Pip install.
 
-If you need to create a LibreOffice Extension that only installs Python Packages then this template is for you.
-No coding experience is needed to use the template in this way.
-Just modify the `pyproject.toml` file to include the packages you want to install.
+The extensions created with this template can be installed cross platform.
 
-Change a few settings and you are ready to go.
+Tested on the following:
 
-This project is a work in progress and is not ready for production use.
-Many more documents to come ...
+- Windows
+- Windows LibreOffice Portable
+- Mac
+- Linux sudo installed LibreOffice
+- Linux Snap installed LibreOffice
+- Linux Flatpak installed LibreOffice
+- Linux AppImage LibreOffice
+
+For more information see the [Wiki](https://github.com/Amourspirit/python-libreoffice-pip/wiki)
 
 
 <details>
