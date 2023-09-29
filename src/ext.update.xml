@@ -10,8 +10,7 @@
             dep:name="LibreOffice 7.0 minimum, or more recent" />
     </dependencies> -->
     <update-download>
-        <src
-            xlink:href="___update_url_oxt___" />
+        <src xlink:href="___update_url_oxt___" />
     </update-download>
     <publisher>
         <name lang="en" xlink:href="___publisher_url___">___publisher_en_us___</name>

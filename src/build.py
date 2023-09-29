@@ -71,11 +71,11 @@ class Build:
     def _rename_lo_pip(self) -> None:
         """Renames the lo_pip folder."""
         token = Token()
-        lo_pip = self._build_path / "___lo_pip___"
-        if not lo_pip.exists():
-            raise FileNotFoundError(f"lo_pip folder '{lo_pip}' not found")
-        new_lo_pip = self._build_path / token.get_token_value("lo_pip")
-        os.rename(lo_pip, new_lo_pip)
+        src_dir = self._build_path / "___lo_pip___"
+        if not src_dir.exists():
+            raise FileNotFoundError(f"lo_pip folder '{src_dir}' not found")
+        dest_dir = self._build_path / token.get_token_value("lo_pip")
+        os.rename(src_dir, dest_dir)
 
     def _ensure_build(self) -> None:
         """Ensures the build directory exists."""

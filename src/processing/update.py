@@ -8,7 +8,7 @@ from .token import Token
 class Update(metaclass=Singleton):
     def __init__(self) -> None:
         self._config = Config()
-        self._update_file = self._config.root_path / "ext.update.xml"
+        self._update_file = self._config.root_path / "src" / "ext.update.xml"
         self._dist_path = self._config.root_path / self._config.dist_dir_name
 
     # region Methods

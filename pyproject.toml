@@ -1,32 +1,31 @@
 [tool.oxt.config]
+auto_install_in_site_packages = true
 build_dir = "build"
 dist_dir = "tmp_dist" # should be changed to someting like dist, tmp_dist is not included in git
-oxt_name = "OooPip"
-token_file_ext = ["txt", "xml", "xcu"]
-update_file = "ooopip.ext.update.xml"
-py_pkg_names = [] # ["ooodev", "ooo"]
-py_pkg_files = []
-py_pkg_dir = "py_pkgs"
-pip_wheel_url = "https://files.pythonhosted.org/packages/50/c2/e06851e8cc28dcad7c155f4753da8833ac06a5c704c109313b8d5a62968a/pip-23.2.1-py3-none-any.whl"
 install_wheel = true
-zip_preinstall_pure = true
-auto_install_in_site_packages = true
-test_internet_url="https://duckduckgo.com"
 log_pip_installs = true
-
+oxt_name = "OooPip"
+pip_wheel_url = "https://files.pythonhosted.org/packages/50/c2/e06851e8cc28dcad7c155f4753da8833ac06a5c704c109313b8d5a62968a/pip-23.2.1-py3-none-any.whl"
+py_pkg_dir = "py_pkgs"
+py_pkg_files = []
+py_pkg_names = [] # ["ooodev", "ooo"]
+test_internet_url = "https://duckduckgo.com"
+token_file_ext = ["txt", "xml", "xcu"]
+update_file = "update.xml"
+zip_preinstall_pure = true
 
 
 [tool.oxt.token]
 # in the form of "token_name": "token_value"
 # in the files the token will have a prefix and suffix of ___
-lo_identifier= "org.openoffice.extensions.ooopip"
+lo_identifier = "org.openoffice.extensions.ooopip"
 lo_implementation_name = "OooPipRunner"
 display_name_en_us = "LibreOffice Python Pip Template"
 description_en_us = "Template for creating pip based extensions for for LibreOffice"
 publisher_en_us = "AmourSpirit"
 publisher_url = "https://github.com/Amourspirit/python-libreoffice-pip"
-update_url_oxt = "https://raw.githubusercontent.com/Amourspirit/python-libreoffice-pip/main/___dist_dir___/___oxt_name___.oxt"
 update_url_xml = "https://raw.githubusercontent.com/Amourspirit/python-libreoffice-pip/main/___dist_dir___/___update_file___"
+update_url_oxt = "https://raw.githubusercontent.com/Amourspirit/python-libreoffice-pip/main/___dist_dir___/___oxt_name___.oxt"
 url_pip = 'https://bootstrap.pypa.io/get-pip.py'
 # set log_file to "" to disable logging
 log_file = "pip_install.log"
@@ -48,14 +47,10 @@ verr = ">=1.1.2"
 name = "libreoffice pip template"
 version = "0.1.0"
 description = "Template for creating pip based extensions for for LibreOffice"
-authors = [
-    ":Barry-Thomas-Paul: Moss <bigbytetech@gmail.com>"
-]
+authors = [":Barry-Thomas-Paul: Moss <bigbytetech@gmail.com>"]
 license = "MIT"
 readme = "README.md"
-packages = [
-    { include = "src" }
-]
+packages = [{ include = "src" }]
 
 [tool.poetry.dependencies]
 python = "^3.8"
@@ -89,17 +84,15 @@ include = ["src"]
 reportMissingModuleSource = false
 
 [tool.ruff]
-extended-select=["ANN", "C4", "N", "SIM", "TCH"]
-ignore=["E501"]
-show-fixes=true
-target="py38"
+extended-select = ["ANN", "C4", "N", "SIM", "TCH"]
+ignore = ["E501"]
+show-fixes = true
+target = "py38"
 
 [tool.pytest.ini_options]
-testpaths = [
-    "tests",
-]
+testpaths = ["tests"]
 
 markers = [
     "skip_headless: skips a test in headless mode",
-    "skip_not_headless_os: skips a test in GUI mode for give os"
+    "skip_not_headless_os: skips a test in GUI mode for give os",
 ]

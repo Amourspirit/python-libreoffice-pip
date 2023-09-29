@@ -13,6 +13,7 @@ class JsonConfig(metaclass=Singleton):
     """Singleton Class the Config Json."""
 
     def __init__(self) -> None:
+        token = Token()
         self._config = Config()
         cfg = toml.load(self._config.toml_path)
         self._requirements = cast(Dict[str, str], cfg["tool"]["oxt"]["requirements"])
@@ -21,7 +22,7 @@ class JsonConfig(metaclass=Singleton):
         except Exception:
             self._zip_preinstall_pure = False
         try:
-            self._pip_wheel_url = str(cfg["tool"]["oxt"]["config"]["pip_wheel_url"])
+            self._pip_wheel_url = token.process(str(cfg["tool"]["oxt"]["config"]["pip_wheel_url"]))
         except Exception:
             self._pip_wheel_url = ""
         try:
@@ -35,7 +36,7 @@ class JsonConfig(metaclass=Singleton):
         except Exception:
             self._install_wheel = False
         try:
-            self._test_internet_url = str(cfg["tool"]["oxt"]["config"]["test_internet_url"])
+            self._test_internet_url = token.process(str(cfg["tool"]["oxt"]["config"]["test_internet_url"]))
         except Exception:
             self._test_internet_url = ""
         try:
