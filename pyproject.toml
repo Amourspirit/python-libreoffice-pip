@@ -11,15 +11,14 @@ pip_wheel_url = "https://files.pythonhosted.org/packages/50/c2/e06851e8cc28dcad7
 install_wheel = true
 zip_preinstall_pure = true
 auto_install_in_site_packages = true
-test_internet_url="https://duckduckgo.com"
+test_internet_url = "https://duckduckgo.com"
 log_pip_installs = true
-
 
 
 [tool.oxt.token]
 # in the form of "token_name": "token_value"
 # in the files the token will have a prefix and suffix of ___
-lo_identifier= "org.openoffice.extensions.ooopip"
+lo_identifier = "org.openoffice.extensions.ooopip"
 lo_implementation_name = "OooPipRunner"
 display_name_en_us = "LibreOffice Python Pip Template"
 description_en_us = "Template for creating pip based extensions for for LibreOffice"
@@ -48,14 +47,10 @@ verr = ">=1.1.2"
 name = "libreoffice pip template"
 version = "0.1.0"
 description = "Template for creating pip based extensions for for LibreOffice"
-authors = [
-    ":Barry-Thomas-Paul: Moss <bigbytetech@gmail.com>"
-]
+authors = [":Barry-Thomas-Paul: Moss <bigbytetech@gmail.com>"]
 license = "MIT"
 readme = "README.md"
-packages = [
-    { include = "src" }
-]
+packages = [{ include = "src" }]
 
 [tool.poetry.dependencies]
 python = "^3.8"
@@ -89,17 +84,15 @@ include = ["src"]
 reportMissingModuleSource = false
 
 [tool.ruff]
-extended-select=["ANN", "C4", "N", "SIM", "TCH"]
-ignore=["E501"]
-show-fixes=true
-target="py38"
+extended-select = ["ANN", "C4", "N", "SIM", "TCH"]
+ignore = ["E501"]
+show-fixes = true
+target = "py38"
 
 [tool.pytest.ini_options]
-testpaths = [
-    "tests",
-]
+testpaths = ["tests"]
 
 markers = [
     "skip_headless: skips a test in headless mode",
-    "skip_not_headless_os: skips a test in GUI mode for give os"
+    "skip_not_headless_os: skips a test in GUI mode for give os",
 ]
