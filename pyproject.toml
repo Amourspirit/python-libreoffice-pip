@@ -24,8 +24,8 @@ display_name_en_us = "LibreOffice Python Pip Template"
 description_en_us = "Template for creating pip based extensions for for LibreOffice"
 publisher_en_us = "AmourSpirit"
 publisher_url = "https://github.com/Amourspirit/python-libreoffice-pip"
-update_url_oxt = "https://raw.githubusercontent.com/Amourspirit/python-libreoffice-pip/main/___dist_dir___/___oxt_name___.oxt"
 update_url_xml = "https://raw.githubusercontent.com/Amourspirit/python-libreoffice-pip/main/___dist_dir___/___update_file___"
+update_url_oxt = "https://raw.githubusercontent.com/Amourspirit/python-libreoffice-pip/main/___dist_dir___/___oxt_name___.oxt"
 url_pip = 'https://bootstrap.pypa.io/get-pip.py'
 # set log_file to "" to disable logging
 log_file = "pip_install.log"
