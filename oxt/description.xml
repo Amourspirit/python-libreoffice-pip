@@ -5,7 +5,7 @@
     <identifier value="___lo_identifier___" />
 
     <version value="___version___" />
-    <platform value="all"/>
+    <platform value="___platform___"/>
 
     <update-information>
         <src xlink:href="___update_url_xml___" />

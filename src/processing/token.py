@@ -38,6 +38,7 @@ class Token(metaclass=Singleton):
             "url_pip",
             "log_format",
             "lo_pip",
+            "platform",
         }
         for key in keys:
             str_key = f"___{key}___"
