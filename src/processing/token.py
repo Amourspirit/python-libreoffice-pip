@@ -22,9 +22,12 @@ class Token(metaclass=Singleton):
         self._tokens["___dist_dir___"] = str(cfg["tool"]["oxt"]["config"]["dist_dir"])
         self._tokens["___update_file___"] = str(cfg["tool"]["oxt"]["config"]["update_file"])
         self._tokens["___py_pkg_dir___"] = str(cfg["tool"]["oxt"]["config"]["py_pkg_dir"])
-        self._tokens["___authors___"] = self._get_authors(cfg)
+        authors = self._get_authors(cfg)
+        self._tokens["___authors___"] = ", ".join(authors)
+        self._tokens["___contributors___"] = "\n".join(authors)
         for token, replacement in self._tokens.items():
             self._tokens[token] = self.process(replacement)
+        self._tokens_remove_whitespace()
         self._validate()
 
     # region Methods
@@ -38,6 +41,7 @@ class Token(metaclass=Singleton):
             "url_pip",
             "log_format",
             "lo_pip",
+            "platform",
         }
         for key in keys:
             str_key = f"___{key}___"
@@ -66,6 +70,22 @@ class Token(metaclass=Singleton):
                     "Token 'log_file' value is invalid and must be renamed in tool.oxt.token in pyproject.toml. Every project must have unique log_file value or set to empty string for no logging."
                 )
 
+    def _tokens_remove_whitespace(self) -> None:
+        """Cleans the tokens."""
+
+        def remove_spaces(text: str) -> str:
+            return text.replace(" ", "")
+
+        keys = {
+            "lo_identifier",
+            "url_pip",
+            "platform",
+        }
+        for key in keys:
+            str_key = f"___{key}___"
+            if str_key in self._tokens:
+                self._tokens[str_key] = remove_spaces(self._tokens[str_key])
+
     def process(self, text: str) -> str:
         """Processes the given text."""
         for token, replacement in self._tokens.items():
@@ -82,13 +102,13 @@ class Token(metaclass=Singleton):
         """
         return self._tokens.get(f"___{token}___", "")
 
-    def _get_authors(self, cfg: Dict[str, Any]) -> str:
+    def _get_authors(self, cfg: Dict[str, Any]) -> List[str]:
         """Returns the authors."""
         authors = cast(List[str], cfg["tool"]["poetry"]["authors"])
         results: List[str] = []
         for author in authors:
             results.append(author.split("<")[0].strip())
-        return ", ".join(results)
+        return results
 
     # endregion Methods
 
