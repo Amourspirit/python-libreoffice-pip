@@ -22,7 +22,9 @@ class Token(metaclass=Singleton):
         self._tokens["___dist_dir___"] = str(cfg["tool"]["oxt"]["config"]["dist_dir"])
         self._tokens["___update_file___"] = str(cfg["tool"]["oxt"]["config"]["update_file"])
         self._tokens["___py_pkg_dir___"] = str(cfg["tool"]["oxt"]["config"]["py_pkg_dir"])
-        self._tokens["___authors___"] = self._get_authors(cfg)
+        authors = self._get_authors(cfg)
+        self._tokens["___authors___"] = ", ".join(authors)
+        self._tokens["___contributors___"] = "\n".join(authors)
         for token, replacement in self._tokens.items():
             self._tokens[token] = self.process(replacement)
         self._tokens_remove_whitespace()
@@ -100,13 +102,13 @@ class Token(metaclass=Singleton):
         """
         return self._tokens.get(f"___{token}___", "")
 
-    def _get_authors(self, cfg: Dict[str, Any]) -> str:
+    def _get_authors(self, cfg: Dict[str, Any]) -> List[str]:
         """Returns the authors."""
         authors = cast(List[str], cfg["tool"]["poetry"]["authors"])
         results: List[str] = []
         for author in authors:
             results.append(author.split("<")[0].strip())
-        return ", ".join(results)
+        return results
 
     # endregion Methods
 
