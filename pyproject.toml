@@ -11,7 +11,7 @@ py_pkg_dir = "py_pkgs"
 py_pkg_files = []
 py_pkg_names = [] # ["ooodev", "ooo"]
 test_internet_url = "https://duckduckgo.com"
-token_file_ext = ["txt", "xml", "xcu"]
+token_file_ext = ["txt", "xml", "xcu", "xcs"]
 update_file = "update.xml"
 zip_preinstall_pure = true
 
