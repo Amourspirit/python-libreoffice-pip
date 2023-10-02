@@ -50,10 +50,6 @@ class JsonConfig(metaclass=Singleton):
             json_config = json.load(f)
         token = Token()
         json_config["url_pip"] = token.get_token_value("url_pip")
-        json_config["log_name"] = token.get_token_value("log_name")
-        json_config["log_level"] = token.get_token_value("log_level")
-        json_config["log_file"] = token.get_token_value("log_file")
-        json_config["log_format"] = token.get_token_value("log_format")
         json_config["py_pkg_dir"] = token.get_token_value("py_pkg_dir")
         json_config["lo_identifier"] = token.get_token_value("lo_identifier")
         json_config["lo_implementation_name"] = token.get_token_value("lo_implementation_name")
@@ -66,6 +62,7 @@ class JsonConfig(metaclass=Singleton):
         json_config["log_pip_installs"] = self._log_pip_installs
         # update the requirements
         json_config["requirements"] = self._requirements
+        json_config["has_locals"] = self._config.has_locals
 
         # save the file
         with open(json_config_path, "w") as f:
