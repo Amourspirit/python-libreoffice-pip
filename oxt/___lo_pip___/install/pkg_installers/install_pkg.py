@@ -161,6 +161,28 @@ class InstallPkg:
             self._install_pkg(name, ",".join(ver_lst), force)
         self._logger.info("Installing packages Done!")
 
+    def install_file(self, pth: str | Path, force: bool = False) -> None:
+        """
+        Install all the packages in the configuration if they are not already installed and meet requirements.
+
+        Args:
+            req (Dict[str, str] | None, optional): The requirements to install.
+                If omitted then requirements from config are used. Defaults to None.
+            force (bool, optional): Force install even if package is already installed. Defaults to False.
+
+        Returns:
+            None:
+        """
+        self._logger.info("Installing packages…")
+        if isinstance(pth, str):
+            pth = Path(pth)
+        if not pth.exists():
+            self._logger.error(f"Cannot install File. Does not exist: {pth}")
+            return
+
+        self._install_pkg(pkg=str(pth), ver="", force=force)
+        self._logger.info(f"Install file package {pth.name} Done!")
+
     def _is_valid_version(self, name: str, ver: str, force: bool) -> Tuple[int, List[VerProto]]:
         """
         Check if the version of the package is valid.

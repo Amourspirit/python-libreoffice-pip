@@ -10,6 +10,7 @@ import platform
 import site
 
 from .input_output import file_util
+from .oxt_logger.logger_config import LoggerConfig
 
 if TYPE_CHECKING:
     from .lo_util import Session
@@ -62,15 +63,11 @@ class Config(metaclass=ConfigMeta):
             from .info import ExtensionInfo
             from .lo_util import Util
 
-        log_file = str(kwargs["log_file"])
-        if log_file:
-            log_pth = Path(log_file)
-            if not log_pth.is_absolute():
-                log_file = Path(file_util.get_user_profile_path(True), log_pth)
+        logger_config = LoggerConfig()
 
-        self._log_file = str(log_file)
-        self._log_name = str(kwargs["log_name"])
-        self._log_format = str(kwargs["log_format"])
+        self._log_file = logger_config.log_file
+        self._log_name = logger_config.log_name
+        self._log_format = logger_config.log_format
         self._session = Session()
         self._extension_info = ExtensionInfo()
         self._url_pip = str(kwargs["url_pip"])
@@ -90,7 +87,7 @@ class Config(metaclass=ConfigMeta):
         if "requirements" not in kwargs:
             kwargs["requirements"] = {}
         self._requirements: Dict[str, str] = dict(**kwargs["requirements"])
-        self._log_level = self._get_log_level(kwargs["log_level"])
+        self._log_level = logger_config.log_level
         self._os = platform.system()
         self._is_win = self._os == "Windows"
         self._is_mac = self._os == "Darwin"
@@ -134,28 +131,6 @@ class Config(metaclass=ConfigMeta):
 
     def join(self, *paths: str):
         return str(Path(paths[0]).joinpath(*paths[1:]))
-
-    def _get_log_level(self, log_level: str | int) -> int:
-        if isinstance(log_level, str):
-            log_level = log_level.upper()
-            if log_level == "NONE":
-                return 0
-            if log_level == "DEBUG":
-                return 10
-            elif log_level == "INFO":
-                return 20
-            elif log_level == "WARNING":
-                return 30
-            elif log_level == "ERROR":
-                return 40
-            elif log_level == "CRITICAL":
-                return 50
-            else:
-                raise ValueError(f"Invalid log level: {log_level}")
-        elif isinstance(log_level, int):
-            return log_level
-        else:
-            raise TypeError(f"Invalid log level type: {type(log_level)}")
 
     def _set_extension_installs(self) -> None:
         details = self._extension_info.get_extension_details(self.lo_identifier)

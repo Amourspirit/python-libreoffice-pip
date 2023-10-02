@@ -12,7 +12,7 @@ if TYPE_CHECKING:
 
 
 class Settings(metaclass=Singleton):
-    """Manages Settings for the extension."""
+    """Singleton Class. Manages Settings for the extension."""
 
     def __init__(self) -> None:
         self._logger = OxtLogger(log_name=__name__)

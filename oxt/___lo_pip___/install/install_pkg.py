@@ -52,17 +52,43 @@ class InstallPkg:
         self._logger.info("Installing packages via default installer")
         self._install_default(req=req, force=force)
 
+    def install_file(self, pth: str | Path, force: bool = False) -> None:
+        """
+        Install a package from a file.
+
+        Args:
+            pth (str | Path): The path to the file to install.
+            force (bool, optional): Force install even if package is already installed. Defaults to False.
+
+        Returns:
+            None:
+        """
+        self._logger.info("Installing packages via default installer")
+        self._install_default_file(pth=pth, force=force)
+
     def _install_default(self, req: Dict[str, str] | None, force: bool) -> None:
         from .pkg_installers.install_pkg import InstallPkg
 
         installer = InstallPkg()
         installer.install(req=req, force=force)
 
+    def _install_default_file(self, pth: str | Path, force: bool = False) -> None:
+        from .pkg_installers.install_pkg import InstallPkg
+
+        installer = InstallPkg()
+        installer.install_file(pth=pth, force=force)
+
     def _install_flatpak(self, req: Dict[str, str] | None, force: bool) -> None:
         from .pkg_installers.install_pkg_flatpak import InstallPkgFlatpak
 
         installer = InstallPkgFlatpak()
         installer.install(req=req, force=force)
+
+    def _install_flatpak_file(self, pth: str | Path, force: bool = False) -> None:
+        from .pkg_installers.install_pkg_flatpak import InstallPkgFlatpak
+
+        installer = InstallPkgFlatpak()
+        installer.install_file(pth=pth, force=force)
 
     def get_package_version(self, package_name: str) -> str:
         """

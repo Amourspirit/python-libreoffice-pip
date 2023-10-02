@@ -7,7 +7,7 @@ from ..config import Config
 
 
 class PipInfoSettings(Settings):
-    """Manages Settings for the extension."""
+    """Singleton Class. Manages Settings for the extension."""
 
     def __init__(self) -> None:
         super().__init__()
