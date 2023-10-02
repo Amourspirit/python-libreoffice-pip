@@ -84,7 +84,7 @@ class ExtensionInfo(metaclass=Singleton):
         # On an older Mac, It say that Java is corrupted and a new version needs to be installed.
         # Setting smoke to None seems to work fine.
         # This next line can break the extension due to Java requirement.
-        # smoke = Util().create_instance("com.sun.star.deployment.test.SmoketestCommandEnvironment")
+        # smoke = Util().create_uno_service("com.sun.star.deployment.test.SmoketestCommandEnvironment")
         smoke = None
         pip = self.get_pip()
         filename = pip.getPackageLocation(pkg_id)

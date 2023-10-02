@@ -27,29 +27,8 @@ class ConfigMeta(type):
         if cls._instance is None:
             root = Path(__file__).parent
             config_file = Path(root, "config.json")
-            if config_file.exists():
-                with open(config_file, "r") as file:
-                    data = json.load(file)
-                    # logger.debug("Configuration: Loaded config.json")
-            else:
-                data = {
-                    "url_pip": "https://bootstrap.pypa.io/get-pip.py",
-                    "log_file": "lo_pip.log",
-                    "log_name": "OOO PIP Installer",
-                    "log_level": "INFO",
-                    "log_format": "%(asctime)s - %(name)s - %(levelname)s - %(message)s",
-                    "py_pkg_dir": "py_pkgs",
-                    "pip_wheel_url": "",
-                    "lo_identifier": "",
-                    "lo_implementation_name": "",
-                    "requirements": {},
-                    "zipped_preinstall_pure": False,
-                    "auto_install_in_site_packages": False,
-                    "install_wheel": False,
-                    "test_internet_url": "",
-                    "log_pip_installs": True,
-                }
-                # logger.debug("Configuration: no config.json, using defaults")
+            with open(config_file, "r") as file:
+                data = json.load(file)
 
             cls._instance = super().__call__(**data)
         return cls._instance
@@ -104,6 +83,7 @@ class Config(metaclass=ConfigMeta):
         self._auto_install_in_site_packages = bool(kwargs["auto_install_in_site_packages"])
         self._install_wheel = bool(kwargs["install_wheel"])
         self._log_pip_installs = bool(kwargs["log_pip_installs"])
+        self._has_locals = bool(kwargs["has_locals"])
         if not self._auto_install_in_site_packages and os.getenv("DEV_CONTAINER", "") == "1":
             # if running in a dev container (Codespace)
             self._auto_install_in_site_packages = True
@@ -497,6 +477,13 @@ class Config(metaclass=ConfigMeta):
         Gets the flag indicating if pip installs should be logged.
         """
         return self._log_pip_installs
+
+    @property
+    def has_locals(self) -> bool:
+        """
+        Gets the flag indicating if the extension has local pip files to install.
+        """
+        return self._has_locals
 
     # endregion Properties
 

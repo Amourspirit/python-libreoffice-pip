@@ -1,0 +1,63 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<oor:component-schema oor:name="Settings" oor:package="___lo_implementation_name___" xml:ang="en-US"
+    xmlns:oor="http://openoffice.org/2001/registry"
+    xmlns:xs="http://www.w3.org/2001/XMLSchema"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+    <templates />
+    <component>
+        <group oor:name="PipInfo">
+            <prop oor:name="InstalledLocalPips" oor:type="oor:string-list">
+                <info>
+                    <desc>Local Installed Pip Packages</desc>
+                </info>
+                <value></value>
+            </prop>
+        </group>
+        <group oor:name="Logging">
+            <prop oor:name="LogToFile" oor:type="xs:short">
+                <info>
+                    <desc>0 = log to stdout, 1 = log to file.</desc>
+                </info>
+            </prop>
+            <prop oor:name="LogFile" oor:type="xs:string">
+                <info>
+                    <desc>Log File Name</desc>
+                </info>
+                <value>___log_file___</value>
+            </prop>
+            <prop oor:name="LogName" oor:type="xs:string">
+                <info>
+                    <desc>Log Name</desc>
+                </info>
+                <value>___log_name___</value>
+            </prop>
+            <prop oor:name="LogLevel" oor:type="xs:string">
+                <info>
+                    <desc>Loggging Level, NONE, DEBUG, INFO, WARNING, ERROR, CRITICAL</desc>
+                </info>
+                <value>___log_level___</value>
+            </prop>
+            <prop oor:name="LogFormat" oor:type="xs:string">
+                <info>
+                    <desc>Log Format. Eg: %(asctime)s - %(name)s - %(levelname)s - %(message)s</desc>
+                </info>
+                <value>___log_format___</value>
+            </prop>
+        </group>
+        <group oor:name="Token">
+            <prop oor:name="LoImplementationName" oor:type="xs:string">
+                <info>
+                    <desc>Extension Implementation Name</desc>
+                </info>
+                <value>___lo_implementation_name___</value>
+            </prop>
+            <prop oor:name="LoIdentifier" oor:type="xs:string">
+                <info>
+                    <desc>Extension Identifier</desc>
+                </info>
+                <value>___lo_identifier___</value>
+            </prop>
+
+        </group>
+    </component>
+</oor:component-schema>
