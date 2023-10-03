@@ -2,7 +2,7 @@ from __future__ import annotations
 from typing import Any, Dict, cast, TYPE_CHECKING
 from pathlib import Path
 
-import json
+from ..basic_config import BasicConfig
 from ..meta.singleton import Singleton
 from ..lo_util.configuration import Configuration
 from ..input_output import file_util
@@ -17,8 +17,8 @@ if TYPE_CHECKING:
 
 class LoggerConfig(metaclass=Singleton):
     def __init__(self) -> None:
-        config_dict = self._get_config()
-        self._lo_implementation_name = config_dict["lo_implementation_name"]
+        basic_config = BasicConfig()
+        self._lo_implementation_name = basic_config.lo_implementation_name
         # self._lo_implementation_name = settings.current_settings["lo_implementation_name"]
         configuration_settings = self._get_settings()
         log_file = str(configuration_settings["LogFile"])
@@ -31,18 +31,12 @@ class LoggerConfig(metaclass=Singleton):
         self._log_level = self._get_log_level(log_level)
         self._log_ready_event_raised = False
 
-    def _get_config(self) -> Dict[str, Any]:
-        config_pth = Path(__file__).parent.parent / "config.json"
-        with open(config_pth, "r") as f:
-            config = json.load(f)
-        return config
-
     def _get_settings(self) -> Dict[str, Any]:
         # sourcery skip: dict-assign-update-to-union
         configuration = Configuration()
         key = f"/{self.lo_implementation_name}.Settings"
         reader = cast("ConfigurationAccess", configuration.get_configuration_access(key))
-        group_names = reader.getElementNames()
+        # group_names = reader.getElementNames()
         settings = {}
 
         log_group = cast("ConfigurationAccess", reader.getByName("Logging"))
