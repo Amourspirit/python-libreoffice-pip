@@ -25,7 +25,6 @@ class BasicConfig(metaclass=ConfigMeta):
         self._py_pkg_dir = str(kwargs["py_pkg_dir"])
         self._lo_identifier = str(kwargs["lo_identifier"])
         self._lo_implementation_name = str(kwargs["lo_implementation_name"])
-        self._pip_wheel_url = str(kwargs["pip_wheel_url"])
         self._test_internet_url = str(kwargs["test_internet_url"])
         self._zipped_preinstall_pure = bool(kwargs["zipped_preinstall_pure"])
         self._auto_install_in_site_packages = bool(kwargs["auto_install_in_site_packages"])
@@ -91,15 +90,6 @@ class BasicConfig(metaclass=ConfigMeta):
         Gets the flag indicating if pip installs should be logged.
         """
         return self._log_pip_installs
-
-    @property
-    def pip_wheel_url(self) -> str:
-        """
-        Gets the pip wheel url.
-
-        May be empty string.
-        """
-        return self._pip_wheel_url
 
     @property
     def py_pkg_dir(self) -> str:

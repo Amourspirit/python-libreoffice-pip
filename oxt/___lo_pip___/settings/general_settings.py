@@ -20,6 +20,7 @@ class GeneralSettings(metaclass=Singleton):
         self._update_url_xml = str(settings.current_settings.get("UpdateUrlXml", ""))
         self._update_url_oxt = str(settings.current_settings.get("UpdateUrlOxt", ""))
         self._url_pip = str(settings.current_settings.get("UrlPip", ""))
+        self._pip_wheel_url = str(settings.current_settings.get("UrlPipWheel", ""))
         self._platform = str(settings.current_settings.get("Platform", ""))
 
     @property
@@ -46,6 +47,11 @@ class GeneralSettings(metaclass=Singleton):
     def url_pip(self) -> str:
         """Gets the url to ``get-pip.py`` that installs pip."""
         return self._url_pip
+
+    @property
+    def pip_wheel_url(self) -> str:
+        """Gets the url to the pip wheel."""
+        return self._pip_wheel_url
 
     @property
     def platform(self) -> str:

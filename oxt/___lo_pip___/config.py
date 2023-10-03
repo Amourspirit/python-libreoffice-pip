@@ -61,6 +61,7 @@ class Config(metaclass=Singleton):
             generals_settings = GeneralSettings()
             self._logger.debug("General Settings initialized")
             self._url_pip = generals_settings.url_pip
+            self._pip_wheel_url = generals_settings.pip_wheel_url
 
             self._session = Session()
             self._extension_info = ExtensionInfo()
@@ -370,7 +371,7 @@ class Config(metaclass=Singleton):
 
         May be empty string.
         """
-        return self._basic_config.pip_wheel_url
+        return self._pip_wheel_url
 
     @property
     def install_wheel(self) -> bool:

@@ -76,6 +76,12 @@
                 </info>
                 <value>___url_pip___</value>
             </prop>
+            <prop oor:name="UrlPipWheel" oor:type="xs:string">
+                <info>
+                    <desc>Url to Pip Wheel file that installs pip in Flatpak</desc>
+                </info>
+                <value>___pip_wheel_url___</value>
+            </prop>
             <prop oor:name="Platform" oor:type="xs:string">
                 <info>
                     <desc>The platform that this extension is targeted for</desc>

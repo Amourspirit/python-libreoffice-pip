@@ -22,10 +22,6 @@ class JsonConfig(metaclass=Singleton):
         except Exception:
             self._zip_preinstall_pure = False
         try:
-            self._pip_wheel_url = token.process(str(cfg["tool"]["oxt"]["config"]["pip_wheel_url"]))
-        except Exception:
-            self._pip_wheel_url = ""
-        try:
             self._auto_install_in_site_packages = cast(
                 bool, cfg["tool"]["oxt"]["config"]["auto_install_in_site_packages"]
             )
@@ -53,7 +49,6 @@ class JsonConfig(metaclass=Singleton):
         json_config["lo_identifier"] = token.get_token_value("lo_identifier")
         json_config["lo_implementation_name"] = token.get_token_value("lo_implementation_name")
 
-        json_config["pip_wheel_url"] = self._pip_wheel_url
         json_config["test_internet_url"] = self._test_internet_url
         json_config["zipped_preinstall_pure"] = self._zip_preinstall_pure
         json_config["auto_install_in_site_packages"] = self._auto_install_in_site_packages
