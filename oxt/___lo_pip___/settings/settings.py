@@ -5,7 +5,7 @@ import uno
 from ..lo_util.configuration import Configuration
 from ..meta.singleton import Singleton
 from ..oxt_logger import OxtLogger
-from ..config import Config
+from ..basic_config import BasicConfig
 
 from ..events.lo_events import Events
 from ..events.args import EventArgs
@@ -21,7 +21,7 @@ class Settings(metaclass=Singleton):
     def __init__(self) -> None:
         self._logger: OxtLogger | None = None
         self._configuration = Configuration()
-        cfg = Config()
+        cfg = BasicConfig()
         self._lo_identifier = cfg.lo_identifier
         self._lo_implementation_name = cfg.lo_implementation_name
         self._current_settings = self.get_settings()

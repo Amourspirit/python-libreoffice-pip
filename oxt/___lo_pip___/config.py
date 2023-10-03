@@ -18,6 +18,7 @@ if TYPE_CHECKING:
     from .lo_util import Session
     from .lo_util import Util
     from .info import ExtensionInfo
+    from .settings.general_settings import GeneralSettings
 # endregion Imports
 
 
@@ -46,6 +47,7 @@ class Config(metaclass=Singleton):
             from .lo_util import Session
             from .info import ExtensionInfo
             from .lo_util import Util
+            from .settings.general_settings import GeneralSettings
 
         logger_config = LoggerConfig()
         self._logger = OxtLogger(log_name=__name__)
@@ -56,6 +58,9 @@ class Config(metaclass=Singleton):
             self._log_format = logger_config.log_format
             self._basic_config = BasicConfig()
             self._logger.debug("Basic config initialized")
+            generals_settings = GeneralSettings()
+            self._logger.debug("General Settings initialized")
+            self._url_pip = generals_settings.url_pip
 
             self._session = Session()
             self._extension_info = ExtensionInfo()
@@ -197,7 +202,8 @@ class Config(metaclass=Singleton):
 
         The value for this property can be set in pyproject.toml (tool.oxt.token.url_pip)
         """
-        return self._basic_config.url_pip
+        return self._url_pip
+        # return self._basic_config.url_pip
 
     @property
     def test_internet_url(self) -> str:

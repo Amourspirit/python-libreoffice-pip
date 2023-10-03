@@ -22,7 +22,6 @@ class ConfigMeta(type):
 
 class BasicConfig(metaclass=ConfigMeta):
     def __init__(self, **kwargs) -> None:
-        self._url_pip = str(kwargs["url_pip"])
         self._py_pkg_dir = str(kwargs["py_pkg_dir"])
         self._lo_identifier = str(kwargs["lo_identifier"])
         self._lo_implementation_name = str(kwargs["lo_implementation_name"])
@@ -129,15 +128,6 @@ class BasicConfig(metaclass=ConfigMeta):
         Example: {"requests": ">=2.25.1"}
         """
         return self._requirements
-
-    @property
-    def url_pip(self) -> str:
-        """
-        String path such as ``https://bootstrap.pypa.io/get-pip.py``
-
-        The value for this property can be set in pyproject.toml (tool.oxt.token.url_pip)
-        """
-        return self._url_pip
 
     @property
     def zipped_preinstall_pure(self) -> bool:

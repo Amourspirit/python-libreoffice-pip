@@ -49,7 +49,6 @@ class JsonConfig(metaclass=Singleton):
         with open(json_config_path, "r") as f:
             json_config = json.load(f)
         token = Token()
-        json_config["url_pip"] = token.get_token_value("url_pip")
         json_config["py_pkg_dir"] = token.get_token_value("py_pkg_dir")
         json_config["lo_identifier"] = token.get_token_value("lo_identifier")
         json_config["lo_implementation_name"] = token.get_token_value("lo_implementation_name")

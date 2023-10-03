@@ -12,7 +12,6 @@ class GeneralSettings(metaclass=Singleton):
 
     def __init__(self) -> None:
         settings = Settings()
-        self._config = Config()
         self._configuration = Configuration()
         self._node_value = f"/{settings.lo_implementation_name}.Settings/GeneralSettings"
         self._lo_implementation_name = str(settings.current_settings.get("LoImplementationName", ""))
