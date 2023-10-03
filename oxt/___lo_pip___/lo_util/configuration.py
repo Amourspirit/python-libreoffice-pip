@@ -31,7 +31,6 @@ class Configuration(metaclass=Singleton):
     def __init__(self) -> None:
         # shared events that other objects can subscribe to such as settings.Settings
         self._events = Events()
-        self._logger = None
 
     def get_configuration_access(self, node_value: str, updatable: bool = False) -> Any:
         """

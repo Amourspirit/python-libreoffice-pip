@@ -9,33 +9,17 @@ import sys
 import platform
 import site
 
-from .input_output import file_util
 from .oxt_logger.logger_config import LoggerConfig
+from .meta.singleton import Singleton
+from .basic_config import BasicConfig
+from .oxt_logger.oxt_logger import OxtLogger
 
 if TYPE_CHECKING:
     from .lo_util import Session
     from .lo_util import Util
     from .info import ExtensionInfo
-
 # endregion Imports
 
-
-# region Config Meta Class
-class ConfigMeta(type):
-    _instance = None
-
-    def __call__(cls, *args, **kwargs):
-        if cls._instance is None:
-            root = Path(__file__).parent
-            config_file = Path(root, "config.json")
-            with open(config_file, "r") as file:
-                data = json.load(file)
-
-            cls._instance = super().__call__(**data)
-        return cls._instance
-
-
-# endregion Config Meta Class
 
 # region Constants
 
@@ -48,7 +32,7 @@ IS_MAC = OS == "Darwin"
 # region Config Class
 
 
-class Config(metaclass=ConfigMeta):
+class Config(metaclass=Singleton):
     """
     Singleton Configuration Class
 
@@ -57,73 +41,69 @@ class Config(metaclass=ConfigMeta):
 
     # region Init
 
-    def __init__(self, **kwargs):
+    def __init__(self):
         if not TYPE_CHECKING:
             from .lo_util import Session
             from .info import ExtensionInfo
             from .lo_util import Util
 
         logger_config = LoggerConfig()
+        self._logger = OxtLogger(log_name=__name__)
+        self._logger.debug("Initializing Config")
+        try:
+            self._log_file = logger_config.log_file
+            self._log_name = logger_config.log_name
+            self._log_format = logger_config.log_format
+            self._basic_config = BasicConfig()
+            self._logger.debug("Basic config initialized")
 
-        self._log_file = logger_config.log_file
-        self._log_name = logger_config.log_name
-        self._log_format = logger_config.log_format
-        self._session = Session()
-        self._extension_info = ExtensionInfo()
-        self._url_pip = str(kwargs["url_pip"])
-        self._pip_wheel_url = str(kwargs["pip_wheel_url"])
-        self._py_pkg_dir = str(kwargs["py_pkg_dir"])
-        self._lo_identifier = str(kwargs["lo_identifier"])
-        self._lo_implementation_name = str(kwargs["lo_implementation_name"])
-        self._test_internet_url = str(kwargs["test_internet_url"])
-        self._zipped_preinstall_pure = bool(kwargs["zipped_preinstall_pure"])
-        self._auto_install_in_site_packages = bool(kwargs["auto_install_in_site_packages"])
-        self._install_wheel = bool(kwargs["install_wheel"])
-        self._log_pip_installs = bool(kwargs["log_pip_installs"])
-        self._has_locals = bool(kwargs["has_locals"])
-        if not self._auto_install_in_site_packages and os.getenv("DEV_CONTAINER", "") == "1":
-            # if running in a dev container (Codespace)
-            self._auto_install_in_site_packages = True
-        if "requirements" not in kwargs:
-            kwargs["requirements"] = {}
-        self._requirements: Dict[str, str] = dict(**kwargs["requirements"])
-        self._log_level = logger_config.log_level
-        self._os = platform.system()
-        self._is_win = self._os == "Windows"
-        self._is_mac = self._os == "Darwin"
-        self._is_app_image = False
-        app_img = os.getenv("APPIMAGE", "")
-        if app_img:
-            self._is_app_image = True
-        flat_pak_id = os.getenv("FLATPAK_ID", "")
-        self._is_flatpak = flat_pak_id.lower() == "org.libreoffice.libreoffice"
-        self._site_packages = ""
-        util = Util()
+            self._session = Session()
+            self._extension_info = ExtensionInfo()
+            self._auto_install_in_site_packages = self._basic_config.auto_install_in_site_packages
+            if not self._auto_install_in_site_packages and os.getenv("DEV_CONTAINER", "") == "1":
+                # if running in a dev container (Codespace)
+                self._auto_install_in_site_packages = True
+            self._log_level = logger_config.log_level
+            self._os = platform.system()
+            self._is_win = self._os == "Windows"
+            self._is_mac = self._os == "Darwin"
+            self._is_app_image = False
+            app_img = os.getenv("APPIMAGE", "")
+            if app_img:
+                self._is_app_image = True
+            flat_pak_id = os.getenv("FLATPAK_ID", "")
+            self._is_flatpak = flat_pak_id.lower() == "org.libreoffice.libreoffice"
+            self._site_packages = ""
+            util = Util()
 
-        # self._package_location = Path(file_util.get_package_location(self._lo_identifier, True))
-        self._package_location = Path(self._extension_info.get_extension_loc(self._lo_identifier, True)).resolve()
-        self._python_major_minor = self._get_python_major_minor()
+            # self._package_location = Path(file_util.get_package_location(self._lo_identifier, True))
+            self._package_location = Path(self._extension_info.get_extension_loc(self.lo_identifier, True)).resolve()
+            self._python_major_minor = self._get_python_major_minor()
 
-        self._is_user_installed = False
-        self._is_shared_installed = False
-        self._is_bundled_installed = False
-        self._set_extension_installs()
+            self._is_user_installed = False
+            self._is_shared_installed = False
+            self._is_bundled_installed = False
+            self._set_extension_installs()
 
-        if self._is_win:
-            self._python_path = Path(self.join(util.config("Module"), "python.exe"))
-            self._site_packages = self._get_windows_site_packages_dir()
-        elif self._is_mac:
-            self._python_path = Path(self.join(util.config("Module"), "..", "Resources", "python"))
-            self._site_packages = self._get_mac_site_packages_dir()
-        elif self._is_app_image:
-            self._python_path = Path(self.join(util.config("Module"), "python"))
-            self._site_packages = self._get_default_site_packages_dir()
-        else:
-            self._python_path = Path(sys.executable)
-            if self._is_flatpak:
-                self._site_packages = self._get_flatpak_site_packages_dir()
-            else:
+            if self._is_win:
+                self._python_path = Path(self.join(util.config("Module"), "python.exe"))
+                self._site_packages = self._get_windows_site_packages_dir()
+            elif self._is_mac:
+                self._python_path = Path(self.join(util.config("Module"), "..", "Resources", "python"))
+                self._site_packages = self._get_mac_site_packages_dir()
+            elif self._is_app_image:
+                self._python_path = Path(self.join(util.config("Module"), "python"))
                 self._site_packages = self._get_default_site_packages_dir()
+            else:
+                self._python_path = Path(sys.executable)
+                if self._is_flatpak:
+                    self._site_packages = self._get_flatpak_site_packages_dir()
+                else:
+                    self._site_packages = self._get_default_site_packages_dir()
+        except Exception as err:
+            self._logger.error(f"Error initializing config: {err}", exc_info=True)
+            raise
+        self._logger.debug("Config initialized")
 
     # endregion Init
 
@@ -217,7 +197,7 @@ class Config(metaclass=ConfigMeta):
 
         The value for this property can be set in pyproject.toml (tool.oxt.token.url_pip)
         """
-        return self._url_pip
+        return self._basic_config.url_pip
 
     @property
     def test_internet_url(self) -> str:
@@ -226,7 +206,7 @@ class Config(metaclass=ConfigMeta):
 
         The value for this property can be set in pyproject.toml (tool.oxt.token.test_internet_url)
         """
-        return self._test_internet_url
+        return self._basic_config.test_internet_url
 
     @property
     def python_path(self) -> Path:
@@ -280,7 +260,7 @@ class Config(metaclass=ConfigMeta):
 
         The value for this property can be set in pyproject.toml (tool.oxt.token.py_pkg_dir)
         """
-        return self._py_pkg_dir
+        return self._basic_config.py_pkg_dir
 
     @property
     def requirements(self) -> Dict[str, str]:
@@ -292,7 +272,7 @@ class Config(metaclass=ConfigMeta):
         The key is the name of the package and the value is the version number.
         Example: {"requests": ">=2.25.1"}
         """
-        return self._requirements
+        return self._basic_config.requirements
 
     @property
     def zipped_preinstall_pure(self) -> bool:
@@ -303,7 +283,7 @@ class Config(metaclass=ConfigMeta):
 
         If this is set to ``True`` then pure python packages will be zipped and installed as a zip file.
         """
-        return self._zipped_preinstall_pure
+        return self._basic_config.zipped_preinstall_pure
 
     @property
     def auto_install_in_site_packages(self) -> bool:
@@ -384,14 +364,14 @@ class Config(metaclass=ConfigMeta):
 
         May be empty string.
         """
-        return self._pip_wheel_url
+        return self._basic_config.pip_wheel_url
 
     @property
     def install_wheel(self) -> bool:
         """
         Gets the flag indicating if wheel should be installed.
         """
-        return self._install_wheel
+        return self._basic_config.install_wheel
 
     @property
     def lo_identifier(self) -> str:
@@ -400,7 +380,7 @@ class Config(metaclass=ConfigMeta):
 
         The value for this property can be set in pyproject.toml (tool.oxt.token.lo_identifier)
         """
-        return self._lo_identifier
+        return self._basic_config.lo_identifier
 
     @property
     def lo_implementation_name(self) -> str:
@@ -409,7 +389,7 @@ class Config(metaclass=ConfigMeta):
 
         The value for this property can be set in pyproject.toml (tool.oxt.token.lo_implementation_name)
         """
-        return self._lo_implementation_name
+        return self._basic_config.lo_implementation_name
 
     @property
     def python_major_minor(self) -> str:
@@ -451,14 +431,14 @@ class Config(metaclass=ConfigMeta):
         """
         Gets the flag indicating if pip installs should be logged.
         """
-        return self._log_pip_installs
+        return self._basic_config.log_pip_installs
 
     @property
     def has_locals(self) -> bool:
         """
         Gets the flag indicating if the extension has local pip files to install.
         """
-        return self._has_locals
+        return self._basic_config.has_locals
 
     # endregion Properties
 

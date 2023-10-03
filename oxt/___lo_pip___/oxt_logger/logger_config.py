@@ -10,6 +10,7 @@ from ..events.lo_events import LoEvents
 from ..events.args import EventArgs
 from ..events.named_events.log_named_event import LogNamedEvent
 
+
 if TYPE_CHECKING:
     from com.sun.star.configuration import ConfigurationAccess
 
@@ -18,6 +19,7 @@ class LoggerConfig(metaclass=Singleton):
     def __init__(self) -> None:
         config_dict = self._get_config()
         self._lo_implementation_name = config_dict["lo_implementation_name"]
+        # self._lo_implementation_name = settings.current_settings["lo_implementation_name"]
         configuration_settings = self._get_settings()
         log_file = str(configuration_settings["LogFile"])
         self._log_file = str(Path(file_util.get_user_profile_path(True), log_file))
