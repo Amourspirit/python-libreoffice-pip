@@ -2,21 +2,20 @@ from __future__ import annotations
 from typing import cast, Tuple
 
 from .settings import Settings
+from ..meta.singleton import Singleton
 from ..lo_util.configuration import Configuration
 from ..config import Config
 
 
-class PipInfoSettings(Settings):
+class PipInfoSettings(metaclass=Singleton):
     """Singleton Class. Manages Settings for the extension."""
 
     def __init__(self) -> None:
-        super().__init__()
+        settings = Settings()
         self._config = Config()
-        self._installed_local_pips = cast(Tuple, self.current_settings.get("InstalledLocalPips", ()))
-        self._node_value = self._get_node_value()
-
-    def _get_node_value(self) -> str:
-        return f"/{self.lo_implementation_name}.Settings/PipInfo"
+        self._configuration = Configuration()
+        self._installed_local_pips = cast(Tuple, settings.current_settings.get("InstalledLocalPips", ()))
+        self._node_value = f"/{settings.lo_implementation_name}.Settings/PipInfo"
 
     def append_installed_local_pip(self, pip_name: str) -> None:
         """Appends a pip to the installed local pips."""
@@ -35,8 +34,7 @@ class PipInfoSettings(Settings):
 
     @installed_local_pips.setter
     def installed_local_pips(self, value: Tuple[str, ...]) -> None:
-        self.configuration.save_configuration_str_lst(
+        self._configuration.save_configuration_str_lst(
             node_value=self._node_value, name="InstalledLocalPips", value=value
         )
         self._installed_local_pips = value
-        self.on_update_settings()

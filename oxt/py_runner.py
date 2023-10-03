@@ -345,7 +345,7 @@ class ___lo_implementation_name___(unohelper.Base, XJob):
             from ___lo_pip___.install.install_pkg_local import InstallPkgLocal
 
             installer = InstallPkgLocal()
-            installer.install()
+            _ = installer.install()
         except Exception as err:
             self._logger.error(f"Unable to install local packages: {err}", exc_info=True)
             return

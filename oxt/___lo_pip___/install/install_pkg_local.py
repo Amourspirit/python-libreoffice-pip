@@ -30,31 +30,45 @@ class InstallPkgLocal:
                     result.append(pkg)
         return result
 
-    def install(self) -> None:
-        """Install any local packages that are not already installed."""
+    def install(self) -> bool:
+        """
+        Install any local packages that are not already installed.
+
+        Returns:
+            bool: True if successful installing all local packages, False otherwise.
+        """
+        # sourcery skip: use-named-expression
         self._logger.debug("Install any local packages that are not already installed.")
         local_pkgs = self._get_local_packages()
         if not local_pkgs:
             self._logger.debug("No local packages to install.")
-            return
+            return False
 
         self._logger.debug(f"Found {len(local_pkgs)} Local packages to install")
-        installer = InstallPkg()
+        installer = InstallPkg(flag_upgrade=False)
         pi = PipInfoSettings()
-        # new_pkgs: List[str] = []
+
         installed_count = 0
+        success = True
         for pkg in local_pkgs:
             if pkg.name in pi.installed_local_pips:
-                self._logger.debug(f"Local package {pkg.name} is already installed.")
+                self._logger.info(f"Local package {pkg.name} is already installed.")
                 continue
-            installer.install_file(pth=pkg, force=False)
-            pi.append_installed_local_pip(pkg.name)
-            # new_pkgs.append(pkg.name)
-            installed_count += 1
+            result = installer.install_file(pth=pkg, force=False)
+            if result:
+                pi.append_installed_local_pip(pkg.name)
+                installed_count += 1
+            else:
+                self._logger.error(f"Failed to install local package: {pkg.name}")
+            success = success and result
         if installed_count > 0:
             # Update the installed local pips to reflect the files that have been installed
             self._logger.debug(f"Updating installed local pips. Added {installed_count} new packages.")
             # pi.installed_local_pips = (*pi.installed_local_pips, *new_pkgs)
         else:
             self._logger.debug("No new local packages installed.")
-        self._logger.debug("Finished installing local packages.")
+        if success:
+            self._logger.info("Finished installing local packages.")
+        else:
+            self._logger.error("Failed to install all local packages.")
+        return success

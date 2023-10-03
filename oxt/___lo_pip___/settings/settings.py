@@ -7,6 +7,10 @@ from ..meta.singleton import Singleton
 from ..oxt_logger import OxtLogger
 from ..config import Config
 
+from ..events.lo_events import Events
+from ..events.args import EventArgs
+from ..events.named_events import ConfigurationNamedEvent
+
 if TYPE_CHECKING:
     from com.sun.star.configuration import ConfigurationAccess
 
@@ -21,9 +25,28 @@ class Settings(metaclass=Singleton):
         self._lo_identifier = cfg.lo_identifier
         self._lo_implementation_name = cfg.lo_implementation_name
         self._current_settings = self.get_settings()
+        self._events = Events(source=self)
+        self._set_events()
 
-    def _get_node_value(self) -> str:
-        raise NotImplementedError
+    def _set_events(self) -> None:
+        def on_configuration_saved(src: Any, event_args: EventArgs) -> None:
+            self._logger.debug("Settings. Configuration saved. Updating settings..")
+            self._update_settings()
+
+        def on_configuration_str_lst_saved(src: Any, event_args: EventArgs) -> None:
+            self._logger.debug("Settings. Configuration str lst saved. Updating settings..")
+            self._update_settings()
+
+        # keep callbacks in scope
+        self._fn_on_configuration_saved = on_configuration_saved
+        self._fn_oon_configuration_str_lst_saved = on_configuration_str_lst_saved
+
+        events = self._events  # _Events()
+
+        events.on(event_name=ConfigurationNamedEvent.CONFIGURATION_SAVED, callback=on_configuration_saved)
+        events.on(
+            event_name=ConfigurationNamedEvent.CONFIGURATION_STR_LST_SAVED, callback=on_configuration_str_lst_saved
+        )
 
     def get_settings(self) -> Dict[str, Any]:
         key = f"/{self.lo_implementation_name}.Settings"
@@ -38,7 +61,7 @@ class Settings(metaclass=Singleton):
         self._logger.debug(f"Returning {self.lo_implementation_name} settings.")
         return settings
 
-    def on_update_settings(self) -> None:
+    def _update_settings(self) -> None:
         """Updates the current settings"""
         self._current_settings = self.get_settings()
 
