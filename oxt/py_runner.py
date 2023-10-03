@@ -69,10 +69,10 @@ class ___lo_implementation_name___(unohelper.Base, XJob):
             RegisterPathKind = InitRegisterPathKind
             UnRegisterPathKind = InitUnRegisterPathKind
 
-        # design time
         self._config = Config()
-        self._util = Util()
         self._logger = self._get_local_logger()
+
+        self._util = Util()
         self._logger.debug("Got OxtLogger instance")
 
         # create an environment variable for the log file path.
@@ -120,12 +120,8 @@ class ___lo_implementation_name___(unohelper.Base, XJob):
                 # self._config.extension_info.log_extensions(self._logger)
 
             requirements_met = False
-            if self._requirements_check.check_requirements() is True:
-                # This will be True if all requirements in tool.oxt.requirements of pyproject.toml are met.
-                # Also, This speeds up the loading of the extension considerably if no requirements need installing.
-
-                if not self._config.has_locals:
-                    requirements_met = True
+            if self._requirements_check.check_requirements() is True and not self._config.has_locals:
+                requirements_met = True
 
             if requirements_met:
                 self._logger.debug("Requirements are met. Nothing more to do.")

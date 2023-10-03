@@ -14,11 +14,6 @@
             </prop>
         </group>
         <group oor:name="Logging">
-            <prop oor:name="LogToFile" oor:type="xs:short">
-                <info>
-                    <desc>0 = log to stdout, 1 = log to file.</desc>
-                </info>
-            </prop>
             <prop oor:name="LogFile" oor:type="xs:string">
                 <info>
                     <desc>Log File Name</desc>
@@ -44,7 +39,7 @@
                 <value>___log_format___</value>
             </prop>
         </group>
-        <group oor:name="Token">
+        <group oor:name="GeneralSettings">
             <prop oor:name="LoImplementationName" oor:type="xs:string">
                 <info>
                     <desc>Extension Implementation Name</desc>
@@ -57,7 +52,36 @@
                 </info>
                 <value>___lo_identifier___</value>
             </prop>
-
+            <prop oor:name="PublisherUrl" oor:type="xs:string">
+                <info>
+                    <desc>Publisher URL</desc>
+                </info>
+                <value>___publisher_url___</value>
+            </prop>
+            <prop oor:name="UpdateUrlXml" oor:type="xs:string">
+                <info>
+                    <desc>Update URL XML</desc>
+                </info>
+                <value>___update_url_xml___</value>
+            </prop>
+            <prop oor:name="UpdateUrlOxt" oor:type="xs:string">
+                <info>
+                    <desc>Update URL OXT</desc>
+                </info>
+                <value>___update_url_oxt___</value>
+            </prop>
+            <prop oor:name="UrlPip" oor:type="xs:string">
+                <info>
+                    <desc>Url to get-pip.py that installs pip</desc>
+                </info>
+                <value>___url_pip___</value>
+            </prop>
+            <prop oor:name="Platform" oor:type="xs:string">
+                <info>
+                    <desc>The platform that this extension is targeted for</desc>
+                </info>
+                <value>___platform___</value>
+            </prop>
         </group>
     </component>
 </oor:component-schema>

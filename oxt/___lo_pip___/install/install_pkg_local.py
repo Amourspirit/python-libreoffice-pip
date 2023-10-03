@@ -6,7 +6,7 @@ from typing import List
 from .install_pkg import InstallPkg
 from ..config import Config
 from ..oxt_logger import OxtLogger
-from ..settings.pip_settings import PipInfoSettings
+from ..settings.pip_settings import PipSettings
 
 
 class InstallPkgLocal:
@@ -46,7 +46,7 @@ class InstallPkgLocal:
 
         self._logger.debug(f"Found {len(local_pkgs)} Local packages to install")
         installer = InstallPkg(flag_upgrade=False)
-        pi = PipInfoSettings()
+        pi = PipSettings()
 
         installed_count = 0
         success = True

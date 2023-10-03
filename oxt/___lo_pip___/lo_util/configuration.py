@@ -29,6 +29,7 @@ class Configuration(metaclass=Singleton):
     """Configuration class for accessing and saving configuration settings stored in LibreOffice."""
 
     def __init__(self) -> None:
+        # shared events that other objects can subscribe to such as settings.Settings
         self._events = Events()
         self._logger = None
 

@@ -6,6 +6,9 @@ import json
 from ..meta.singleton import Singleton
 from ..lo_util.configuration import Configuration
 from ..input_output import file_util
+from ..events.lo_events import LoEvents
+from ..events.args import EventArgs
+from ..events.named_events.log_named_event import LogNamedEvent
 
 if TYPE_CHECKING:
     from com.sun.star.configuration import ConfigurationAccess
@@ -24,6 +27,7 @@ class LoggerConfig(metaclass=Singleton):
 
         log_level = str(configuration_settings["LogLevel"])
         self._log_level = self._get_log_level(log_level)
+        self._log_ready_event_raised = False
 
     def _get_config(self) -> Dict[str, Any]:
         config_pth = Path(__file__).parent.parent / "config.json"
@@ -32,6 +36,7 @@ class LoggerConfig(metaclass=Singleton):
         return config
 
     def _get_settings(self) -> Dict[str, Any]:
+        # sourcery skip: dict-assign-update-to-union
         configuration = Configuration()
         key = f"/{self.lo_implementation_name}.Settings"
         reader = cast("ConfigurationAccess", configuration.get_configuration_access(key))
@@ -41,7 +46,8 @@ class LoggerConfig(metaclass=Singleton):
         log_group = cast("ConfigurationAccess", reader.getByName("Logging"))
         log_props = log_group.getElementNames()
         log_values = log_group.getPropertyValues(log_props)
-        settings.update({k: v for k, v in zip(log_props, log_values)})
+        # settings.update({k: v for k, v in zip(log_props, log_values)})
+        settings.update(dict(zip(log_props, log_values)))
         return settings
 
     def _get_log_level(self, log_level: str) -> int:
@@ -60,6 +66,18 @@ class LoggerConfig(metaclass=Singleton):
             return 50
         else:
             raise ValueError(f"Invalid log level: {log_level}")
+
+    def trigger_log_ready_event(self) -> None:
+        """
+        Raises the log ready event. ``LogNamedEvent.LOGGING_READY`` named event.
+
+        When a logger is created, it will raise this event to signal that the logger is ready.
+        The event args ``event_data`` will contain a dictionary with the key ``first_time`` and a boolean value indicating if this the first time the event has been raised.
+        """
+        event_args = EventArgs("LoggerConfig.raise_log_ready_event")
+        event_args.event_data = {"first_time": not self._log_ready_event_raised}
+        LoEvents().trigger(event_name=LogNamedEvent.LOGGING_READY, event_args=event_args)
+        self._log_ready_event_raised = True
 
     @property
     def lo_implementation_name(self) -> str:

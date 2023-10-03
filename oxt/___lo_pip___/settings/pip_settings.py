@@ -7,7 +7,7 @@ from ..lo_util.configuration import Configuration
 from ..config import Config
 
 
-class PipInfoSettings(metaclass=Singleton):
+class PipSettings(metaclass=Singleton):
     """Singleton Class. Manages Settings for the extension."""
 
     def __init__(self) -> None:
