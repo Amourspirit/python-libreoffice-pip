@@ -40,6 +40,12 @@
             </prop>
         </group>
         <group oor:name="GeneralSettings">
+            <prop oor:name="LogPipInstalls" oor:type="xs:boolean">
+                <info>
+                    <desc>Log Pip Installs</desc>
+                </info>
+                <value>___log_pip_installs___</value>
+            </prop>
             <prop oor:name="LoImplementationName" oor:type="xs:string">
                 <info>
                     <desc>Extension Implementation Name</desc>
@@ -51,6 +57,12 @@
                     <desc>Extension Identifier</desc>
                 </info>
                 <value>___lo_identifier___</value>
+            </prop>
+            <prop oor:name="Platform" oor:type="xs:string">
+                <info>
+                    <desc>The platform that this extension is targeted for</desc>
+                </info>
+                <value>___platform___</value>
             </prop>
             <prop oor:name="PublisherUrl" oor:type="xs:string">
                 <info>
@@ -82,12 +94,13 @@
                 </info>
                 <value>___pip_wheel_url___</value>
             </prop>
-            <prop oor:name="Platform" oor:type="xs:string">
+            <prop oor:name="UrlTestInternet" oor:type="xs:string">
                 <info>
-                    <desc>The platform that this extension is targeted for</desc>
+                    <desc>Url to used for testing internet connection</desc>
                 </info>
-                <value>___platform___</value>
+                <value>___test_internet_url___</value>
             </prop>
+            
         </group>
     </component>
 </oor:component-schema>

@@ -86,12 +86,18 @@ class Token(metaclass=Singleton):
             if str_key in self._tokens:
                 self._tokens[str_key] = remove_spaces(self._tokens[str_key])
 
-    def process(self, text: str) -> str:
+    def process(self, value: Any) -> str:
         """Processes the given text."""
+        if isinstance(value, bool):
+            return str(value).lower()
+        if isinstance(value, (int, float)):
+            return str(value)
+        if not isinstance(value, str):
+            return str(value)
         for token, replacement in self._tokens.items():
-            text = text.replace(token, replacement)
+            value = value.replace(token, str(replacement))
 
-        return text
+        return value
 
     def get_token_value(self, token: str) -> str:
         """

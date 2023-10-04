@@ -25,11 +25,9 @@ class BasicConfig(metaclass=ConfigMeta):
         self._py_pkg_dir = str(kwargs["py_pkg_dir"])
         self._lo_identifier = str(kwargs["lo_identifier"])
         self._lo_implementation_name = str(kwargs["lo_implementation_name"])
-        self._test_internet_url = str(kwargs["test_internet_url"])
         self._zipped_preinstall_pure = bool(kwargs["zipped_preinstall_pure"])
         self._auto_install_in_site_packages = bool(kwargs["auto_install_in_site_packages"])
         self._install_wheel = bool(kwargs["install_wheel"])
-        self._log_pip_installs = bool(kwargs["log_pip_installs"])
         self._has_locals = bool(kwargs["has_locals"])
         if "requirements" not in kwargs:
             kwargs["requirements"] = {}
@@ -85,27 +83,11 @@ class BasicConfig(metaclass=ConfigMeta):
         return self._lo_implementation_name
 
     @property
-    def log_pip_installs(self) -> bool:
-        """
-        Gets the flag indicating if pip installs should be logged.
-        """
-        return self._log_pip_installs
-
-    @property
     def py_pkg_dir(self) -> str:
         """
         The value for this property can be set in pyproject.toml (tool.oxt.config.py_pkg_dir)
         """
         return self._py_pkg_dir
-
-    @property
-    def test_internet_url(self) -> str:
-        """
-        String path such as ``https://www.google.com``
-
-        The value for this property can be set in pyproject.toml (tool.oxt.token.test_internet_url)
-        """
-        return self._test_internet_url
 
     @property
     def requirements(self) -> Dict[str, str]:

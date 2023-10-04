@@ -21,7 +21,16 @@ class GeneralSettings(metaclass=Singleton):
         self._update_url_oxt = str(settings.current_settings.get("UpdateUrlOxt", ""))
         self._url_pip = str(settings.current_settings.get("UrlPip", ""))
         self._pip_wheel_url = str(settings.current_settings.get("UrlPipWheel", ""))
+        self._test_internet_url = str(settings.current_settings.get("UrlTestInternet", ""))
         self._platform = str(settings.current_settings.get("Platform", ""))
+        self._log_pip_installs = bool(settings.current_settings.get("LogPipInstalls", False))
+
+    @property
+    def log_pip_installs(self) -> bool:
+        """
+        Gets the flag indicating if pip installs should be logged.
+        """
+        return self._log_pip_installs
 
     @property
     def lo_implementation_name(self) -> str:
@@ -57,3 +66,12 @@ class GeneralSettings(metaclass=Singleton):
     def platform(self) -> str:
         """Gets the platform of the LibreOffice extension is targeted for."""
         return self._platform
+
+    @property
+    def test_internet_url(self) -> str:
+        """
+        String path such as ``https://www.google.com``
+
+        The value for this property can be set in pyproject.toml (tool.oxt.token.test_internet_url)
+        """
+        return self._test_internet_url

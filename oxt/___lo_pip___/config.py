@@ -62,6 +62,8 @@ class Config(metaclass=Singleton):
             self._logger.debug("General Settings initialized")
             self._url_pip = generals_settings.url_pip
             self._pip_wheel_url = generals_settings.pip_wheel_url
+            self._test_internet_url = generals_settings.test_internet_url
+            self._log_pip_installs = generals_settings.log_pip_installs
 
             self._session = Session()
             self._extension_info = ExtensionInfo()
@@ -213,7 +215,7 @@ class Config(metaclass=Singleton):
 
         The value for this property can be set in pyproject.toml (tool.oxt.token.test_internet_url)
         """
-        return self._basic_config.test_internet_url
+        return self._test_internet_url
 
     @property
     def python_path(self) -> Path:
@@ -438,7 +440,7 @@ class Config(metaclass=Singleton):
         """
         Gets the flag indicating if pip installs should be logged.
         """
-        return self._basic_config.log_pip_installs
+        return self._log_pip_installs
 
     @property
     def has_locals(self) -> bool:
