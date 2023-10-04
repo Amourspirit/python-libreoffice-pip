@@ -7,17 +7,31 @@ from ..meta.singleton import Singleton
 
 
 class Util(metaclass=Singleton):
-    def __init__(self) -> None:
-        self._ctx = uno.getComponentContext()
-        self._service_manager = self._ctx.getServiceManager()  # type: ignore
+    """Utility Functions."""
 
-    def create_instance(self, name: str, with_context: bool = False, args: Any = None) -> Any:
-        if with_context:
-            return self._service_manager.createInstanceWithContext(name, self._ctx)
+    def create_uno_service(self, service: str, *, ctx: Any = None, args: Any = None) -> Any:
+        """
+        Creates an instance of a UNO service.
+
+        Args:
+            service (str): Service Name
+            ctx (Any, optional): Component Context. Defaults to None.
+            args (Any, optional): Args. Defaults to None.
+
+        Returns:
+            Any: New instance of service.
+        """
+        if not ctx:
+            ctx = uno.getComponentContext()
+        service_mgr = ctx.getServiceManager()  # type: ignore
+        if ctx and args:
+            return service_mgr.createInstanceWithArgumentsAndContext(service, args, ctx)
         elif args:
-            return self._service_manager.createInstanceWithArguments(name, (args,))
+            return service_mgr.createInstanceWithArguments(service, args)
+        elif ctx:
+            return service_mgr.createInstanceWithContext(service, ctx)
         else:
-            return self._service_manager.createInstance(name)
+            return service_mgr.createInstance(service)
 
     def config(self, name="Work"):
         """
@@ -32,7 +46,7 @@ class Util(metaclass=Singleton):
             ``config("Work")``
             ``/home/user/Documents``
         """
-        path = self.create_instance("com.sun.star.util.PathSettings")
+        path = self.create_uno_service("com.sun.star.util.PathSettings")
         return self.to_system(getattr(path, name))
 
     def to_system(self, path: str) -> str:

@@ -30,11 +30,12 @@ else:
 class InstallPkg:
     """Install pip packages."""
 
-    def __init__(self) -> None:
+    def __init__(self, flag_upgrade: bool = True) -> None:
         self._config = Config()
         self._path_python = Path(self._config.python_path)
         self._ver_rules = VerRules()
         self._logger = self._get_logger()
+        self._flag_upgrade = flag_upgrade
 
     def _get_logger(self) -> OxtLogger:
         return OxtLogger(log_name=__name__)
@@ -58,12 +59,13 @@ class InstallPkg:
         cmd: List[str] = [str(self._path_python), "-m", "pip", *args]
         if self._config.log_pip_installs and self._config.log_file:
             log_file = self._config.log_file
+
             if " " in log_file:
                 log_file = f'"{log_file}"'
             cmd.append(f"--log={log_file}")
         return cmd
 
-    def _install_pkg(self, pkg: str, ver: str, force: bool) -> None:
+    def _install_pkg(self, pkg: str, ver: str, force: bool) -> bool:
         """
         Install a package.
 
@@ -73,7 +75,7 @@ class InstallPkg:
             force (bool): Force install even if package is already installed.
 
         Returns:
-            None:
+            bool: True if successful, False otherwise.
         """
         auto_target = False
         if self.config.auto_install_in_site_packages:
@@ -86,33 +88,45 @@ class InstallPkg:
                 self._logger.debug(
                     "Ignoring auto_install_in_site_packages and continuing to install in user directory via pip --user"
                 )
-        if auto_target:
-            cmd = ["install", "--upgrade", f"--target={self.config.site_packages}"]
-        elif self.config.is_user_installed:
-            cmd = ["install", "--upgrade", "--user"]
-        else:
-            cmd = ["install", "--upgrade"]
-
+        cmd = ["install"]
         if force:
             cmd.append("--force-reinstall")
+        elif self.flag_upgrade:
+            cmd.append("--upgrade")
+
+        if auto_target:
+            cmd.append(f"--target={self.config.site_packages}")
+        elif self.config.is_user_installed:
+            cmd.append("--user")
 
         pkg_cmd = f"{pkg}{ver}" if ver else pkg
         cmd = self._cmd_pip(*[*cmd, pkg_cmd])
         self._logger.debug(f"Running command {cmd}")
         self._logger.info(f"Installing package {pkg}")
-        msg = f"Pip Install - Upgrading success for: {pkg_cmd}"
-        err_msg = f"Pip Install - Upgrading failed for: {pkg_cmd}"
+        if self._flag_upgrade:
+            msg = f"Pip Install - Upgrading success for: {pkg_cmd}"
+            err_msg = f"Pip Install - Upgrading failed for: {pkg_cmd}"
+        else:
+            msg = f"Pip Install success for: {pkg_cmd}"
+            err_msg = f"Pip Install failed for: {pkg_cmd}"
+
         if STARTUP_INFO:
             process = subprocess.run(
                 cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, env=self._get_env(), startupinfo=STARTUP_INFO
             )
         else:
             process = subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, env=self._get_env())
+
         if process.returncode == 0:
             self._logger.info(msg)
+            return True
         else:
             self._logger.error(err_msg)
-        return
+            try:
+                self._logger.error(process.stderr.decode("utf-8"))
+            except Exception as err:
+                self._logger.error(f"Error decoding stderr: {err}")
+        return False
 
     def _get_env(self) -> Dict[str, str]:
         """
@@ -126,7 +140,7 @@ class InstallPkg:
         my_env["PYTHONPATH"] = py_path
         return my_env
 
-    def install(self, req: Dict[str, str] | None = None, force: bool = False) -> None:
+    def install(self, req: Dict[str, str] | None = None, force: bool = False) -> bool:
         """
         Install all the packages in the configuration if they are not already installed and meet requirements.
 
@@ -136,7 +150,7 @@ class InstallPkg:
             force (bool, optional): Force install even if package is already installed. Defaults to False.
 
         Returns:
-            None:
+            bool: True if all packages are installed successful, False otherwise.
         """
         self._logger.info("Installing packages…")
 
@@ -144,8 +158,9 @@ class InstallPkg:
 
         if not req:
             self._logger.warning("No packages to install.")
-            return
+            return False
 
+        result = True
         for name, ver in req.items():
             valid, rules = self._is_valid_version(name, ver, force)
             if force:
@@ -158,8 +173,32 @@ class InstallPkg:
                 break
 
             ver_lst: List[str] = [rule.get_versions_str() for rule in rules]
-            self._install_pkg(name, ",".join(ver_lst), force)
+            result = result and self._install_pkg(name, ",".join(ver_lst), force)
         self._logger.info("Installing packages Done!")
+        return result
+
+    def install_file(self, pth: str | Path, force: bool = False) -> bool:
+        """
+        Install all the packages in the configuration if they are not already installed and meet requirements.
+
+        Args:
+            req (Dict[str, str] | None, optional): The requirements to install.
+                If omitted then requirements from config are used. Defaults to None.
+            force (bool, optional): Force install even if package is already installed. Defaults to False.
+
+        Returns:
+            None:
+        """
+        self._logger.info("Installing packages…")
+        if isinstance(pth, str):
+            pth = Path(pth)
+        if not pth.exists():
+            self._logger.error(f"Cannot install File. Does not exist: {pth}")
+            return False
+
+        result = self._install_pkg(pkg=str(pth), ver="", force=force)
+        self._logger.info(f"Install file package {pth.name} Done!")
+        return result
 
     def _is_valid_version(self, name: str, ver: str, force: bool) -> Tuple[int, List[VerProto]]:
         """
@@ -218,3 +257,8 @@ class InstallPkg:
     @property
     def python_path(self) -> Path:
         return self._path_python
+
+    @property
+    def flag_upgrade(self) -> bool:
+        """Gets if the packages should be installed with  --upgrade flag."""
+        return self._flag_upgrade

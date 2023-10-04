@@ -11,21 +11,26 @@ class InstallWheel:
     def __init__(self) -> None:
         self._config = Config()
 
-    def install(self) -> None:
-        """Install wheel if it is not already installed."""
-        if self._config.is_flatpak:
-            self._install_flatpak()
-        else:
-            self._install_default()
+    def install(self) -> bool:
+        """
+        Install wheel if it is not already installed.
 
-    def _install_flatpak(self) -> None:
+        Returns:
+            bool: True if successful, False otherwise.
+        """
+        if self._config.is_flatpak:
+            return self._install_flatpak()
+
+        return self._install_default()
+
+    def _install_flatpak(self) -> bool:
         from .pkg_installers.install_pkg_flatpak import InstallPkgFlatpak
 
         installer = InstallPkgFlatpak()
-        installer.install({"wheel": ""})
+        return installer.install({"wheel": ""})
 
-    def _install_default(self) -> None:
+    def _install_default(self) -> bool:
         from .pkg_installers.install_pkg import InstallPkg
 
         installer = InstallPkg()
-        installer.install({"wheel": ""})
+        return installer.install({"wheel": ""})

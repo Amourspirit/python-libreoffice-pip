@@ -4,14 +4,11 @@ auto_install_in_site_packages = true
 build_dir = "build"
 dist_dir = "tmp_dist" # should be changed to someting like dist, tmp_dist is not included in git
 install_wheel = true
-log_pip_installs = true
 oxt_name = "OooPip"
-pip_wheel_url = "https://files.pythonhosted.org/packages/50/c2/e06851e8cc28dcad7c155f4753da8833ac06a5c704c109313b8d5a62968a/pip-23.2.1-py3-none-any.whl"
 py_pkg_dir = "py_pkgs"
 py_pkg_files = []
 py_pkg_names = [] # ["ooodev", "ooo"]
-test_internet_url = "https://duckduckgo.com"
-token_file_ext = ["txt", "xml", "xcu"]
+token_file_ext = ["txt", "xml", "xcu", "xcs"]
 update_file = "update.xml"
 zip_preinstall_pure = true
 
@@ -19,6 +16,9 @@ zip_preinstall_pure = true
 [tool.oxt.token]
 # in the form of "token_name": "token_value"
 # in the files the token will have a prefix and suffix of ___
+pip_wheel_url = "https://files.pythonhosted.org/packages/50/c2/e06851e8cc28dcad7c155f4753da8833ac06a5c704c109313b8d5a62968a/pip-23.2.1-py3-none-any.whl"
+test_internet_url = "https://duckduckgo.com"
+log_pip_installs = false
 lo_identifier = "org.openoffice.extensions.ooopip"
 lo_implementation_name = "OooPipRunner"
 display_name_en_us = "LibreOffice Python Pip Template"

@@ -17,7 +17,7 @@ class Build:
 
     def __init__(self, args: BuildArgs) -> None:
         self._config = Config()
-        self._build_path = self._config.root_path / self._config.build_dir_name
+        self._build_path = self._config.build_path
         self._args = args
         self._src_path = self._config.root_path / args.oxt_src
         if not self._src_path.exists():
