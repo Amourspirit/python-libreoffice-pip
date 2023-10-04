@@ -24,6 +24,7 @@ class GeneralSettings(metaclass=Singleton):
         self._test_internet_url = str(settings.current_settings.get("UrlTestInternet", ""))
         self._platform = str(settings.current_settings.get("Platform", ""))
         self._log_pip_installs = bool(settings.current_settings.get("LogPipInstalls", False))
+        self._show_progress = bool(settings.current_settings.get("ShowProgress", False))
 
     @property
     def log_pip_installs(self) -> bool:
@@ -66,6 +67,11 @@ class GeneralSettings(metaclass=Singleton):
     def platform(self) -> str:
         """Gets the platform of the LibreOffice extension is targeted for."""
         return self._platform
+
+    @property
+    def show_progress(self) -> bool:
+        """Gets the flag indicating if the terminal should be shown."""
+        return self._show_progress
 
     @property
     def test_internet_url(self) -> str:

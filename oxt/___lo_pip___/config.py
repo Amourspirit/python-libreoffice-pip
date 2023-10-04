@@ -64,6 +64,7 @@ class Config(metaclass=Singleton):
             self._pip_wheel_url = generals_settings.pip_wheel_url
             self._test_internet_url = generals_settings.test_internet_url
             self._log_pip_installs = generals_settings.log_pip_installs
+            self._show_progress = generals_settings.show_progress
 
             self._session = Session()
             self._extension_info = ExtensionInfo()
@@ -448,6 +449,13 @@ class Config(metaclass=Singleton):
         Gets the flag indicating if the extension has local pip files to install.
         """
         return self._basic_config.has_locals
+
+    @property
+    def show_progress(self) -> bool:
+        """
+        Gets the flag indicating if the terminal should be shown.
+        """
+        return self._show_progress
 
     # endregion Properties
 

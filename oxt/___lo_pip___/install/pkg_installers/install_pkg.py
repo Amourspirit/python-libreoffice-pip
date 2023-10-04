@@ -13,6 +13,7 @@ from ...config import Config
 from ...ver.rules.ver_rules import VerRules, VerProto
 from ...oxt_logger import OxtLogger
 from ..download import Download
+from ..progress import Progress
 
 
 # https://docs.python.org/3.8/library/importlib.metadata.html#module-importlib.metadata
@@ -110,6 +111,15 @@ class InstallPkg:
             msg = f"Pip Install success for: {pkg_cmd}"
             err_msg = f"Pip Install failed for: {pkg_cmd}"
 
+        progress: Progress | None = None
+        if self._config.show_progress:
+            # display a terminal window to show progress
+            self._logger.debug("Starting Progress Window")
+            progress = Progress(start_msg=f"Installing: {pkg}")
+            progress.start()
+        else:
+            self._logger.debug("Progress Window is disabled")
+
         if STARTUP_INFO:
             process = subprocess.run(
                 cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, env=self._get_env(), startupinfo=STARTUP_INFO
@@ -117,16 +127,22 @@ class InstallPkg:
         else:
             process = subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, env=self._get_env())
 
+        result = False
         if process.returncode == 0:
             self._logger.info(msg)
-            return True
+            result = True
         else:
             self._logger.error(err_msg)
             try:
                 self._logger.error(process.stderr.decode("utf-8"))
             except Exception as err:
                 self._logger.error(f"Error decoding stderr: {err}")
-        return False
+
+        if progress:
+            self._logger.debug("Ending Progress Window")
+            progress.kill()
+
+        return result
 
     def _get_env(self) -> Dict[str, str]:
         """

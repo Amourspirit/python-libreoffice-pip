@@ -43,8 +43,8 @@ class OxtLogger(Logger):
 
         if self._log_file and self._config.log_level >= 10:  # DEBUG
             self.addHandler(self._get_file_handler())
-        else:
-            self.addHandler(self._get_console_handler())
+
+        self.addHandler(self._get_console_handler())
 
         # with this pattern, it's rarely necessary to propagate the| error up to parent
         self.propagate = False

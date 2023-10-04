@@ -46,6 +46,12 @@
                 </info>
                 <value>___log_pip_installs___</value>
             </prop>
+            <prop oor:name="ShowProgress" oor:type="xs:boolean">
+                <info>
+                    <desc>Determines if terminal window is displayed during pip installs to show progress</desc>
+                </info>
+                <value>___show_progress___</value>
+            </prop>
             <prop oor:name="LoImplementationName" oor:type="xs:string">
                 <info>
                     <desc>Extension Implementation Name</desc>

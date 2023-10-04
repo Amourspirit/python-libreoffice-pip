@@ -35,6 +35,7 @@ log_level = "DEBUG" # NONE, DEBUG, INFO, WARNING, ERROR, CRITICAL
 log_format = "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
 lo_pip = "lo_pip"
 platform = "all"
+show_progress = true
 
 [tool.oxt.requirements]
 # https://python-poetry.org/docs/dependency-specification/
