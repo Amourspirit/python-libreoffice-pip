@@ -1,5 +1,5 @@
 from __future__ import annotations
-from typing import cast, Dict
+from typing import cast, Dict, List
 from pathlib import Path
 import json
 import toml
@@ -31,10 +31,6 @@ class JsonConfig(metaclass=Singleton):
             self._install_wheel = cast(bool, cfg["tool"]["oxt"]["config"]["install_wheel"])
         except Exception:
             self._install_wheel = False
-        # try:
-        #     self._log_pip_installs = cast(bool, cfg["tool"]["oxt"]["config"]["log_pip_installs"])
-        # except Exception:
-        #     self._log_pip_installs = True
 
     def update_json_config(self, json_config_path: Path) -> None:
         """Read and updates the config.json file."""

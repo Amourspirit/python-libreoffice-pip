@@ -5,6 +5,7 @@ import subprocess
 # import pkg_resources
 from ...oxt_logger import OxtLogger
 from .install_pkg import InstallPkg
+from ..progress import Progress
 from .install_pkg import STARTUP_INFO
 
 
@@ -50,12 +51,26 @@ class InstallPkgFlatpak(InstallPkg):
         else:
             msg = f"Pip Install success for: {pkg_cmd}"
             err_msg = f"Pip Install failed for: {pkg_cmd}"
+
+        progress: Progress | None = None
+        if self._config.show_progress:
+            # display a terminal window to show progress
+            self._logger.debug("Starting Progress Window")
+            progress = Progress(start_msg=f"Installing: {pkg}", title=f"Installing: {pkg}")
+            progress.start()
+        else:
+            self._logger.debug("Progress Window is disabled")
+
         if STARTUP_INFO:
             process = subprocess.run(
                 cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, env=self._get_env(), startupinfo=STARTUP_INFO
             )
         else:
             process = subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, env=self._get_env())
+
+        if progress:
+            self._logger.debug("Ending Progress Window")
+            progress.kill()
         if process.returncode == 0:
             self._logger.info(msg)
             return True

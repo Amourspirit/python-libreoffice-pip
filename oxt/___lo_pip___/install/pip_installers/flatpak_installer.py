@@ -43,7 +43,7 @@ class FlatpakInstaller(BaseInstaller):
         progress: Progress | None = None
         if cfg.show_progress:
             self._logger.debug("Starting Progress Window")
-            progress = Progress(start_msg="Installing PIP")
+            progress = Progress(start_msg="Installing PIP", title="PIP Installing")
             progress.start()
         else:
             self._logger.debug("Progress Window is disabled")

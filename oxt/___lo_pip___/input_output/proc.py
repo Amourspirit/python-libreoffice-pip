@@ -1,5 +1,7 @@
 from __future__ import annotations
 import sys
+import os
+import signal
 import subprocess
 
 _IS_WINDOWS_PLATFORM = "win" in sys.platform
