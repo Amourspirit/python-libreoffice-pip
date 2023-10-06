@@ -53,7 +53,7 @@ class InstallPkgFlatpak(InstallPkg):
             err_msg = f"Pip Install failed for: {pkg_cmd}"
 
         progress: Progress | None = None
-        if self._config.show_progress:
+        if self._config.show_progress and self.show_progress:
             # display a terminal window to show progress
             self._logger.debug("Starting Progress Window")
             progress = Progress(start_msg=f"Installing: {pkg}", title=f"Installing: {pkg}")

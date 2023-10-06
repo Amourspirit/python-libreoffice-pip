@@ -2,7 +2,7 @@ from __future__ import annotations
 import os
 import sys
 import subprocess
-from typing import Dict, List, Tuple
+from typing import Any, Dict, List, Tuple
 
 
 # import pkg_resources
@@ -31,12 +31,24 @@ else:
 class InstallPkg:
     """Install pip packages."""
 
-    def __init__(self, flag_upgrade: bool = True) -> None:
+    def __init__(self, flag_upgrade: bool = True, **kwargs: Any) -> None:
+        """Constructor
+
+        Args:
+            flag_upgrade (bool, optional): Specifies if the upgrade flag should be used. Defaults to True.
+
+        Keyword Args:
+            show_progress (bool, optional): Specifies if the progress window should be shown. Defaults to ``Config.show_progress``.
+
+        Returns:
+            None:
+        """
         self._config = Config()
         self._path_python = Path(self._config.python_path)
         self._ver_rules = VerRules()
         self._logger = self._get_logger()
         self._flag_upgrade = flag_upgrade
+        self._show_progress = bool(kwargs.get("show_progress", self._config.show_progress))
 
     def _get_logger(self) -> OxtLogger:
         return OxtLogger(log_name=__name__)
@@ -112,7 +124,7 @@ class InstallPkg:
             err_msg = f"Pip Install failed for: {pkg_cmd}"
 
         progress: Progress | None = None
-        if self._config.show_progress:
+        if self._config.show_progress and self.show_progress:
             # display a terminal window to show progress
             self._logger.debug("Starting Progress Window")
             progress = Progress(start_msg=f"Installing: {pkg}", title=f"Installing: {pkg}")
@@ -278,3 +290,17 @@ class InstallPkg:
     def flag_upgrade(self) -> bool:
         """Gets if the packages should be installed with  --upgrade flag."""
         return self._flag_upgrade
+
+    @property
+    def show_progress(self) -> bool:
+        """
+        Gets/Sets if the progress window should be shown.
+
+        ``Config.show_progress`` is used by default and ``Config.show_progress`` must be ``True`` for this to be used.
+        """
+        return self._show_progress
+
+    @show_progress.setter
+    def show_progress(self, value: bool) -> None:
+        """Sets if the progress window should be shown."""
+        self._show_progress = value

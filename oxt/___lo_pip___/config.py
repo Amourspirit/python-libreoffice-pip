@@ -97,7 +97,7 @@ class Config(metaclass=Singleton):
                 self._python_path = Path(self.join(util.config("Module"), "python.exe"))
                 self._site_packages = self._get_windows_site_packages_dir()
             elif self._is_mac:
-                self._python_path = Path(self.join(util.config("Module"), "..", "Resources", "python"))
+                self._python_path = Path(self.join(util.config("Module"), "..", "Resources", "python")).resolve()
                 self._site_packages = self._get_mac_site_packages_dir()
             elif self._is_app_image:
                 self._python_path = Path(self.join(util.config("Module"), "python"))

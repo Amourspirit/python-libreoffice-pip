@@ -17,7 +17,7 @@ class WindowsTerminal(Term):
         self._pid = -1
 
     def get_is_match(self) -> bool:
-        """Check if the version matches the given string."""
+        """Check if matches for Windows."""
         return self.config.is_win
 
     def _get_command(self, msg: str, title: str) -> List[str]:

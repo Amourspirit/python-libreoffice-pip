@@ -1,10 +1,10 @@
 from __future__ import annotations
-import sys
 import os
+import platform
 import signal
 import subprocess
 
-_IS_WINDOWS_PLATFORM = "win" in sys.platform
+_IS_WINDOWS_PLATFORM = platform.system() == "Windows"
 
 
 def kill_proc(pid: int) -> None:

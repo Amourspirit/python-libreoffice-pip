@@ -19,7 +19,7 @@ class GnomeTerminal(Term):
         self._pid = -1
 
     def get_is_match(self) -> bool:
-        """Check if the version matches the given string."""
+        """Check if matches for Linux Gnome Terminal."""
         if not self.config.is_linux:
             return False
         if self.config.is_app_image:

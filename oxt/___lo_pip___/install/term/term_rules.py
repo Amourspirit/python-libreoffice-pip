@@ -3,6 +3,7 @@ from typing import List, Type
 from .term_proto import TermProto
 from .gnome_terminal import GnomeTerminal
 from .win_terminal import WindowsTerminal
+from .mac_terminal import MacTerminal
 from ...config import Config
 
 
@@ -63,6 +64,8 @@ class TermRules:
             self._reg_rule(rule=WindowsTerminal)
         elif cfg.is_linux:
             self._reg_rule(rule=GnomeTerminal)
+        elif cfg.is_mac:
+            self._reg_rule(rule=MacTerminal)
 
     def get_terminal(self) -> TermProto | None:
         """

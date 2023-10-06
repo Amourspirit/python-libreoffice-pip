@@ -6,6 +6,7 @@
     "words": [
         "abstrancmethod",
         "APPIMAGE",
+        "applescript",
         "Codespace",
         "creationflags",
         "endregion",
@@ -16,6 +17,7 @@
         "mkdirp",
         "nodepath",
         "ooopip",
+        "osascript",
         "preexec",
         "preinstall",
         "setpgrp",
