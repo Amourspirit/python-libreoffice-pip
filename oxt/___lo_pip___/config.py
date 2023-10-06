@@ -2,7 +2,7 @@
 # region Imports
 from __future__ import annotations
 from pathlib import Path
-from typing import Dict, TYPE_CHECKING
+from typing import Dict, List, TYPE_CHECKING
 import json
 import os
 import sys
@@ -27,6 +27,7 @@ if TYPE_CHECKING:
 OS = platform.system()
 IS_WIN = OS == "Windows"
 IS_MAC = OS == "Darwin"
+IS_LINUX = OS == "Linux"
 
 # endregion Constants
 
@@ -64,6 +65,7 @@ class Config(metaclass=Singleton):
             self._pip_wheel_url = generals_settings.pip_wheel_url
             self._test_internet_url = generals_settings.test_internet_url
             self._log_pip_installs = generals_settings.log_pip_installs
+            self._show_progress = generals_settings.show_progress
 
             self._session = Session()
             self._extension_info = ExtensionInfo()
@@ -73,14 +75,12 @@ class Config(metaclass=Singleton):
                 self._auto_install_in_site_packages = True
             self._log_level = logger_config.log_level
             self._os = platform.system()
-            self._is_win = self._os == "Windows"
-            self._is_mac = self._os == "Darwin"
-            self._is_app_image = False
-            app_img = os.getenv("APPIMAGE", "")
-            if app_img:
-                self._is_app_image = True
-            flat_pak_id = os.getenv("FLATPAK_ID", "")
-            self._is_flatpak = flat_pak_id.lower() == "org.libreoffice.libreoffice"
+            self._is_win = IS_WIN
+            self._is_mac = IS_MAC
+            self._is_linux = IS_LINUX
+            self._is_app_image = bool(os.getenv("APPIMAGE", ""))
+            self._is_flatpak = bool(os.getenv("FLATPAK_ID", ""))
+            self._is_snap = bool(os.getenv("SNAP_INSTANCE_NAME", ""))
             self._site_packages = ""
             util = Util()
 
@@ -97,7 +97,7 @@ class Config(metaclass=Singleton):
                 self._python_path = Path(self.join(util.config("Module"), "python.exe"))
                 self._site_packages = self._get_windows_site_packages_dir()
             elif self._is_mac:
-                self._python_path = Path(self.join(util.config("Module"), "..", "Resources", "python"))
+                self._python_path = Path(self.join(util.config("Module"), "..", "Resources", "python")).resolve()
                 self._site_packages = self._get_mac_site_packages_dir()
             elif self._is_app_image:
                 self._python_path = Path(self.join(util.config("Module"), "python"))
@@ -311,11 +311,11 @@ class Config(metaclass=Singleton):
         return self._auto_install_in_site_packages
 
     @property
-    def is_win(self) -> bool:
+    def is_linux(self) -> bool:
         """
-        Gets the flag indicating if the operating system is Windows.
+        Gets the flag indicating if the operating system is Linux.
         """
-        return self._is_win
+        return self._is_linux
 
     @property
     def is_mac(self) -> bool:
@@ -323,6 +323,13 @@ class Config(metaclass=Singleton):
         Gets the flag indicating if the operating system is macOS.
         """
         return self._is_mac
+
+    @property
+    def is_win(self) -> bool:
+        """
+        Gets the flag indicating if the operating system is Windows.
+        """
+        return self._is_win
 
     @property
     def is_app_image(self) -> bool:
@@ -337,6 +344,13 @@ class Config(metaclass=Singleton):
         Gets the flag indicating if LibreOffice is running as a Flatpak.
         """
         return self._is_flatpak
+
+    @property
+    def is_snap(self) -> bool:
+        """
+        Gets the flag indicating if LibreOffice is running as a Snap.
+        """
+        return self._is_snap
 
     @property
     def is_user_installed(self) -> bool:
@@ -448,6 +462,13 @@ class Config(metaclass=Singleton):
         Gets the flag indicating if the extension has local pip files to install.
         """
         return self._basic_config.has_locals
+
+    @property
+    def show_progress(self) -> bool:
+        """
+        Gets the flag indicating if the terminal should be shown.
+        """
+        return self._show_progress
 
     # endregion Properties
 

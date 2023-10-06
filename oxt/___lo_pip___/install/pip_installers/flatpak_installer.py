@@ -7,6 +7,7 @@ from pathlib import Path
 from ...config import Config
 from ...oxt_logger import OxtLogger
 from .base_installer import BaseInstaller
+from ..progress import Progress
 
 
 class FlatpakInstaller(BaseInstaller):
@@ -39,6 +40,14 @@ class FlatpakInstaller(BaseInstaller):
         from ..install_pip_from_wheel import InstallPipFromWheel
 
         installer = InstallPipFromWheel()
+        progress: Progress | None = None
+        if cfg.show_progress:
+            self._logger.debug("Starting Progress Window")
+            progress = Progress(start_msg="Installing PIP", title="PIP Installing")
+            progress.start()
+        else:
+            self._logger.debug("Progress Window is disabled")
+
         try:
             installer.install(cfg.site_packages)
             if cfg.site_packages not in sys.path:
@@ -47,6 +56,10 @@ class FlatpakInstaller(BaseInstaller):
         except Exception as err:
             self._logger.error(err)
             return result
+        finally:
+            if progress:
+                self._logger.debug("Ending Progress Window")
+                progress.kill()
         return result
 
     def _install_pip(self, filename: Path):

@@ -1,6 +1,6 @@
 from __future__ import annotations
 from pathlib import Path
-from typing import Dict
+from typing import Dict, List, cast
 import json
 
 from .meta.singleton import Singleton

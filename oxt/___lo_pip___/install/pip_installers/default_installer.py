@@ -8,6 +8,7 @@ from ...oxt_logger import OxtLogger
 from ..download import Download
 
 from .base_installer import BaseInstaller
+from ..progress import Progress
 
 
 class DefaultInstaller(BaseInstaller):
@@ -22,37 +23,50 @@ class DefaultInstaller(BaseInstaller):
             return
         pip_installed = False
         cfg = Config()
-        with tempfile.TemporaryDirectory() as temp_dir:
-            # Do something with the temporary directory
-            # print(f"Temporary directory created at {temp_dir}")
-            path_pip = Path(temp_dir)
+        progress: Progress | None = None
+        if cfg.show_progress:
+            self._logger.debug("Starting Progress Window")
+            progress = Progress(start_msg="Installing PIP", title="PIP Installing")
+            progress.start()
+        else:
+            self._logger.debug("Progress Window is disabled")
 
-            url = cfg.url_pip
-            filename = path_pip / "get-pip.py"
-            dl = Download()
-            data, _, err = dl.url_open(url, verify=False)
-            if err:
-                self._logger.error("Unable to download PIP installation file")
-                return
-            dl.save_binary(pth=filename, data=data)
+        try:
+            with tempfile.TemporaryDirectory() as temp_dir:
+                # Do something with the temporary directory
+                # print(f"Temporary directory created at {temp_dir}")
+                path_pip = Path(temp_dir)
 
-            if filename.exists():
-                self._logger.info("PIP installation file has been saved")
-            else:
-                self._logger.error("Unable to copy PIP installation file")
-                return
-
-            # PIP installation file has been saved
-
-            try:
-                # "Starting PIP installation…"
-                if self._install_pip(filename=filename) and self.is_pip_installed():
-                    self._logger.info("PIP was installed successfully")
-                    pip_installed = True
+                url = cfg.url_pip
+                filename = path_pip / "get-pip.py"
+                dl = Download()
+                data, _, err = dl.url_open(url, verify=False)
+                if err:
+                    self._logger.error("Unable to download PIP installation file")
                     return
-            except Exception as err:
-                # "PIP installation has failed, see log"
-                self._logger.error(err)
+                dl.save_binary(pth=filename, data=data)
+
+                if filename.exists():
+                    self._logger.info("PIP installation file has been saved")
+                else:
+                    self._logger.error("Unable to copy PIP installation file")
+                    return
+
+                # PIP installation file has been saved
+
+                try:
+                    # "Starting PIP installation…"
+                    if self._install_pip(filename=filename) and self.is_pip_installed():
+                        self._logger.info("PIP was installed successfully")
+                        pip_installed = True
+                        return
+                except Exception as err:
+                    # "PIP installation has failed, see log"
+                    self._logger.error(err)
+        finally:
+            if progress:
+                self._logger.debug("Ending Progress Window")
+                progress.kill()
 
         if not pip_installed:
             self._logger.error("PIP installation has failed")

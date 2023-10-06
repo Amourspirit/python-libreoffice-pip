@@ -12,7 +12,6 @@ token_file_ext = ["txt", "xml", "xcu", "xcs"]
 update_file = "update.xml"
 zip_preinstall_pure = true
 
-
 [tool.oxt.token]
 # in the form of "token_name": "token_value"
 # in the files the token will have a prefix and suffix of ___
@@ -35,6 +34,7 @@ log_level = "DEBUG" # NONE, DEBUG, INFO, WARNING, ERROR, CRITICAL
 log_format = "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
 lo_pip = "lo_pip"
 platform = "all"
+show_progress = true
 
 [tool.oxt.requirements]
 # https://python-poetry.org/docs/dependency-specification/

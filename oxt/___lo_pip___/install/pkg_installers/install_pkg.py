@@ -2,7 +2,7 @@ from __future__ import annotations
 import os
 import sys
 import subprocess
-from typing import Dict, List, Tuple
+from typing import Any, Dict, List, Tuple
 
 
 # import pkg_resources
@@ -13,6 +13,7 @@ from ...config import Config
 from ...ver.rules.ver_rules import VerRules, VerProto
 from ...oxt_logger import OxtLogger
 from ..download import Download
+from ..progress import Progress
 
 
 # https://docs.python.org/3.8/library/importlib.metadata.html#module-importlib.metadata
@@ -30,12 +31,24 @@ else:
 class InstallPkg:
     """Install pip packages."""
 
-    def __init__(self, flag_upgrade: bool = True) -> None:
+    def __init__(self, flag_upgrade: bool = True, **kwargs: Any) -> None:
+        """Constructor
+
+        Args:
+            flag_upgrade (bool, optional): Specifies if the upgrade flag should be used. Defaults to True.
+
+        Keyword Args:
+            show_progress (bool, optional): Specifies if the progress window should be shown. Defaults to ``Config.show_progress``.
+
+        Returns:
+            None:
+        """
         self._config = Config()
         self._path_python = Path(self._config.python_path)
         self._ver_rules = VerRules()
         self._logger = self._get_logger()
         self._flag_upgrade = flag_upgrade
+        self._show_progress = bool(kwargs.get("show_progress", self._config.show_progress))
 
     def _get_logger(self) -> OxtLogger:
         return OxtLogger(log_name=__name__)
@@ -110,6 +123,15 @@ class InstallPkg:
             msg = f"Pip Install success for: {pkg_cmd}"
             err_msg = f"Pip Install failed for: {pkg_cmd}"
 
+        progress: Progress | None = None
+        if self._config.show_progress and self.show_progress:
+            # display a terminal window to show progress
+            self._logger.debug("Starting Progress Window")
+            progress = Progress(start_msg=f"Installing: {pkg}", title=f"Installing: {pkg}")
+            progress.start()
+        else:
+            self._logger.debug("Progress Window is disabled")
+
         if STARTUP_INFO:
             process = subprocess.run(
                 cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, env=self._get_env(), startupinfo=STARTUP_INFO
@@ -117,16 +139,22 @@ class InstallPkg:
         else:
             process = subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, env=self._get_env())
 
+        result = False
         if process.returncode == 0:
             self._logger.info(msg)
-            return True
+            result = True
         else:
             self._logger.error(err_msg)
             try:
                 self._logger.error(process.stderr.decode("utf-8"))
             except Exception as err:
                 self._logger.error(f"Error decoding stderr: {err}")
-        return False
+
+        if progress:
+            self._logger.debug("Ending Progress Window")
+            progress.kill()
+
+        return result
 
     def _get_env(self) -> Dict[str, str]:
         """
@@ -262,3 +290,17 @@ class InstallPkg:
     def flag_upgrade(self) -> bool:
         """Gets if the packages should be installed with  --upgrade flag."""
         return self._flag_upgrade
+
+    @property
+    def show_progress(self) -> bool:
+        """
+        Gets/Sets if the progress window should be shown.
+
+        ``Config.show_progress`` is used by default and ``Config.show_progress`` must be ``True`` for this to be used.
+        """
+        return self._show_progress
+
+    @show_progress.setter
+    def show_progress(self, value: bool) -> None:
+        """Sets if the progress window should be shown."""
+        self._show_progress = value
