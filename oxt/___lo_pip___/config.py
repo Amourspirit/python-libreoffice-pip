@@ -197,6 +197,12 @@ class Config(metaclass=Singleton):
     # endregion Methods
 
     # region Properties
+    @property
+    def basic_config(self) -> BasicConfig:
+        """
+        Gets the basic config.
+        """
+        return self._basic_config
 
     @property
     def url_pip(self) -> str:
