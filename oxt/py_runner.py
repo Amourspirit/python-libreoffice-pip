@@ -159,10 +159,6 @@ class ___lo_implementation_name___(unohelper.Base, XJob):
                     self._logger.info("Pip was not successfully installed")
                     return
 
-            # install applescript if needed
-            # needs to be installed before wheel, just in case progress window is needed
-            # self._install_apple_script()
-
             # install wheel if needed
             self._install_wheel()
 
@@ -207,20 +203,6 @@ class ___lo_implementation_name___(unohelper.Base, XJob):
             from ___lo_pip___.install.extras.install_wheel import InstallWheel
 
             installer = InstallWheel()
-            installer.install()
-        except Exception as err:
-            self._logger.error(f"Unable to install wheel: {err}", exc_info=True)
-            return
-        self._logger.debug("Install wheel done.")
-
-    def _install_apple_script(self) -> None:
-        if not self._config.is_mac:
-            return
-        self._logger.debug("Installing applescript.")
-        try:
-            from ___lo_pip___.install.extras.install_apple_script import InstallAppleScript
-
-            installer = InstallAppleScript()
             installer.install()
         except Exception as err:
             self._logger.error(f"Unable to install wheel: {err}", exc_info=True)
