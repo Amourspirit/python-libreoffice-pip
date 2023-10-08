@@ -11,4 +11,8 @@
         manifest:media-type="application/vnd.sun.star.package-bundle-description" />
     <manifest:file-entry manifest:full-path="config/config.xcs"
         manifest:media-type="application/vnd.sun.star.configuration-schema" />
+    <manifest:file-entry manifest:full-path="config/config.xcu"
+        manifest:media-type="application/vnd.sun.star.configuration-data" />
+    <manifest:file-entry manifest:full-path="config/options.xcu"
+        manifest:media-type="application/vnd.sun.star.configuration-data" />
 </manifest:manifest>

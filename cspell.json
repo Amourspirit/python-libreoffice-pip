@@ -18,6 +18,7 @@
         "nodepath",
         "ooopip",
         "osascript",
+        "POSSIZE",
         "preexec",
         "preinstall",
         "setpgrp",
@@ -27,6 +28,7 @@
         "taskkill",
         "unohelper",
         "verr",
+        "vlang",
         "vstr"
     ],
     "ignoreWords": [],
