@@ -54,6 +54,8 @@ class Config(metaclass=Singleton):
         self._logger = OxtLogger(log_name=__name__)
         self._logger.debug("Initializing Config")
         try:
+            self._resource_dir_name = "resources"
+            self._resource_properties_prefix = "pipstrings"
             self._log_file = logger_config.log_file
             self._log_name = logger_config.log_name
             self._log_format = logger_config.log_format
@@ -197,6 +199,12 @@ class Config(metaclass=Singleton):
     # endregion Methods
 
     # region Properties
+    @property
+    def basic_config(self) -> BasicConfig:
+        """
+        Gets the basic config.
+        """
+        return self._basic_config
 
     @property
     def url_pip(self) -> str:
@@ -462,6 +470,20 @@ class Config(metaclass=Singleton):
         Gets the flag indicating if the extension has local pip files to install.
         """
         return self._basic_config.has_locals
+
+    @property
+    def resource_dir_name(self) -> str:
+        """
+        Gets the name of the resources directory.
+        """
+        return self._resource_dir_name
+
+    @property
+    def resource_properties_prefix(self) -> str:
+        """
+        Gets the prefix for resource properties.
+        """
+        return self._resource_properties_prefix
 
     @property
     def show_progress(self) -> bool:

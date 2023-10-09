@@ -34,6 +34,18 @@ implementation_services = ("com.sun.star.task.Job",)
 # endregion Constants
 
 
+def add_local_path_to_sys_path() -> None:
+    # add the path of this module to the sys.path
+    this_pth = os.path.dirname(__file__)
+    if this_pth not in sys.path:
+        sys.path.append(this_pth)
+
+
+add_local_path_to_sys_path()
+
+from ___lo_pip___.dialog.handler import logger_options
+
+
 # region XJob
 class ___lo_implementation_name___(unohelper.Base, XJob):
     """Python UNO Component that implements the com.sun.star.task.Job interface."""
@@ -93,7 +105,12 @@ class ___lo_implementation_name___(unohelper.Base, XJob):
         if not TYPE_CHECKING:
             # run time
             # must be after self._add_py_req_pkgs_to_sys_path()
-            from ___lo_pip___.install.requirements_check import RequirementsCheck
+            try:
+                from ___lo_pip___.install.requirements_check import RequirementsCheck
+
+                # from ___lo_pip___.dialog.logger_options import OptionsDialogHandler
+            except Exception as err:
+                self._logger.error(err, exc_info=True)
         self._requirements_check = RequirementsCheck()
 
     # endregion Init
@@ -174,7 +191,7 @@ class ___lo_implementation_name___(unohelper.Base, XJob):
             if self._logger:
                 self._logger.error(err)
         finally:
-            self._remove_local_path_from_sys_path()
+            # self._remove_local_path_from_sys_path()
             self._remove_py_req_pkgs_from_sys_path()
             self._log_ex_time(start_time)
 
@@ -186,9 +203,9 @@ class ___lo_implementation_name___(unohelper.Base, XJob):
             if "packaging" in sys.modules:
                 # clean up by removing the packaging module from sys.modules
                 del sys.modules["packaging"]
-        if "___lo_pip___" in sys.modules:
-            # clean up by removing the ___lo_pip___ module from sys.modules
-            del sys.modules["___lo_pip___"]
+        # if "___lo_pip___" in sys.modules:
+        #     # clean up by removing the ___lo_pip___ module from sys.modules
+        #     del sys.modules["___lo_pip___"]
 
     # endregion Destructor
 
@@ -396,5 +413,16 @@ g_ImplementationHelper = unohelper.ImplementationHelper()
 # add the FormatFactory class to the implementation container,
 # which the loader uses to register/instantiate the component.
 g_ImplementationHelper.addImplementation(___lo_implementation_name___, implementation_name, implementation_services)
+
+g_ImplementationHelper.addImplementation(
+    logger_options.OptionsDialogHandler, logger_options.IMPLEMENTATION_NAME, (logger_options.IMPLEMENTATION_NAME,)
+)
+
+# uncomment here and int options.xcu to use the example dialog
+# from ___lo_pip___.dialog.handler import example
+
+# g_ImplementationHelper.addImplementation(
+#     example.OptionsDialogHandler, example.IMPLEMENTATION_NAME, (example.IMPLEMENTATION_NAME,)
+# )
 
 # endregion Implementation

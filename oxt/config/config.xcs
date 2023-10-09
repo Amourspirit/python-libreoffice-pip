@@ -10,7 +10,6 @@
                 <info>
                     <desc>Local Installed Pip Packages</desc>
                 </info>
-                <value></value>
             </prop>
         </group>
         <group oor:name="Logging">
@@ -18,25 +17,26 @@
                 <info>
                     <desc>Log File Name</desc>
                 </info>
-                <value>___log_file___</value>
             </prop>
             <prop oor:name="LogName" oor:type="xs:string">
                 <info>
                     <desc>Log Name</desc>
                 </info>
-                <value>___log_name___</value>
             </prop>
             <prop oor:name="LogLevel" oor:type="xs:string">
                 <info>
                     <desc>Loggging Level, NONE, DEBUG, INFO, WARNING, ERROR, CRITICAL</desc>
                 </info>
-                <value>___log_level___</value>
             </prop>
             <prop oor:name="LogFormat" oor:type="xs:string">
                 <info>
                     <desc>Log Format. Eg: %(asctime)s - %(name)s - %(levelname)s - %(message)s</desc>
                 </info>
-                <value>___log_format___</value>
+            </prop>
+            <prop oor:name="TestText" oor:type="xs:string">
+                <info>
+                    <desc>Test</desc>
+                </info>
             </prop>
         </group>
         <group oor:name="GeneralSettings">
@@ -44,69 +44,58 @@
                 <info>
                     <desc>Log Pip Installs</desc>
                 </info>
-                <value>___log_pip_installs___</value>
             </prop>
             <prop oor:name="ShowProgress" oor:type="xs:boolean">
                 <info>
-                    <desc>Determines if terminal window is displayed during pip installs to show progress</desc>
+                    <desc>Determines if terminal window is displayed during pip installs to show
+                        progress</desc>
                 </info>
-                <value>___show_progress___</value>
             </prop>
             <prop oor:name="LoImplementationName" oor:type="xs:string">
                 <info>
                     <desc>Extension Implementation Name</desc>
                 </info>
-                <value>___lo_implementation_name___</value>
             </prop>
             <prop oor:name="LoIdentifier" oor:type="xs:string">
                 <info>
                     <desc>Extension Identifier</desc>
                 </info>
-                <value>___lo_identifier___</value>
             </prop>
             <prop oor:name="Platform" oor:type="xs:string">
                 <info>
                     <desc>The platform that this extension is targeted for</desc>
                 </info>
-                <value>___platform___</value>
             </prop>
             <prop oor:name="PublisherUrl" oor:type="xs:string">
                 <info>
                     <desc>Publisher URL</desc>
                 </info>
-                <value>___publisher_url___</value>
             </prop>
             <prop oor:name="UpdateUrlXml" oor:type="xs:string">
                 <info>
                     <desc>Update URL XML</desc>
                 </info>
-                <value>___update_url_xml___</value>
             </prop>
             <prop oor:name="UpdateUrlOxt" oor:type="xs:string">
                 <info>
                     <desc>Update URL OXT</desc>
                 </info>
-                <value>___update_url_oxt___</value>
             </prop>
             <prop oor:name="UrlPip" oor:type="xs:string">
                 <info>
                     <desc>Url to get-pip.py that installs pip</desc>
                 </info>
-                <value>___url_pip___</value>
             </prop>
             <prop oor:name="UrlPipWheel" oor:type="xs:string">
                 <info>
                     <desc>Url to Pip Wheel file that installs pip in Flatpak</desc>
                 </info>
-                <value>___pip_wheel_url___</value>
             </prop>
             <prop oor:name="UrlTestInternet" oor:type="xs:string">
                 <info>
                     <desc>Url to used for testing internet connection</desc>
                 </info>
-                <value>___test_internet_url___</value>
             </prop>
-            
         </group>
     </component>
 </oor:component-schema>

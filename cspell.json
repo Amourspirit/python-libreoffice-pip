@@ -9,6 +9,7 @@
         "applescript",
         "Codespace",
         "creationflags",
+        "datatransfer",
         "endregion",
         "flatpak",
         "getpgid",
@@ -18,6 +19,7 @@
         "nodepath",
         "ooopip",
         "osascript",
+        "POSSIZE",
         "preexec",
         "preinstall",
         "setpgrp",
@@ -27,6 +29,7 @@
         "taskkill",
         "unohelper",
         "verr",
+        "vlang",
         "vstr"
     ],
     "ignoreWords": [],
