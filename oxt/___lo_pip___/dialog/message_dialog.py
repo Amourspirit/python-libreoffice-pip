@@ -19,11 +19,10 @@ class MessageDialog(DialogBase):
         self.args = kwargs
 
     def execute(self):
-        args = self.args
-        box_type = args.get("type", MESSAGEBOX)
-        buttons = int(args.get("buttons", 1))
-        title = str(args.get("title", ""))
-        message = str(args.get("message", ""))
+        box_type = self.args.get("type", MESSAGEBOX)
+        buttons = int(self.args.get("buttons", 1))
+        title = str(self.args.get("title", ""))
+        message = str(self.args.get("message", ""))
         toolkit = cast(XMessageBoxFactory, self.parent.getToolkit())
         dialog = toolkit.createMessageBox(self.parent, box_type, buttons, title, message)
         n = dialog.execute()

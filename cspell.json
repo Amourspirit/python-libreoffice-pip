@@ -9,6 +9,7 @@
         "applescript",
         "Codespace",
         "creationflags",
+        "datatransfer",
         "endregion",
         "flatpak",
         "getpgid",

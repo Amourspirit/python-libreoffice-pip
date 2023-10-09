@@ -7,14 +7,14 @@ from com.sun.star.awt import XActionListener
 from com.sun.star.awt import XContainerWindowEventHandler
 from com.sun.star.ui.dialogs.TemplateDescription import FILESAVE_AUTOEXTENSION, FILEOPEN_SIMPLE  # type: ignore
 
-from ..basic_config import BasicConfig
-from ..lo_util.resource_resolver import ResourceResolver
+from ...basic_config import BasicConfig
+from ...lo_util.resource_resolver import ResourceResolver
 
-from ..lo_util.configuration import Configuration, SettingsT
-from ..settings.settings import Settings
-from .file_open_dialog import FileOpenDialog
+from ...lo_util.configuration import Configuration, SettingsT
+from ...settings.settings import Settings
+from ..file_open_dialog import FileOpenDialog
 
-from ..oxt_logger import OxtLogger
+from ...oxt_logger import OxtLogger
 
 if TYPE_CHECKING:
     from com.sun.star.awt import UnoControlDialog  # service
@@ -22,11 +22,11 @@ if TYPE_CHECKING:
     from com.sun.star.awt import UnoControlButton  # service
 
 
-IMPLEMENTATION_NAME = f"{BasicConfig().lo_implementation_name}.LoggingOptionsPage"
+IMPLEMENTATION_NAME = f"{BasicConfig().lo_implementation_name}.Example"
 
 
 class ButtonListener(unohelper.Base, XActionListener):
-    def __init__(self, cast: Any):
+    def __init__(self, cast: "OptionsDialogHandler"):
         self._logger = OxtLogger(log_name=__name__)
         self._logger.debug("ButtonListener.__init__")
         self.cast = cast
@@ -57,7 +57,7 @@ class OptionsDialogHandler(unohelper.Base, XContainerWindowEventHandler):
         self._config = BasicConfig()
         self._resource_resolver = ResourceResolver(self.ctx)
         self._config_node = f"/{self._config.lo_implementation_name}.Settings/Logging"
-        self._window_name = "pip"
+        self._window_name = "example"
         self._settings = Settings()
         self._logger.debug("OptionsDialogHandler.__init__ done")
 
@@ -146,8 +146,8 @@ class OptionsDialogHandler(unohelper.Base, XContainerWindowEventHandler):
             self.ctx,
             template=FILEOPEN_SIMPLE,
             filters=(
-                (self._resource_resolver.resolve_string("msg07"), "*.*"),
-                (self._resource_resolver.resolve_string("ek03"), "*.exe;*.bin;*.sh"),
+                (self._resource_resolver.resolve_string("ex03"), "*.*"),
+                (self._resource_resolver.resolve_string("ex04"), "*.exe;*.bin;*.sh"),
             ),
         ).execute()
         return url or False

@@ -43,7 +43,8 @@ def add_local_path_to_sys_path() -> None:
 
 add_local_path_to_sys_path()
 
-from ___lo_pip___.dialog import logger_options
+from ___lo_pip___.dialog.handler import example
+from ___lo_pip___.dialog.handler import logger_options
 
 
 # region XJob
@@ -415,6 +416,10 @@ g_ImplementationHelper = unohelper.ImplementationHelper()
 g_ImplementationHelper.addImplementation(___lo_implementation_name___, implementation_name, implementation_services)
 
 # endregion Implementation
+
+g_ImplementationHelper.addImplementation(
+    example.OptionsDialogHandler, example.IMPLEMENTATION_NAME, (example.IMPLEMENTATION_NAME,)
+)
 
 g_ImplementationHelper.addImplementation(
     logger_options.OptionsDialogHandler, logger_options.IMPLEMENTATION_NAME, (logger_options.IMPLEMENTATION_NAME,)
