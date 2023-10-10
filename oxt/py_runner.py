@@ -8,6 +8,7 @@ import unohelper
 import sys
 import os
 import time
+import threading
 
 from com.sun.star.task import XJob
 
@@ -20,15 +21,6 @@ if TYPE_CHECKING:
 else:
     RegisterPathKind = object
     UnRegisterPathKind = object
-
-# endregion imports
-
-# region Constants
-
-implementation_name = "___lo_identifier___.___lo_implementation_name___"
-implementation_services = ("com.sun.star.task.Job",)
-
-# endregion Constants
 
 
 def add_local_path_to_sys_path() -> None:
@@ -44,6 +36,15 @@ from ___lo_pip___.dialog.handler import logger_options
 from ___lo_pip___.config import Config
 from ___lo_pip___.install.install_pip import InstallPip
 from ___lo_pip___.lo_util.util import Util
+
+# endregion imports
+
+# region Constants
+
+implementation_name = "___lo_identifier___.___lo_implementation_name___"
+implementation_services = ("com.sun.star.task.Job",)
+
+# endregion Constants
 
 
 # region XJob
@@ -108,12 +109,10 @@ class ___lo_implementation_name___(unohelper.Base, XJob):
     # endregion Init
 
     # region execute
-
-    def execute(self, *args):
+    def execute(self, *args: Any) -> None:
         # make sure our pythonpath is in sys.path
         self._logger.debug("___lo_implementation_name___ executing")
         start_time = time.time()
-
         try:
             self._add_py_pkgs_to_sys_path()
             self._add_py_req_pkgs_to_sys_path()
