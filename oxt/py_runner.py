@@ -13,12 +13,9 @@ from com.sun.star.task import XJob
 
 if TYPE_CHECKING:
     # just for design time
-    from ___lo_pip___.config import Config
-    from ___lo_pip___.install.install_pip import InstallPip
     from ___lo_pip___.install.install_pkg import InstallPkg
     from ___lo_pip___.oxt_logger import OxtLogger
     from ___lo_pip___.lo_util import Session, RegisterPathKind, UnRegisterPathKind
-    from ___lo_pip___.lo_util.util import Util
     from ___lo_pip___.install.requirements_check import RequirementsCheck
 else:
     RegisterPathKind = object
@@ -44,6 +41,9 @@ def add_local_path_to_sys_path() -> None:
 add_local_path_to_sys_path()
 
 from ___lo_pip___.dialog.handler import logger_options
+from ___lo_pip___.config import Config
+from ___lo_pip___.install.install_pip import InstallPip
+from ___lo_pip___.lo_util.util import Util
 
 
 # region XJob
@@ -63,14 +63,8 @@ class ___lo_implementation_name___(unohelper.Base, XJob):
             user_path = self._get_user_profile_path(True, self.ctx)
             # logger.debug(f"Init: user_path: {user_path}")
             self._user_path = user_path
-        self._add_local_path_to_sys_path()
         if not TYPE_CHECKING:
             # run time
-            from ___lo_pip___.config import Config
-            from ___lo_pip___.lo_util import Util
-
-            # from ___lo_pip___.install.requirements_check import RequirementsCheck
-
             from ___lo_pip___.lo_util import (
                 Session,
                 RegisterPathKind as InitRegisterPathKind,
@@ -107,8 +101,6 @@ class ___lo_implementation_name___(unohelper.Base, XJob):
             # must be after self._add_py_req_pkgs_to_sys_path()
             try:
                 from ___lo_pip___.install.requirements_check import RequirementsCheck
-
-                # from ___lo_pip___.dialog.logger_options import OptionsDialogHandler
             except Exception as err:
                 self._logger.error(err, exc_info=True)
         self._requirements_check = RequirementsCheck()
@@ -121,12 +113,8 @@ class ___lo_implementation_name___(unohelper.Base, XJob):
         # make sure our pythonpath is in sys.path
         self._logger.debug("___lo_implementation_name___ executing")
         start_time = time.time()
-        # if args:
-        #     self._logger.debug(f"args: {args}")
 
-        # logger = None
         try:
-            self._add_local_path_to_sys_path()
             self._add_py_pkgs_to_sys_path()
             self._add_py_req_pkgs_to_sys_path()
             self._add_pure_pkgs_to_sys_path()
@@ -146,8 +134,6 @@ class ___lo_implementation_name___(unohelper.Base, XJob):
 
             if not TYPE_CHECKING:
                 # run time
-                from ___lo_pip___.install.install_pip import InstallPip
-
                 self._logger.debug("Imported InstallPip")
                 from ___lo_pip___.install.install_pkg import InstallPkg
 
@@ -203,9 +189,10 @@ class ___lo_implementation_name___(unohelper.Base, XJob):
             if "packaging" in sys.modules:
                 # clean up by removing the packaging module from sys.modules
                 del sys.modules["packaging"]
-        # if "___lo_pip___" in sys.modules:
-        #     # clean up by removing the ___lo_pip___ module from sys.modules
-        #     del sys.modules["___lo_pip___"]
+        if "___lo_pip___" in sys.modules:
+            # clean up by removing the ___lo_pip___ module from sys.modules
+            # module still can be imported if needed.
+            del sys.modules["___lo_pip___"]
 
     # endregion Destructor
 
@@ -229,22 +216,6 @@ class ___lo_implementation_name___(unohelper.Base, XJob):
     # endregion Install
 
     # region Register/Unregister sys paths
-
-    def _add_local_path_to_sys_path(self) -> None:
-        # add the path of this module to the sys.path
-        if self._this_pth not in sys.path:
-            sys.path.append(self._this_pth)
-            # logger.debug(f"{self._this_pth}: appended to sys.path")
-        self._path_added = True
-
-    def _remove_local_path_from_sys_path(self) -> None:
-        # remove the path of this module from the sys.path
-        if not self._path_added:
-            return
-        if self._this_pth in sys.path:
-            sys.path.remove(self._this_pth)
-            self._logger.debug(f"sys.path removed: {self._this_pth}")
-        self._path_added = False
 
     def _add_py_pkgs_to_sys_path(self) -> None:
         pth = Path(os.path.dirname(__file__), f"{self._config.py_pkg_dir}.zip")
@@ -366,6 +337,7 @@ class ___lo_implementation_name___(unohelper.Base, XJob):
         self._logger.debug("Install local done.")
 
     # endregion install local
+
     # region Logging
 
     def _get_local_logger(self) -> OxtLogger:
