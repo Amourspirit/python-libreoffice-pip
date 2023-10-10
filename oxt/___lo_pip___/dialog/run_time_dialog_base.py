@@ -15,7 +15,9 @@ if TYPE_CHECKING:
     from com.sun.star.form.control import CommandButton  # service
     from com.sun.star.awt import UnoControlDialog  # service
     from com.sun.star.awt import UnoControlDialogModel  # service
-    from com.sun.star.beans import XPropertyAccess
+
+    # from com.sun.star.beans import XPropertyAccess
+    from com.sun.star.beans import XMultiPropertySet
     from com.sun.star.awt import XWindow
 
 
@@ -24,7 +26,7 @@ class RuntimeDialogBase(DialogBase):
 
     def __init__(self, ctx: Any):
         super().__init__(ctx)
-        self.dialog = cast("UnoControlDialog", None)
+        self._dialog = cast("UnoControlDialog", None)
 
     def _result(self):
         """Returns result."""
@@ -34,7 +36,7 @@ class RuntimeDialogBase(DialogBase):
         """Initialize, create dialog and controls."""
         raise NotImplementedError
 
-    def execute(self):
+    def execute(self) -> Any:
         """
         Execute to show this dialog.
         None return value should mean canceled.
@@ -58,10 +60,11 @@ class RuntimeDialogBase(DialogBase):
         if not full_name:
             type_ = f"com.sun.star.awt.UnoControl{type_}Model"
         dialog_model = cast("UnoControlDialogModel", self.dialog.getModel())
-        model = cast("XPropertyAccess", dialog_model.createInstance(type_))
+        model = cast("XMultiPropertySet", dialog_model.createInstance(type_))
         if prop_names and prop_values:
-            properties = self.convert_to_property_values(prop_names, prop_values)
-            model.setPropertyValues(properties)
+            # properties = self.convert_to_property_values(prop_names, prop_values)
+            # model.setPropertyValues(properties)
+            model.setPropertyValues(tuple(prop_names), tuple(prop_values))
         dialog_model.insertByName(name, model)
         ctrl = cast("XWindow", self.dialog.getControl(name))
         ctrl.setPosSize(pos[0], pos[1], size[0], size[1], POSSIZE)
@@ -91,7 +94,7 @@ class RuntimeDialogBase(DialogBase):
             dialog.setPosSize(0, 0, size[0], size[1], SIZE)
         if isinstance(pos, tuple) and len(pos) == 2:
             dialog.setPosSize(pos[0], pos[1], 0, 0, POS)
-        self.dialog = dialog
+        self._dialog = dialog
 
     def create_label(
         self,
@@ -104,7 +107,7 @@ class RuntimeDialogBase(DialogBase):
         action: XActionListener | None = None,
     ):
         """Create and add new label."""
-        self.create_control(name, "Label", pos, size, prop_names, prop_values)
+        self.create_control(name, "FixedText", pos, size, prop_names, prop_values)
 
     def create_button(
         self,
@@ -158,3 +161,10 @@ class RuntimeDialogBase(DialogBase):
         """Set focus to the control specified by the name."""
         window = cast("XWindow", self.dialog.getControl(name))
         window.setFocus()
+
+    @property
+    def dialog(self) -> UnoControlDialog:
+        """Returns dialog."""
+        if not self._dialog:
+            self._init()
+        return self._dialog
