@@ -29,6 +29,7 @@ class BasicConfig(metaclass=ConfigMeta):
         self._auto_install_in_site_packages = bool(kwargs["auto_install_in_site_packages"])
         self._install_wheel = bool(kwargs["install_wheel"])
         self._has_locals = bool(kwargs["has_locals"])
+        self._window_timeout = int(kwargs["window_timeout"])
         if "requirements" not in kwargs:
             kwargs["requirements"] = {}
         self._requirements: Dict[str, str] = dict(**kwargs["requirements"])
@@ -100,6 +101,17 @@ class BasicConfig(metaclass=ConfigMeta):
         Example: {"requests": ">=2.25.1"}
         """
         return self._requirements
+
+    @property
+    def window_timeout(self) -> int:
+        """
+        Gets the window timeout value.
+
+        The value for this property can be set in pyproject.toml (tool.oxt.config.window_timeout)
+
+        This is the number of seconds to wait for the LibreOffice window to start before installing packages without requiring a LibreOffice window.
+        """
+        return self._window_timeout
 
     @property
     def zipped_preinstall_pure(self) -> bool:

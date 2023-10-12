@@ -42,6 +42,7 @@ class Token(metaclass=Singleton):
             "log_format",
             "lo_pip",
             "platform",
+            "startup_event",
         }
         for key in keys:
             str_key = f"___{key}___"
@@ -69,6 +70,11 @@ class Token(metaclass=Singleton):
                 raise ValueError(
                     "Token 'log_file' value is invalid and must be renamed in tool.oxt.token in pyproject.toml. Every project must have unique log_file value or set to empty string for no logging."
                 )
+        value = self.get_token_value("startup_event")
+        if value not in {"onFirstVisibleTask", "OnStartApp"}:
+            raise ValueError(
+                f"Token 'startup_event' value is invalid: {value}. Valid values are: '', 'onFirstVisibleTask', 'OnStartApp'."
+            )
 
     def _tokens_remove_whitespace(self) -> None:
         """Cleans the tokens."""

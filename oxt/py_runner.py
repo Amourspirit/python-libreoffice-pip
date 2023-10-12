@@ -1,7 +1,7 @@
 # region imports
 from __future__ import unicode_literals, annotations
 import contextlib
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, cast, Tuple
 from pathlib import Path
 import uno
 import unohelper
@@ -18,6 +18,8 @@ if TYPE_CHECKING:
     from ___lo_pip___.oxt_logger import OxtLogger
     from ___lo_pip___.lo_util import Session, RegisterPathKind, UnRegisterPathKind
     from ___lo_pip___.install.requirements_check import RequirementsCheck
+    from com.sun.star.beans import NamedValue
+    from com.sun.star.lang import EventObject
 else:
     RegisterPathKind = object
     UnRegisterPathKind = object
@@ -36,6 +38,12 @@ from ___lo_pip___.dialog.handler import logger_options
 from ___lo_pip___.config import Config
 from ___lo_pip___.install.install_pip import InstallPip
 from ___lo_pip___.lo_util.util import Util
+from ___lo_pip___.adapter.top_window_listener import TopWindowListener
+from ___lo_pip___.events.lo_events import LoEvents
+from ___lo_pip___.events.args.event_args import EventArgs
+from ___lo_pip___.events.startup.startup_monitor import StartupMonitor
+from ___lo_pip___.events.named_events.startup_events import StartupNamedEvent
+from ___lo_pip___.lo_util.resource_resolver import ResourceResolver
 
 # endregion imports
 
@@ -55,11 +63,21 @@ class ___lo_implementation_name___(unohelper.Base, XJob):
 
     def __init__(self, ctx):
         self._this_pth = os.path.dirname(__file__)
+        self._job_event_name = ""
+        self._valid_job_event_names = {"onFirstVisibleTask", "OnStartApp"}
         self._path_added = False
         self._added_packaging = False
+        self._delay_start = True
+        self._start_timed_out = True
+        self._window_timer: threading.Timer | None = None
+        self._thread_lock = threading.Lock()
+        self._execute_args: Tuple[Tuple[NamedValue, ...], ...] | None = None
+        self._events = LoEvents()
+        self._startup_monitor = StartupMonitor()  # start the singleton startup monitor
         # logger.debug("___lo_implementation_name___ Init")
         self.ctx = ctx
         self._user_path = ""
+        self._resource_resolver = ResourceResolver(self.ctx)
         with contextlib.suppress(Exception):
             user_path = self._get_user_profile_path(True, self.ctx)
             # logger.debug(f"Init: user_path: {user_path}")
@@ -106,14 +124,110 @@ class ___lo_implementation_name___(unohelper.Base, XJob):
                 self._logger.error(err, exc_info=True)
         self._requirements_check = RequirementsCheck()
 
+        if self._delay_start:
+
+            def _on_window_opened(source: Any, event_args: EventArgs, *args, **kwargs) -> None:
+                self.on_window_opened(source=source, event_args=event_args, *args, **kwargs)
+
+            self._fn_on_window_opened = _on_window_opened
+
+            self._twl = TopWindowListener()
+            self._start_window_timer()
+            self._twl.on("windowOpened", _on_window_opened)
+
     # endregion Init
 
+    def on_window_opened(self, source: Any, event_args: EventArgs, *args, **kwargs) -> None:
+        """is invoked when a window is activated."""
+        if self._twl is None:
+            return
+        self._start_timed_out = False
+        if self._window_timer:
+            # if we got to here then the timer is no longer needed
+            self._logger.debug("Stopping timer")
+            self._window_timer.cancel()
+        self._logger.debug("Window Opened Event took place.")
+        # event = cast("EventObject", event_args.event_data)
+        # self._logger.debug(dir(event.Source))
+        self._twl = None
+        self._fn_on_window_opened = None
+        self._events.trigger(StartupNamedEvent.WINDOW_STARTED, EventArgs(self))
+        self._ex_thread = threading.Thread(target=self._real_execute, args=(True,))
+        self._ex_thread.start()
+        # self._real_execute()
+
+    def _start_window_timer(self) -> None:
+        """Starts the timer to delay the execution of the execute method."""
+
+        def timer_tick() -> None:
+            self._logger.debug("Window timer elapsed.")
+            if self._start_timed_out:
+                self._logger.debug("Window timed out. Starting execute.")
+                t = threading.Thread(target=self._real_execute)
+                t.start()
+            else:
+                self._logger.debug("Window opened and did not time out. Not starting execute.")
+
+        self._logger.debug("Starting timer")
+        self._fn_timer_tick = timer_tick  # keep alive
+        self._delay_start = True
+        self._window_timer = threading.Timer(self._config.window_timeout, timer_tick)
+        self._window_timer.start()
+
+    def _get_event_name(self, args: Tuple[Tuple[NamedValue, ...], ...]) -> str:
+        """
+        Gets the event name from the args.
+
+        Args:
+            args (Tuple[Tuple[NamedValue, ...], ...]): Event args passed to execute.
+
+        Returns:
+            str: Event name.
+        """
+        if not args:
+            return ""
+        for tup in args:
+            if not tup:
+                continue
+            for arg in tup:
+                if arg.Name != "Environment":
+                    continue
+                named_vals = cast(Tuple["NamedValue", ...], arg.Value)
+                for val in named_vals:
+                    if val.Name == "EventName":
+                        return str(val.Value)
+        return ""
+
+    def _is_valid_job_event(self) -> bool:
+        return self._job_event_name in self._valid_job_event_names
+
     # region execute
-    def execute(self, *args: Any) -> None:
+    def execute(self, *args: Tuple[NamedValue, ...]) -> None:
         # make sure our pythonpath is in sys.path
+        self._execute_args = args
         self._logger.debug("___lo_implementation_name___ executing")
+        try:
+            self._job_event_name = self._get_event_name(args)
+        except Exception as err:
+            self._logger.error(err, exc_info=True)
+            self._job_event_name = ""
+        if not self._is_valid_job_event():
+            self._logger.error(f"Invalid job event name: {self._job_event_name}")
+            self._logger.info(f"Valid job event names: {self._valid_job_event_names}")
+            return
+        self._logger.debug(f"Job event name: {self._job_event_name}")
+        if self._delay_start:
+            return
+        self._real_execute()
+
+    def _real_execute(self, has_window: bool = False) -> None:
         start_time = time.time()
         try:
+            # from ___lo_pip___.dialog.infinite_progress import InfiniteProgress
+            # my_progress = InfiniteProgress(self.ctx)
+            # my_progress.start()
+            # time.sleep(10)
+            # my_progress.stop()
             self._add_py_pkgs_to_sys_path()
             self._add_py_req_pkgs_to_sys_path()
             self._add_pure_pkgs_to_sys_path()
@@ -145,7 +259,7 @@ class ___lo_implementation_name___(unohelper.Base, XJob):
                     sys.path.append(pth)
             # sys.path.insert(0, sys.path.pop(sys.path.index(pth)))
 
-            pip_installer = InstallPip()
+            pip_installer = InstallPip(self.ctx)
             self._logger.debug("Created InstallPip instance")
             if pip_installer.is_pip_installed():
                 self._logger.info("Pip is already installed")
@@ -167,9 +281,12 @@ class ___lo_implementation_name___(unohelper.Base, XJob):
             # install any packages that are not installed
             if self._config.has_locals:
                 self._install_locals()
-            pkg_installer = InstallPkg()
+            pkg_installer = InstallPkg(ctx=self.ctx)
             self._logger.debug("Created InstallPkg instance")
             pkg_installer.install()
+
+            if has_window:
+                self._display_complete_dialog()
 
             self._logger.info(f"{self._config.lo_implementation_name} execute Done!")
         except Exception as err:
@@ -181,6 +298,31 @@ class ___lo_implementation_name___(unohelper.Base, XJob):
             self._log_ex_time(start_time)
 
     # endregion execute
+
+    # def _display_message(self, msg: str, title: str = "Message") -> None:
+    #     try:
+    #         from ___lo_pip___.dialog.message_dialog import MessageDialog
+
+    #         # ctx = uno.getComponentContext()
+    #         tk = self.ctx.ServiceManager.createInstance("com.sun.star.awt.Toolkit")  # type: ignore
+    #         top_win = None
+    #         if tk:
+    #             top_win = tk.getActiveTopWindow()
+    #         msg_box = MessageDialog(ctx=self.ctx, parent=top_win, message=msg, title=title)  # type: ignore
+    #         _ = msg_box.execute()
+    #     except Exception as err:
+    #         self._logger.error(err, exc_info=True)
+
+    def _display_complete_dialog(self) -> None:
+        try:
+            from ___lo_pip___.dialog.count_down_dialog import CountDownDialog
+
+            title = self._resource_resolver.resolve_string("msg06")
+            msg = self._resource_resolver.resolve_string("msg07")
+            dlg = CountDownDialog(msg=msg, title=title, display_time=5)
+            dlg.start()
+        except Exception as err:
+            self._logger.error(err, exc_info=True)
 
     # region Destructor
     def __del__(self):
@@ -328,7 +470,7 @@ class ___lo_implementation_name___(unohelper.Base, XJob):
         try:
             from ___lo_pip___.install.install_pkg_local import InstallPkgLocal
 
-            installer = InstallPkgLocal()
+            installer = InstallPkgLocal(ctx=self.ctx)
             _ = installer.install()
         except Exception as err:
             self._logger.error(f"Unable to install local packages: {err}", exc_info=True)

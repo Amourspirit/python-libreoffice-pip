@@ -96,6 +96,15 @@
                     <desc>Url to used for testing internet connection</desc>
                 </info>
             </prop>
+            <prop oor:name="StartupEvent" oor:type="xs:string">
+                <info>
+                    <desc>
+                        The Startup event used to start extension.
+                        Set in tool.oxt.token.startup_event.
+                        OnStartApp or onFirstVisibleTask.
+                    </desc>
+                </info>
+            </prop>
         </group>
     </component>
 </oor:component-schema>

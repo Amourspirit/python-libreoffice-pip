@@ -4,6 +4,7 @@ from .term_proto import TermProto
 from .gnome_terminal import GnomeTerminal
 from .win_terminal import WindowsTerminal
 from .mac_terminal import MacTerminal
+from .progress_dialog import ProgressDialog
 from ...config import Config
 
 
@@ -60,6 +61,7 @@ class TermRules:
 
     def _register_known_rules(self):
         cfg = Config()
+        self.register_rule(rule=ProgressDialog)
         if cfg.is_win:
             self._reg_rule(rule=WindowsTerminal)
         elif cfg.is_linux:

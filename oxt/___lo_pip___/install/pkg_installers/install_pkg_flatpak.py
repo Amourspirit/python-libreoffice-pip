@@ -55,8 +55,9 @@ class InstallPkgFlatpak(InstallPkg):
         progress: Progress | None = None
         if self._config.show_progress and self.show_progress:
             # display a terminal window to show progress
+            title = self.resource_resolver.resolve_string("msg08")
             self._logger.debug("Starting Progress Window")
-            progress = Progress(start_msg=f"Installing: {pkg}", title=f"Installing: {pkg}")
+            progress = Progress(start_msg=f"{title}: {pkg}", title=f"{title}: {pkg}")
             progress.start()
         else:
             self._logger.debug("Progress Window is disabled")

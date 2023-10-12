@@ -5,12 +5,13 @@ from abc import abstractmethod
 import platform
 import subprocess
 from pathlib import Path
-from typing import List, Dict
+from typing import Any, List, Dict
 
 
 from ...config import Config
 from ...oxt_logger import OxtLogger
 from ..download import Download
+from ...lo_util.resource_resolver import ResourceResolver
 
 IS_WIN = platform.system() == "Windows"
 
@@ -27,12 +28,14 @@ else:
 class BaseInstaller:
     """class for the PIP install."""
 
-    def __init__(self) -> None:
+    def __init__(self, ctx: Any) -> None:
+        self.ctx = ctx
         cfg = Config()
         self._logger = self._get_logger()
         self.path_python = cfg.python_path
         self._logger.debug(f"Python path: {self.path_python}")
         self._download = Download()
+        self._resource_resolver = ResourceResolver(ctx=self.ctx)
 
     def _get_logger(self) -> OxtLogger:
         return OxtLogger(log_name=__name__)
@@ -162,3 +165,8 @@ class BaseInstaller:
     def is_internet(self) -> bool:
         """Gets if there is an internet connection."""
         return self._download.is_internet
+
+    @property
+    def resource_resolver(self) -> ResourceResolver:
+        """Gets the resource resolver."""
+        return self._resource_resolver

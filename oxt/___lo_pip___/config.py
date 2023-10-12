@@ -68,6 +68,7 @@ class Config(metaclass=Singleton):
             self._test_internet_url = generals_settings.test_internet_url
             self._log_pip_installs = generals_settings.log_pip_installs
             self._show_progress = generals_settings.show_progress
+            self._startup_event = generals_settings.startup_event
 
             self._session = Session()
             self._extension_info = ExtensionInfo()
@@ -491,6 +492,26 @@ class Config(metaclass=Singleton):
         Gets the flag indicating if the terminal should be shown.
         """
         return self._show_progress
+
+    @property
+    def startup_event(self) -> str:
+        """
+        Gets the startup event of the extension.
+
+        The value for this property can be set in pyproject.toml (tool.oxt.token.startup_event)
+        """
+        return self._startup_event
+
+    @property
+    def window_timeout(self) -> int:
+        """
+        Gets the window timeout value.
+
+        The value for this property can be set in pyproject.toml (tool.oxt.config.window_timeout)
+
+        This is the number of seconds to wait for the LibreOffice window to start before installing packages without requiring a LibreOffice window.
+        """
+        return self._basic_config.window_timeout
 
     # endregion Properties
 

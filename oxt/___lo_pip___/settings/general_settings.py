@@ -25,6 +25,7 @@ class GeneralSettings(metaclass=Singleton):
         self._platform = str(settings.current_settings.get("Platform", ""))
         self._log_pip_installs = bool(settings.current_settings.get("LogPipInstalls", False))
         self._show_progress = bool(settings.current_settings.get("ShowProgress", False))
+        self._startup_event = str(settings.current_settings.get("StartupEvent", ""))
 
     @property
     def log_pip_installs(self) -> bool:
@@ -72,6 +73,18 @@ class GeneralSettings(metaclass=Singleton):
     def show_progress(self) -> bool:
         """Gets the flag indicating if the terminal should be shown."""
         return self._show_progress
+
+    @property
+    def startup_event(self) -> str:
+        """
+        Gets the startup event of the extension.
+
+        The value for this property can be set in pyproject.toml (tool.oxt.token.startup_event)
+
+        Returns:
+            str: The startup event of the extension.
+        """
+        return self._startup_event
 
     @property
     def test_internet_url(self) -> str:
