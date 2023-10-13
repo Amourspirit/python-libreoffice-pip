@@ -43,7 +43,6 @@ delay_startup = true # determines if installing waits fo the window to load befo
 # https://python-poetry.org/docs/dependency-specification/
 typing-extensions = ">=4.7.0"
 verr = ">=1.1.2"
-ooo-dev-tools = ">=0.12.2"
 
 [tool.oxt.preinstall.pure]
 # verr = ">=1.1.2"
