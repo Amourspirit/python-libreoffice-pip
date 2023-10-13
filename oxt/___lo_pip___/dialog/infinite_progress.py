@@ -15,9 +15,8 @@ class InfiniteProgressDialog(RuntimeDialogBase):
     """
 
     MARGIN = 3
-    BUTTON_WIDTH = 80
-    BUTTON_HEIGHT = 26
-    HEIGHT = MARGIN * 3 + BUTTON_HEIGHT * 2
+    WORKING_HEIGHT = 40
+    HEIGHT = MARGIN * 3 + WORKING_HEIGHT * 2
     WIDTH = 400
 
     def __init__(self, ctx: Any, title: str, msg: str = "Please wait...", parent: Any = None):
@@ -96,7 +95,7 @@ class InfiniteProgress(threading.Thread):
                 self._ellipsis += 1
                 in_progress.dialog.setVisible(True)
                 in_progress.update(f"{self._msg}{'.' * self._ellipsis}")
-                if self._ellipsis > 10:
+                if self._ellipsis > 300:
                     self._ellipsis = 0
                 time.sleep(1)
         in_progress.dialog.dispose()

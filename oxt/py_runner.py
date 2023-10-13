@@ -125,17 +125,6 @@ class ___lo_implementation_name___(unohelper.Base, XJob):
                 self._logger.error(err, exc_info=True)
         self._requirements_check = RequirementsCheck()
 
-        # if self._delay_start:
-
-        #     def _on_window_opened(source: Any, event_args: EventArgs, *args, **kwargs) -> None:
-        #         self.on_window_opened(source=source, event_args=event_args, *args, **kwargs)
-
-        #     self._fn_on_window_opened = _on_window_opened
-
-        #     self._twl = TopWindowListener()
-        #     self._start_window_timer()
-        #     self._twl.on("windowOpened", _on_window_opened)
-
     # endregion Init
 
     def on_window_opened(self, source: Any, event_args: EventArgs, *args, **kwargs) -> None:
@@ -277,7 +266,24 @@ class ___lo_implementation_name___(unohelper.Base, XJob):
         self._real_execute(start_time=self._start_time, has_window=False)
 
     def _real_execute(self, start_time: float, has_window: bool = False) -> None:
+        if has_window:
+            # LibreOffice runs extension in parallel, so we need to wait in line
+            wait_count = 0
+            while os.environ.get("OOOPIP_RUNNER_WAIT_IN_LINE", ""):
+                wait_count += 1
+                if wait_count == 1:
+                    self._logger.info("Waiting in line. Other Installers are working...")
+                time.sleep(0.5)
+            if wait_count > 0:
+                # reset the time and don't include wait time.
+                start_time = time.time()
+                self._logger.info("Done waiting in line.")
+            else:
+                self._logger.debug("No other Installers are running. Starting...")
+
         try:
+            with self._thread_lock:
+                os.environ["OOOPIP_RUNNER_WAIT_IN_LINE"] = "1"
             if not TYPE_CHECKING:
                 # run time
                 self._logger.debug("Imported InstallPip")
@@ -317,6 +323,8 @@ class ___lo_implementation_name___(unohelper.Base, XJob):
                 self._logger.error(err)
         finally:
             # self._remove_local_path_from_sys_path()
+            with self._thread_lock:
+                del os.environ["OOOPIP_RUNNER_WAIT_IN_LINE"]
             self._remove_py_req_pkgs_from_sys_path()
             self._log_ex_time(start_time)
 
