@@ -96,6 +96,24 @@
                     <desc>Url to used for testing internet connection</desc>
                 </info>
             </prop>
+            <prop oor:name="StartupEvent" oor:type="xs:string">
+                <info>
+                    <desc>
+                        The Startup event used to start extension.
+                        Set in tool.oxt.token.startup_event.
+                        OnStartApp or onFirstVisibleTask.
+                    </desc>
+                </info>
+            </prop>
+            <prop oor:name="DelayStartup" oor:type="xs:boolean">
+                <info>
+                    <desc>
+                        Determins if Delayed startup is used before installing any pip packages.
+                        If set to true, then the extension will wait until a window is available before starting instalation.
+                        This has the advantage of allowing the user to see the progress of the installation via progress dialogs.
+                    </desc>
+                </info>
+            </prop>
         </group>
     </component>
 </oor:component-schema>

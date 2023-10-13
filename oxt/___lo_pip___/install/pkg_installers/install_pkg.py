@@ -14,6 +14,7 @@ from ...ver.rules.ver_rules import VerRules, VerProto
 from ...oxt_logger import OxtLogger
 from ..download import Download
 from ..progress import Progress
+from ...lo_util.resource_resolver import ResourceResolver
 
 
 # https://docs.python.org/3.8/library/importlib.metadata.html#module-importlib.metadata
@@ -31,10 +32,11 @@ else:
 class InstallPkg:
     """Install pip packages."""
 
-    def __init__(self, flag_upgrade: bool = True, **kwargs: Any) -> None:
+    def __init__(self, ctx: Any, flag_upgrade: bool = True, **kwargs: Any) -> None:
         """Constructor
 
         Args:
+            ctx (Any): The context.
             flag_upgrade (bool, optional): Specifies if the upgrade flag should be used. Defaults to True.
 
         Keyword Args:
@@ -43,12 +45,14 @@ class InstallPkg:
         Returns:
             None:
         """
+        self.ctx = ctx
         self._config = Config()
         self._path_python = Path(self._config.python_path)
         self._ver_rules = VerRules()
         self._logger = self._get_logger()
         self._flag_upgrade = flag_upgrade
         self._show_progress = bool(kwargs.get("show_progress", self._config.show_progress))
+        self._resource_resolver = ResourceResolver(ctx=self.ctx)
 
     def _get_logger(self) -> OxtLogger:
         return OxtLogger(log_name=__name__)
@@ -127,7 +131,11 @@ class InstallPkg:
         if self._config.show_progress and self.show_progress:
             # display a terminal window to show progress
             self._logger.debug("Starting Progress Window")
-            progress = Progress(start_msg=f"Installing: {pkg}", title=f"Installing: {pkg}")
+            msg = self.resource_resolver.resolve_string("msg08")
+            title = self.resource_resolver.resolve_string("title01")
+            if not title:
+                title = self.config.lo_implementation_name
+            progress = Progress(start_msg=f"{msg}: {pkg}", title=title)
             progress.start()
         else:
             self._logger.debug("Progress Window is disabled")
@@ -304,3 +312,8 @@ class InstallPkg:
     def show_progress(self, value: bool) -> None:
         """Sets if the progress window should be shown."""
         self._show_progress = value
+
+    @property
+    def resource_resolver(self) -> ResourceResolver:
+        """Gets the resource resolver."""
+        return self._resource_resolver

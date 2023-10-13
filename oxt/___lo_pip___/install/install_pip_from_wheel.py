@@ -1,4 +1,5 @@
 from __future__ import annotations
+from typing import Any
 import tempfile
 from pathlib import Path
 
@@ -12,7 +13,8 @@ from .install_pkg import InstallPkg
 class InstallPipFromWheel:
     """Download and install PIP from wheel url"""
 
-    def __init__(self) -> None:
+    def __init__(self, ctx: Any) -> None:
+        self.ctx = ctx
         self._config = Config()
         self._logger = OxtLogger(log_name=__name__)
 
@@ -88,7 +90,7 @@ class InstallPipFromWheel:
 
     def _force_install_pip(self) -> None:
         """Now that pip has been installed, force reinstall it to ensure it is the latest version"""
-        installer = InstallPkg()
+        installer = InstallPkg(ctx=self.ctx)
         ver = installer.get_package_version("pip")
         if ver:
             ver = f">={ver}"

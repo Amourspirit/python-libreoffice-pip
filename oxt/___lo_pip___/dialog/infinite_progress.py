@@ -11,13 +11,17 @@ if TYPE_CHECKING:
 
 
 class InfiniteProgressDialog(RuntimeDialogBase):
-    """Progress dialog."""
+    """
+    Progress dialog.
+
+    Be aware this dialog does not have a button.
+    """
 
     MARGIN = 3
     BUTTON_WIDTH = 80
     BUTTON_HEIGHT = 26
     HEIGHT = MARGIN * 3 + BUTTON_HEIGHT * 2
-    WIDTH = 300
+    WIDTH = 400
 
     def __init__(self, ctx: Any, title: str, msg: str = "Please wait...", parent: Any = None):
         super().__init__(ctx)
@@ -38,9 +42,9 @@ class InfiniteProgressDialog(RuntimeDialogBase):
             name="label",
             command="",
             pos=(margin, margin),
-            size=(self.WIDTH - margin * 2, self.BUTTON_HEIGHT),
-            prop_names=("Label",),
-            prop_values=(self._msg,),
+            size=(self.WIDTH - margin * 2, self.HEIGHT - (margin * 2)),
+            prop_names=("Label", "MultiLine"),
+            prop_values=(self._msg, True),
         )
         if self.parent:
             self.dialog.createPeer(self.parent.getToolkit(), self.parent)
@@ -81,23 +85,23 @@ class InfiniteProgress(threading.Thread):
         self._msg = msg
         self._ellipsis = 0
         self._stop_event = threading.Event()
+        self._lock = threading.Lock()
 
     def run(self):
         # use the setVisible method and not Execute.
         # This makes visible the dialog and makes it not modal.
-        in_progress = InfiniteProgressDialog(self._ctx, self._title)
         # in_progress.dialog.setVisible(True)
         # _ = in_progress.execute()
+        in_progress = InfiniteProgressDialog(self._ctx, self._title)
         while not self._stop_event.is_set():
-            # code for the process you want to run on the thread
-            # ...
-            # possibly sleep and update a label to show progress
-            self._ellipsis += 1
-            in_progress.dialog.setVisible(True)
-            in_progress.update(f"{self._msg}{'.' * self._ellipsis}")
-            if self._ellipsis > 10:
-                self._ellipsis = 1
-            time.sleep(1)
+            with self._lock:
+                # possibly sleep and update a label to show progress
+                self._ellipsis += 1
+                in_progress.dialog.setVisible(True)
+                in_progress.update(f"{self._msg}{'.' * self._ellipsis}")
+                if self._ellipsis > 10:
+                    self._ellipsis = 0
+                time.sleep(1)
         in_progress.dialog.dispose()
 
     def stop(self):

@@ -2,7 +2,7 @@ from __future__ import annotations
 import os
 
 import subprocess
-from typing import Dict
+from typing import Any, Dict
 from pathlib import Path
 from importlib.metadata import PackageNotFoundError, version
 
@@ -26,7 +26,8 @@ else:
 class InstallPkg:
     """Install pip packages."""
 
-    def __init__(self, flag_upgrade: bool = True) -> None:
+    def __init__(self, ctx: Any, flag_upgrade: bool = True) -> None:
+        self.ctx = ctx
         self._config = Config()
         self.path_python = Path(self._config.python_path)
         self.ver_rules = VerRules()
@@ -78,25 +79,25 @@ class InstallPkg:
     def _install_default(self, req: Dict[str, str] | None, force: bool) -> bool:
         from .pkg_installers.install_pkg import InstallPkg
 
-        installer = InstallPkg(flag_upgrade=self._flag_upgrade)
+        installer = InstallPkg(ctx=self.ctx, flag_upgrade=self._flag_upgrade)
         return installer.install(req=req, force=force)
 
     def _install_default_file(self, pth: str | Path, force: bool = False) -> bool:
         from .pkg_installers.install_pkg import InstallPkg
 
-        installer = InstallPkg(flag_upgrade=self._flag_upgrade)
+        installer = InstallPkg(ctx=self.ctx, flag_upgrade=self._flag_upgrade)
         return installer.install_file(pth=pth, force=force)
 
     def _install_flatpak(self, req: Dict[str, str] | None, force: bool) -> bool:
         from .pkg_installers.install_pkg_flatpak import InstallPkgFlatpak
 
-        installer = InstallPkgFlatpak(flag_upgrade=self._flag_upgrade)
+        installer = InstallPkgFlatpak(ctx=self.ctx, flag_upgrade=self._flag_upgrade)
         return installer.install(req=req, force=force)
 
     def _install_flatpak_file(self, pth: str | Path, force: bool = False) -> bool:
         from .pkg_installers.install_pkg_flatpak import InstallPkgFlatpak
 
-        installer = InstallPkgFlatpak(flag_upgrade=self._flag_upgrade)
+        installer = InstallPkgFlatpak(ctx=self.ctx, flag_upgrade=self._flag_upgrade)
         return installer.install_file(pth=pth, force=force)
 
     def get_package_version(self, package_name: str) -> str:

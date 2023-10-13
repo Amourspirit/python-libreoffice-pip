@@ -1,7 +1,7 @@
 """Install any local packages that are not already installed."""
 from __future__ import annotations
 from pathlib import Path
-from typing import List
+from typing import Any, List
 
 from .install_pkg import InstallPkg
 from ..config import Config
@@ -12,7 +12,8 @@ from ..settings.pip_settings import PipSettings
 class InstallPkgLocal:
     """Install local pip packages."""
 
-    def __init__(self) -> None:
+    def __init__(self, ctx: Any) -> None:
+        self.ctx = ctx
         self._config = Config()
         self._logger = OxtLogger(log_name=__name__)
 
@@ -45,7 +46,7 @@ class InstallPkgLocal:
             return False
 
         self._logger.debug(f"Found {len(local_pkgs)} Local packages to install")
-        installer = InstallPkg(flag_upgrade=False)
+        installer = InstallPkg(ctx=self.ctx, flag_upgrade=False)
         pi = PipSettings()
 
         installed_count = 0
