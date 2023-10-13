@@ -131,8 +131,11 @@ class InstallPkg:
         if self._config.show_progress and self.show_progress:
             # display a terminal window to show progress
             self._logger.debug("Starting Progress Window")
-            title = self.resource_resolver.resolve_string("msg08")
-            progress = Progress(start_msg=f"{title}: {pkg}", title=f"{title}: {pkg}")
+            msg = self.resource_resolver.resolve_string("msg08")
+            title = self.resource_resolver.resolve_string("title01")
+            if not title:
+                title = self.config.lo_implementation_name
+            progress = Progress(start_msg=f"{msg}: {pkg}", title=title)
             progress.start()
         else:
             self._logger.debug("Progress Window is disabled")

@@ -30,9 +30,9 @@ class BaseInstaller:
 
     def __init__(self, ctx: Any) -> None:
         self.ctx = ctx
-        cfg = Config()
+        self._config = Config()
         self._logger = self._get_logger()
-        self.path_python = cfg.python_path
+        self.path_python = self._config.python_path
         self._logger.debug(f"Python path: {self.path_python}")
         self._download = Download()
         self._resource_resolver = ResourceResolver(ctx=self.ctx)
@@ -45,8 +45,7 @@ class BaseInstaller:
         pass
 
     def _get_pip_cmd(self, filename: Path) -> List[str]:
-        cfg = Config()
-        if cfg.is_user_installed:
+        if self._config.is_user_installed:
             cmd = [str(self.path_python), f"{filename}", "--user"]
         else:
             cmd = [str(self.path_python), f"{filename}"]
@@ -170,3 +169,8 @@ class BaseInstaller:
     def resource_resolver(self) -> ResourceResolver:
         """Gets the resource resolver."""
         return self._resource_resolver
+
+    @property
+    def config(self) -> Config:
+        """Gets the config."""
+        return self._config

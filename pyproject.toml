@@ -35,7 +35,7 @@ log_level = "DEBUG" # NONE, DEBUG, INFO, WARNING, ERROR, CRITICAL
 log_format = "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
 lo_pip = "lo_pip"
 platform = "all"
-startup_event = "OnStartApp" # OnStartApp or onFirstVisibleTask
+startup_event = "onFirstVisibleTask" # OnStartApp or onFirstVisibleTask
 show_progress = true
 delay_startup = true # determines if installing waits fo the window to load before installing
 

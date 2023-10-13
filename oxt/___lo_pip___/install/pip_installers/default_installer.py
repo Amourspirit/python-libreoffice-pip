@@ -26,8 +26,11 @@ class DefaultInstaller(BaseInstaller):
         progress: Progress | None = None
         if cfg.show_progress:
             self._logger.debug("Starting Progress Window")
-            title = self.resource_resolver.resolve_string("msg08")
-            progress = Progress(start_msg=f"{title} PIP", title=f"PIP {title}")
+            msg = self.resource_resolver.resolve_string("msg08")
+            title = self.resource_resolver.resolve_string("title01")
+            if not title:
+                title = self.config.lo_implementation_name
+            progress = Progress(start_msg=f"{msg} PIP", title=title)
             progress.start()
         else:
             self._logger.debug("Progress Window is disabled")

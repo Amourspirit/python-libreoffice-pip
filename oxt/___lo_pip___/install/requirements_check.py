@@ -5,17 +5,10 @@ No Internet needed.
 """
 from __future__ import annotations
 
-import os
-import sys
-import subprocess
-from typing import Dict, List, Tuple
-
-
 from importlib.metadata import PackageNotFoundError, version
-from pathlib import Path
 
 from ..config import Config
-from ..ver.rules.ver_rules import VerRules, VerProto
+from ..ver.rules.ver_rules import VerRules
 from ..oxt_logger import OxtLogger
 from ..meta.singleton import Singleton
 

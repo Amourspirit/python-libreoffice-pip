@@ -63,14 +63,15 @@ class ___lo_implementation_name___(unohelper.Base, XJob):
 
     def __init__(self, ctx):
         self._this_pth = os.path.dirname(__file__)
+        self._error_msg = ""
         self._job_event_name = ""
         self._valid_job_event_names = {"onFirstVisibleTask", "OnStartApp"}
         self._path_added = False
         self._added_packaging = False
         self._start_timed_out = True
+        self._start_time = 0.0
         self._window_timer: threading.Timer | None = None
         self._thread_lock = threading.Lock()
-        self._execute_args: Tuple[Tuple[NamedValue, ...], ...] | None = None
         self._events = LoEvents()
         self._startup_monitor = StartupMonitor()  # start the singleton startup monitor
         # logger.debug("___lo_implementation_name___ Init")
@@ -124,16 +125,16 @@ class ___lo_implementation_name___(unohelper.Base, XJob):
                 self._logger.error(err, exc_info=True)
         self._requirements_check = RequirementsCheck()
 
-        if self._delay_start:
+        # if self._delay_start:
 
-            def _on_window_opened(source: Any, event_args: EventArgs, *args, **kwargs) -> None:
-                self.on_window_opened(source=source, event_args=event_args, *args, **kwargs)
+        #     def _on_window_opened(source: Any, event_args: EventArgs, *args, **kwargs) -> None:
+        #         self.on_window_opened(source=source, event_args=event_args, *args, **kwargs)
 
-            self._fn_on_window_opened = _on_window_opened
+        #     self._fn_on_window_opened = _on_window_opened
 
-            self._twl = TopWindowListener()
-            self._start_window_timer()
-            self._twl.on("windowOpened", _on_window_opened)
+        #     self._twl = TopWindowListener()
+        #     self._start_window_timer()
+        #     self._twl.on("windowOpened", _on_window_opened)
 
     # endregion Init
 
@@ -152,7 +153,13 @@ class ___lo_implementation_name___(unohelper.Base, XJob):
         self._twl = None
         self._fn_on_window_opened = None
         self._events.trigger(StartupNamedEvent.WINDOW_STARTED, EventArgs(self))
-        self._ex_thread = threading.Thread(target=self._real_execute, args=(True,))
+        if self._error_msg:
+            with contextlib.suppress(Exception):
+                self._display_message(
+                    msg=self._error_msg, title=self._config.lo_implementation_name, suppress_error=False
+                )
+            return
+        self._ex_thread = threading.Thread(target=self._real_execute, args=(self._start_time, True))
         self._ex_thread.start()
         # self._real_execute()
 
@@ -204,7 +211,7 @@ class ___lo_implementation_name___(unohelper.Base, XJob):
     # region execute
     def execute(self, *args: Tuple[NamedValue, ...]) -> None:
         # make sure our pythonpath is in sys.path
-        self._execute_args = args
+        self._start_time = time.time()
         self._logger.debug("___lo_implementation_name___ executing")
         try:
             self._job_event_name = self._get_event_name(args)
@@ -216,23 +223,11 @@ class ___lo_implementation_name___(unohelper.Base, XJob):
             self._logger.info(f"Valid job event names: {self._valid_job_event_names}")
             return
         self._logger.debug(f"Job event name: {self._job_event_name}")
-        if self._delay_start:
-            return
-        self._real_execute()
-
-    def _real_execute(self, has_window: bool = False) -> None:
-        start_time = time.time()
         try:
-            # from ___lo_pip___.dialog.infinite_progress import InfiniteProgress
-            # my_progress = InfiniteProgress(self.ctx)
-            # my_progress.start()
-            # time.sleep(10)
-            # my_progress.stop()
             self._add_py_pkgs_to_sys_path()
             self._add_py_req_pkgs_to_sys_path()
             self._add_pure_pkgs_to_sys_path()
             self._add_site_package_dir_to_sys_path()
-
             if self._config.log_level < 20:  # Less than INFO
                 self._show_extra_debug_info()
                 # self._config.extension_info.log_extensions(self._logger)
@@ -245,11 +240,6 @@ class ___lo_implementation_name___(unohelper.Base, XJob):
                 self._logger.debug("Requirements are met. Nothing more to do.")
                 return
 
-            if not TYPE_CHECKING:
-                # run time
-                self._logger.debug("Imported InstallPip")
-                from ___lo_pip___.install.install_pkg import InstallPkg
-
             if self._config.py_pkg_dir:
                 # add package zip file to the sys.path
                 pth = os.path.join(os.path.dirname(__file__), f"{self._config.py_pkg_dir}.zip")
@@ -257,9 +247,44 @@ class ___lo_implementation_name___(unohelper.Base, XJob):
                 if os.path.exists(pth) and os.path.isfile(pth) and os.path.getsize(pth) > 0 and pth not in sys.path:
                     self._logger.debug(f"sys.path appended: {pth}")
                     sys.path.append(pth)
-            # sys.path.insert(0, sys.path.pop(sys.path.index(pth)))
 
+            if not self.has_internet_connection:
+                self._logger.error("No internet connection")
+                with contextlib.suppress(Exception):
+                    self._error_msg = self.resource_resolver.resolve_string("msg07")
+
+            if self._delay_start:
+
+                def _on_window_opened(source: Any, event_args: EventArgs, *args, **kwargs) -> None:
+                    self.on_window_opened(source=source, event_args=event_args, *args, **kwargs)
+
+                self._fn_on_window_opened = _on_window_opened
+
+                self._twl = TopWindowListener()
+                self._start_window_timer()
+                self._twl.on("windowOpened", _on_window_opened)
+
+        except Exception as err:
+            if self._logger:
+                self._logger.error(err)
+            self._log_ex_time(self._start_time)
+            return
+        finally:
+            # self._remove_local_path_from_sys_path()
+            self._remove_py_req_pkgs_from_sys_path()
+        if self._delay_start:
+            return
+        self._real_execute(start_time=self._start_time, has_window=False)
+
+    def _real_execute(self, start_time: float, has_window: bool = False) -> None:
+        try:
+            if not TYPE_CHECKING:
+                # run time
+                self._logger.debug("Imported InstallPip")
+                from ___lo_pip___.install.install_pkg import InstallPkg
             pip_installer = InstallPip(self.ctx)
+            if not pip_installer.is_internet and has_window:
+                pass
             self._logger.debug("Created InstallPip instance")
             if pip_installer.is_pip_installed():
                 self._logger.info("Pip is already installed")
@@ -299,19 +324,21 @@ class ___lo_implementation_name___(unohelper.Base, XJob):
 
     # endregion execute
 
-    # def _display_message(self, msg: str, title: str = "Message") -> None:
-    #     try:
-    #         from ___lo_pip___.dialog.message_dialog import MessageDialog
+    def _display_message(self, msg: str, title: str = "Message", suppress_error: bool = False) -> None:
+        try:
+            from ___lo_pip___.dialog.message_dialog import MessageDialog
 
-    #         # ctx = uno.getComponentContext()
-    #         tk = self.ctx.ServiceManager.createInstance("com.sun.star.awt.Toolkit")  # type: ignore
-    #         top_win = None
-    #         if tk:
-    #             top_win = tk.getActiveTopWindow()
-    #         msg_box = MessageDialog(ctx=self.ctx, parent=top_win, message=msg, title=title)  # type: ignore
-    #         _ = msg_box.execute()
-    #     except Exception as err:
-    #         self._logger.error(err, exc_info=True)
+            ctx = uno.getComponentContext()
+
+            tk = ctx.ServiceManager.createInstance("com.sun.star.awt.Toolkit")  # type: ignore
+            top_win = None
+            if tk:
+                top_win = tk.getTopWindow(0)
+            msg_box = MessageDialog(ctx=self.ctx, parent=top_win, message=msg, title=title)  # type: ignore
+            _ = msg_box.execute()
+        except Exception as err:
+            if not suppress_error:
+                self._logger.error(err, exc_info=True)
 
     def _display_complete_dialog(self) -> None:
         if not self._config.show_progress:
@@ -319,8 +346,10 @@ class ___lo_implementation_name___(unohelper.Base, XJob):
         try:
             from ___lo_pip___.dialog.count_down_dialog import CountDownDialog
 
-            title = self.resource_resolver.resolve_string("msg06")
-            msg = self.resource_resolver.resolve_string("msg07")
+            msg = self.resource_resolver.resolve_string("msg06")
+            title = self.resource_resolver.resolve_string("title01")
+            if not title:
+                title = self._config.lo_implementation_name
             dlg = CountDownDialog(msg=msg, title=title, display_time=5)
             dlg.start()
         except Exception as err:
@@ -524,6 +553,16 @@ class ___lo_implementation_name___(unohelper.Base, XJob):
 
             self._resource_resolver = ResourceResolver(self.ctx)
         return self._resource_resolver
+
+    @property
+    def has_internet_connection(self) -> bool:
+        try:
+            return self._has_internet_connection
+        except AttributeError:
+            from ___lo_pip___.install.download import Download
+
+            self._has_internet_connection = Download().is_internet
+        return self._has_internet_connection
 
     # endregion Properties
 
