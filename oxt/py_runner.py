@@ -155,9 +155,10 @@ class ___lo_implementation_name___(unohelper.Base, XJob):
         self._events.trigger(StartupNamedEvent.WINDOW_STARTED, EventArgs(self))
         if self._error_msg:
             with contextlib.suppress(Exception):
-                self._display_message(
-                    msg=self._error_msg, title=self._config.lo_implementation_name, suppress_error=False
-                )
+                title = self.resource_resolver.resolve_string("title01")
+                if not title:
+                    title = self._config.lo_implementation_name
+                self._display_message(msg=self._error_msg, title=title, suppress_error=False)
             return
         self._ex_thread = threading.Thread(target=self._real_execute, args=(self._start_time, True))
         self._ex_thread.start()
