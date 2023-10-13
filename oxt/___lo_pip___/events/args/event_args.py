@@ -140,8 +140,8 @@ class EventArgs(AbstractEvent):
         Returns:
             EventArgs: args
         """
-        eargs = EventArgs(source=args.source)
-        eargs._event_name = args.event_name
-        eargs._event_source = args.event_source
-        eargs.event_data = args.event_data
-        return eargs
+        event_args = EventArgs(source=args.source)
+        event_args._event_name = args.event_name
+        event_args._event_source = args.event_source
+        event_args.event_data = args.event_data
+        return event_args

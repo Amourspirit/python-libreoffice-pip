@@ -13,7 +13,7 @@ from ..config import Config
 
 
 class Download(metaclass=Singleton):
-    """Download file from url"""
+    """Singleton class. Download file from url"""
 
     def __init__(self) -> None:
         self._logger = OxtLogger(log_name=__name__)

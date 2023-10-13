@@ -42,6 +42,7 @@ class ButtonListener(unohelper.Base, XActionListener):
         pass
 
     def actionPerformed(self, ev: Any):
+        # sourcery skip: extract-method
         self._logger.debug("ButtonListener.actionPerformed")
         try:
             cmd = str(ev.ActionCommand)

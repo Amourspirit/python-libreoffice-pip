@@ -21,7 +21,7 @@ class PrePackages(metaclass=Singleton):
 
     def _check_dict_values_are_strings(self, d: Dict[str, str]) -> None:
         """Check that all the values in the list are strings."""
-        for _, value in d.items():
+        for value in d.values():
             if not isinstance(value, str):
                 raise ValueError(f"item '{value}' is not a string")
 

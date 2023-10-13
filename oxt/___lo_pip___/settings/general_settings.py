@@ -1,10 +1,8 @@
 from __future__ import annotations
-from typing import cast, Tuple
 
 from .settings import Settings
 from ..meta.singleton import Singleton
 from ..lo_util.configuration import Configuration
-from ..config import Config
 
 
 class GeneralSettings(metaclass=Singleton):
@@ -25,6 +23,16 @@ class GeneralSettings(metaclass=Singleton):
         self._platform = str(settings.current_settings.get("Platform", ""))
         self._log_pip_installs = bool(settings.current_settings.get("LogPipInstalls", False))
         self._show_progress = bool(settings.current_settings.get("ShowProgress", False))
+        self._startup_event = str(settings.current_settings.get("StartupEvent", ""))
+        self._delay_startup = bool(settings.current_settings.get("DelayStartup", True))
+
+    # region Properties
+    @property
+    def delay_startup(self) -> bool:
+        """
+        Gets the flag indicating if the startup should be delayed.
+        """
+        return self._delay_startup
 
     @property
     def log_pip_installs(self) -> bool:
@@ -74,6 +82,18 @@ class GeneralSettings(metaclass=Singleton):
         return self._show_progress
 
     @property
+    def startup_event(self) -> str:
+        """
+        Gets the startup event of the extension.
+
+        The value for this property can be set in pyproject.toml (tool.oxt.token.startup_event)
+
+        Returns:
+            str: The startup event of the extension.
+        """
+        return self._startup_event
+
+    @property
     def test_internet_url(self) -> str:
         """
         String path such as ``https://www.google.com``
@@ -81,3 +101,5 @@ class GeneralSettings(metaclass=Singleton):
         The value for this property can be set in pyproject.toml (tool.oxt.token.test_internet_url)
         """
         return self._test_internet_url
+
+    # endregion Properties

@@ -13,6 +13,7 @@ class Token(metaclass=Singleton):
         cfg = toml.load(toml_path)
 
         tokens = cast(Dict[str, str], cfg["tool"]["oxt"]["token"])
+        self._validate_toml_dict(tokens)
         self._tokens: Dict[str, str] = {}
         for token, replacement in tokens.items():
             self._tokens[f"___{token}___"] = replacement
@@ -28,47 +29,74 @@ class Token(metaclass=Singleton):
         for token, replacement in self._tokens.items():
             self._tokens[token] = self.process(replacement)
         self._tokens_remove_whitespace()
-        self._validate()
 
     # region Methods
-    def _validate(self) -> None:
-        keys = {
-            "lo_identifier",
-            "lo_implementation_name",
-            "display_name_en_us",
-            "description_en_us",
-            "publisher_en_us",
-            "url_pip",
-            "log_format",
-            "lo_pip",
-            "platform",
+    def _validate_toml_dict(self, cfg: Dict[str, Any]) -> None:
+        # sourcery skip: extract-method
+        key_types = {
+            "lo_identifier": str,
+            "lo_implementation_name": str,
+            "display_name_en_us": str,
+            "description_en_us": str,
+            "publisher_en_us": str,
+            "url_pip": str,
+            "log_format": str,
+            "lo_pip": str,
+            "platform": str,
+            "startup_event": str,
+            "log_level": str,
+            "show_progress": bool,
+            "delay_startup": bool,
+            "log_pip_installs": bool,
         }
-        for key in keys:
-            str_key = f"___{key}___"
-            if str_key not in self._tokens:
-                raise ValueError(f"Token '{key}' not found")
-            if not self._tokens[str_key]:
-                raise ValueError(f"Token '{key}' is empty")
-        if "___log_level___" not in self._tokens:
-            raise ValueError("Token 'log_level' not found")
+        for key, value in key_types.items():
+            if key not in cfg:
+                raise ValueError(f"Key '{key}' not found")
+            if not isinstance(cfg[key], value):
+                raise ValueError(f"Key '{key}' must be {value.__name__}, got: {type(cfg[key]).__name__}")
+            if value is str and not cfg[key]:
+                raise ValueError(f"Key '{key}' is empty")
+
+        allow_empty_key_types = {
+            "pip_wheel_url": str,
+            "test_internet_url": str,
+        }
+        for key, value in allow_empty_key_types.items():
+            if key not in cfg:
+                raise ValueError(f"Key '{key}' not found")
+            if not isinstance(cfg[key], value):
+                raise ValueError(f"Key '{key}' must be {value.__name__}, got: {type(cfg[key]).__name__}")
+
         levels = {"none", "debug", "info", "warning", "error", "critical"}
-        if self._tokens["___log_level___"].lower() not in levels:
-            raise ValueError(f"Token 'log_level' is invalid: {self._tokens['___log_level___']}")
-        lo_identifier = self.get_token_value("lo_identifier")
+        value = str(cfg.get("log_level", "")).lower()
+        if value not in levels:
+            raise ValueError(f"Token 'log_level' is invalid: {value}")
+
+        lo_identifier = str(cfg.get("lo_identifier", ""))
         if lo_identifier != "org.openoffice.extensions.ooopip":
-            if self.get_token_value("lo_implementation_name") == "OooPipRunner":
+            value = str(cfg.get("lo_implementation_name", ""))
+            if value == "OooPipRunner":
                 raise ValueError(
                     "Token 'lo_implementation_name' value is invalid and must be renamed in tool.oxt.token in pyproject.toml. Every project must have unique lo_implementation_name value."
                 )
-            if self.get_token_value("lo_pip") == "lo_pip":
+
+            value = str(cfg.get("lo_pip", ""))
+            if value == "lo_pip":
                 raise ValueError(
                     "Token 'lo_pip' value is invalid and must be renamed in tool.oxt.token in pyproject.toml. Every project must have unique lo_pip value."
                 )
-            log_file = self.get_token_value("log_file")
-            if log_file == "pip_install.log":
+            value = str(cfg.get("log_file", ""))
+            if value == "pip_install.log":
                 raise ValueError(
                     "Token 'log_file' value is invalid and must be renamed in tool.oxt.token in pyproject.toml. Every project must have unique log_file value or set to empty string for no logging."
                 )
+
+        value = str(cfg.get("startup_event", ""))
+        if value not in {"onFirstVisibleTask", "OnStartApp"}:
+            raise ValueError(
+                f"Token 'startup_event' value is invalid: {value}. Valid values are: '', 'onFirstVisibleTask', 'OnStartApp'."
+            )
+        # show_progress
 
     def _tokens_remove_whitespace(self) -> None:
         """Cleans the tokens."""
@@ -99,7 +127,7 @@ class Token(metaclass=Singleton):
 
         return value
 
-    def get_token_value(self, token: str) -> str:
+    def get_token_value(self, token: str) -> Any:
         """
         Returns the value of the given token.
 
@@ -111,9 +139,7 @@ class Token(metaclass=Singleton):
     def _get_authors(self, cfg: Dict[str, Any]) -> List[str]:
         """Returns the authors."""
         authors = cast(List[str], cfg["tool"]["poetry"]["authors"])
-        results: List[str] = []
-        for author in authors:
-            results.append(author.split("<")[0].strip())
+        results: List[str] = [author.split("<")[0].strip() for author in authors]
         return results
 
     # endregion Methods

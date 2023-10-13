@@ -25,8 +25,11 @@ class NameInput(RuntimeDialogBase):
         self.title = title
         self.default = default
         self.parent = parent
+        self._is_init = False
 
     def _init(self):
+        if self._is_init:
+            return
         margin = self.MARGIN
         self.create_dialog(self.title, size=(self.WIDTH, self.HEIGHT))
         self.create_edit(
@@ -58,6 +61,7 @@ class NameInput(RuntimeDialogBase):
         if self.default:
             edit_ctl = cast("UnoControlEdit", self.get(self.EDIT_NAME))
             edit_ctl.setSelection(Selection(0, len(self.default)))
+        self._is_init = True
 
     def _result(self):
         return self.get_text("edit_name")

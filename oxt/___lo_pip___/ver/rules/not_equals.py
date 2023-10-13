@@ -44,18 +44,14 @@ class NotEquals(VerRuleBase):
             return False
         try:
             versions = self.get_versions()
-            if len(versions) == 1:
-                return True
-            return False
+            return len(versions) == 1
         except Exception:
             return False
 
     def get_versions(self) -> List[ReqVersion]:
         """Get the list of versions. In this case it will be a single version, unless vstr is invalid in which case it will be an empty list."""
         ver = self.vstr[2:].strip()
-        if ver == "":
-            return []
-        return [ReqVersion(f"!={ver}")]
+        return [] if ver == "" else [ReqVersion(f"!={ver}")]
 
     def get_versions_str(self) -> str:
         """
@@ -66,9 +62,7 @@ class NotEquals(VerRuleBase):
             str: The version as a string or an empty string if the version is invalid.
         """
         versions = self.get_versions()
-        if len(versions) == 1:
-            return versions[0].get_pip_ver_str()
-        return ""
+        return versions[0].get_pip_ver_str() if len(versions) == 1 else ""
 
     def get_version_is_valid(self, check_version: str) -> int:
         """
@@ -87,11 +81,7 @@ class NotEquals(VerRuleBase):
             if len(versions) != 1:
                 return -2
             v1 = versions[0]
-            if check_ver == v1:
-                return 2
-            else:
-                # less than
-                return 0
+            return 2 if check_ver == v1 else 0
         except Exception:
             return -2
 

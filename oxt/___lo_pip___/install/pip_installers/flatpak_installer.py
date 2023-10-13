@@ -39,11 +39,15 @@ class FlatpakInstaller(BaseInstaller):
         result = False
         from ..install_pip_from_wheel import InstallPipFromWheel
 
-        installer = InstallPipFromWheel()
+        installer = InstallPipFromWheel(ctx=self.ctx)
         progress: Progress | None = None
         if cfg.show_progress:
             self._logger.debug("Starting Progress Window")
-            progress = Progress(start_msg="Installing PIP", title="PIP Installing")
+            msg = self.resource_resolver.resolve_string("msg08")
+            title = self.resource_resolver.resolve_string("title01")
+            if not title:
+                title = self.config.lo_implementation_name
+            progress = Progress(start_msg=f"{msg} PIP", title=title)
             progress.start()
         else:
             self._logger.debug("Progress Window is disabled")

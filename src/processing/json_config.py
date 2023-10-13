@@ -13,7 +13,6 @@ class JsonConfig(metaclass=Singleton):
     """Singleton Class the Config Json."""
 
     def __init__(self) -> None:
-        token = Token()
         self._config = Config()
         cfg = toml.load(self._config.toml_path)
         self._requirements = cast(Dict[str, str], cfg["tool"]["oxt"]["requirements"])
@@ -31,6 +30,10 @@ class JsonConfig(metaclass=Singleton):
             self._install_wheel = cast(bool, cfg["tool"]["oxt"]["config"]["install_wheel"])
         except Exception:
             self._install_wheel = False
+        try:
+            self._window_timeout = int(cfg["tool"]["oxt"]["config"]["window_timeout"])
+        except Exception:
+            self._window_timeout = 5
 
     def update_json_config(self, json_config_path: Path) -> None:
         """Read and updates the config.json file."""
@@ -44,6 +47,7 @@ class JsonConfig(metaclass=Singleton):
         json_config["zipped_preinstall_pure"] = self._zip_preinstall_pure
         json_config["auto_install_in_site_packages"] = self._auto_install_in_site_packages
         json_config["install_wheel"] = self._install_wheel
+        json_config["window_timeout"] = self._window_timeout
         # json_config["log_pip_installs"] = self._log_pip_installs
         # update the requirements
         json_config["requirements"] = self._requirements

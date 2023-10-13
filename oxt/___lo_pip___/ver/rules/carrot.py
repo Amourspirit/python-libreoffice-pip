@@ -26,9 +26,7 @@ class Carrot(VerRuleBase):
             return False
         try:
             versions = self.get_versions()
-            if len(versions) == 2:
-                return True
-            return False
+            return len(versions) == 2
         except Exception:
             return False
 
@@ -69,9 +67,7 @@ class Carrot(VerRuleBase):
             v2 = versions[1]
             if check_ver >= v1 and check_ver < v2:
                 return 0
-            if check_ver < v1:
-                return -1
-            return 1
+            return -1 if check_ver < v1 else 1
         except Exception:
             return -2
 

@@ -2,7 +2,7 @@ from __future__ import annotations
 import os
 import sys
 import subprocess
-from typing import Dict
+from typing import Any, Dict
 
 from ..config import Config
 from ..oxt_logger import OxtLogger
@@ -14,7 +14,8 @@ from .pip_installers.base_installer import STARTUP_INFO
 class InstallPip:
     """class for the PIP install."""
 
-    def __init__(self) -> None:
+    def __init__(self, ctx: Any) -> None:
+        self.ctx = ctx
         self._config = Config()
         self._logger = OxtLogger(log_name=__name__)
         self._download = Download()
@@ -30,13 +31,13 @@ class InstallPip:
     def _install_default(self) -> None:
         from .pip_installers.default_installer import DefaultInstaller
 
-        installer = DefaultInstaller()
+        installer = DefaultInstaller(ctx=self.ctx)
         installer.install_pip()
 
     def _install_flatpak(self) -> None:
         from .pip_installers.flatpak_installer import FlatpakInstaller
 
-        installer = FlatpakInstaller()
+        installer = FlatpakInstaller(ctx=self.ctx)
         installer.install_pip()
 
     def _get_env(self) -> Dict[str, str]:

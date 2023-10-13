@@ -44,25 +44,19 @@ class Lesser(VerRuleBase):
             return False
         try:
             versions = self.get_versions()
-            if len(versions) == 1:
-                return True
-            return False
+            return len(versions) == 1
         except Exception:
             return False
 
     def get_versions(self) -> List[ReqVersion]:
         """Get the list of versions. In this case it will be a single version, unless vstr is invalid in which case it will be an empty list."""
         ver = self.vstr[1:].strip()
-        if ver == "":
-            return []
-        return [ReqVersion(f"<{ver}")]
+        return [] if ver == "" else [ReqVersion(f"<{ver}")]
 
     def get_versions_str(self) -> str:
         """Get the list of versions as strings."""
         versions = self.get_versions()
-        if len(versions) == 1:
-            return versions[0].get_pip_ver_str()
-        return ""
+        return versions[0].get_pip_ver_str() if len(versions) == 1 else ""
 
     def get_version_is_valid(self, check_version: str) -> int:
         """
