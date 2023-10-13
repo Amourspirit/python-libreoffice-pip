@@ -20,6 +20,7 @@ if TYPE_CHECKING:
     from ___lo_pip___.install.requirements_check import RequirementsCheck
     from com.sun.star.beans import NamedValue
     from com.sun.star.lang import EventObject
+    from ___lo_pip___.lo_util.resource_resolver import ResourceResolver
 else:
     RegisterPathKind = object
     UnRegisterPathKind = object
@@ -43,7 +44,6 @@ from ___lo_pip___.events.lo_events import LoEvents
 from ___lo_pip___.events.args.event_args import EventArgs
 from ___lo_pip___.events.startup.startup_monitor import StartupMonitor
 from ___lo_pip___.events.named_events.startup_events import StartupNamedEvent
-from ___lo_pip___.lo_util.resource_resolver import ResourceResolver
 
 # endregion imports
 
@@ -67,7 +67,6 @@ class ___lo_implementation_name___(unohelper.Base, XJob):
         self._valid_job_event_names = {"onFirstVisibleTask", "OnStartApp"}
         self._path_added = False
         self._added_packaging = False
-        self._delay_start = True
         self._start_timed_out = True
         self._window_timer: threading.Timer | None = None
         self._thread_lock = threading.Lock()
@@ -77,7 +76,7 @@ class ___lo_implementation_name___(unohelper.Base, XJob):
         # logger.debug("___lo_implementation_name___ Init")
         self.ctx = ctx
         self._user_path = ""
-        self._resource_resolver = ResourceResolver(self.ctx)
+        self._resource_resolver: ResourceResolver | None = None
         with contextlib.suppress(Exception):
             user_path = self._get_user_profile_path(True, self.ctx)
             # logger.debug(f"Init: user_path: {user_path}")
@@ -95,6 +94,7 @@ class ___lo_implementation_name___(unohelper.Base, XJob):
             UnRegisterPathKind = InitUnRegisterPathKind
 
         self._config = Config()
+        self._delay_start = self._config.delay_startup
         self._logger = self._get_local_logger()
 
         self._util = Util()
@@ -314,11 +314,13 @@ class ___lo_implementation_name___(unohelper.Base, XJob):
     #         self._logger.error(err, exc_info=True)
 
     def _display_complete_dialog(self) -> None:
+        if not self._config.show_progress:
+            return
         try:
             from ___lo_pip___.dialog.count_down_dialog import CountDownDialog
 
-            title = self._resource_resolver.resolve_string("msg06")
-            msg = self._resource_resolver.resolve_string("msg07")
+            title = self.resource_resolver.resolve_string("msg06")
+            msg = self.resource_resolver.resolve_string("msg07")
             dlg = CountDownDialog(msg=msg, title=title, display_time=5)
             dlg.start()
         except Exception as err:
@@ -347,7 +349,7 @@ class ___lo_implementation_name___(unohelper.Base, XJob):
         try:
             from ___lo_pip___.install.extras.install_wheel import InstallWheel
 
-            installer = InstallWheel()
+            installer = InstallWheel(ctx=self.ctx)
             installer.install()
         except Exception as err:
             self._logger.error(f"Unable to install wheel: {err}", exc_info=True)
@@ -513,6 +515,17 @@ class ___lo_implementation_name___(unohelper.Base, XJob):
         self._logger.debug(f"Util.config - BasePathShareLayer: {self._util.config('BasePathShareLayer')}")
 
     # endregion Debug
+
+    # region Properties
+    @property
+    def resource_resolver(self) -> ResourceResolver:
+        if self._resource_resolver is None:
+            from ___lo_pip___.lo_util.resource_resolver import ResourceResolver
+
+            self._resource_resolver = ResourceResolver(self.ctx)
+        return self._resource_resolver
+
+    # endregion Properties
 
 
 # endregion XJob

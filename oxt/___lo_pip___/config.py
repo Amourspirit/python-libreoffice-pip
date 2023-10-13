@@ -69,6 +69,7 @@ class Config(metaclass=Singleton):
             self._log_pip_installs = generals_settings.log_pip_installs
             self._show_progress = generals_settings.show_progress
             self._startup_event = generals_settings.startup_event
+            self._delay_startup = generals_settings.delay_startup
 
             self._session = Session()
             self._extension_info = ExtensionInfo()
@@ -206,6 +207,13 @@ class Config(metaclass=Singleton):
         Gets the basic config.
         """
         return self._basic_config
+
+    @property
+    def delay_startup(self) -> bool:
+        """
+        Gets the flag indicating if the startup should be delayed.
+        """
+        return self._delay_startup
 
     @property
     def url_pip(self) -> str:
