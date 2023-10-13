@@ -155,9 +155,7 @@ class ___lo_implementation_name___(unohelper.Base, XJob):
         self._events.trigger(StartupNamedEvent.WINDOW_STARTED, EventArgs(self))
         if self._error_msg:
             with contextlib.suppress(Exception):
-                title = self.resource_resolver.resolve_string("title01")
-                if not title:
-                    title = self._config.lo_implementation_name
+                title = self.resource_resolver.resolve_string("title01") or self._config.lo_implementation_name
                 self._display_message(msg=self._error_msg, title=title, suppress_error=False)
             return
         self._ex_thread = threading.Thread(target=self._real_execute, args=(self._start_time, True))
@@ -239,6 +237,7 @@ class ___lo_implementation_name___(unohelper.Base, XJob):
 
             if requirements_met:
                 self._logger.debug("Requirements are met. Nothing more to do.")
+                self._log_ex_time(self._start_time)
                 return
 
             if self._config.py_pkg_dir:
@@ -284,8 +283,6 @@ class ___lo_implementation_name___(unohelper.Base, XJob):
                 self._logger.debug("Imported InstallPip")
                 from ___lo_pip___.install.install_pkg import InstallPkg
             pip_installer = InstallPip(self.ctx)
-            if not pip_installer.is_internet and has_window:
-                pass
             self._logger.debug("Created InstallPip instance")
             if pip_installer.is_pip_installed():
                 self._logger.info("Pip is already installed")
@@ -331,10 +328,10 @@ class ___lo_implementation_name___(unohelper.Base, XJob):
 
             ctx = uno.getComponentContext()
 
-            tk = ctx.ServiceManager.createInstance("com.sun.star.awt.Toolkit")  # type: ignore
-            top_win = None
-            if tk:
+            if tk := ctx.ServiceManager.createInstance("com.sun.star.awt.Toolkit"):  # type: ignore
                 top_win = tk.getTopWindow(0)
+            else:
+                top_win = None
             msg_box = MessageDialog(ctx=self.ctx, parent=top_win, message=msg, title=title)  # type: ignore
             _ = msg_box.execute()
         except Exception as err:
@@ -348,9 +345,7 @@ class ___lo_implementation_name___(unohelper.Base, XJob):
             from ___lo_pip___.dialog.count_down_dialog import CountDownDialog
 
             msg = self.resource_resolver.resolve_string("msg06")
-            title = self.resource_resolver.resolve_string("title01")
-            if not title:
-                title = self._config.lo_implementation_name
+            title = self.resource_resolver.resolve_string("title01") or self._config.lo_implementation_name
             dlg = CountDownDialog(msg=msg, title=title, display_time=5)
             dlg.start()
         except Exception as err:
@@ -358,10 +353,8 @@ class ___lo_implementation_name___(unohelper.Base, XJob):
 
     # region Destructor
     def __del__(self):
-        if self._added_packaging:
-            if "packaging" in sys.modules:
-                # clean up by removing the packaging module from sys.modules
-                del sys.modules["packaging"]
+        if self._added_packaging and "packaging" in sys.modules:
+            del sys.modules["packaging"]
         if "___lo_pip___" in sys.modules:
             # clean up by removing the ___lo_pip___ module from sys.modules
             # module still can be imported if needed.
@@ -400,7 +393,7 @@ class ___lo_implementation_name___(unohelper.Base, XJob):
     def _add_pure_pkgs_to_sys_path(self) -> None:
         pth = Path(os.path.dirname(__file__), "pure.zip")
         if not pth.exists():
-            self._logger.debug(f"pure.zip not found.")
+            self._logger.debug("pure.zip not found.")
             return
         result = self._session.register_path(pth, True)
         self._log_sys_path_register_result(pth, result)

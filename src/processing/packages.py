@@ -31,6 +31,7 @@ class Packages(metaclass=Singleton):
 
     def _get_package_names(self) -> Set[str]:
         """Gets the Package Names."""
+        # sourcery skip: class-extract-method
         cfg = toml.load(self._config.toml_path)
         lst = cast(List[str], cfg["tool"]["oxt"]["config"]["py_pkg_names"])
         if not isinstance(lst, list):
@@ -71,11 +72,7 @@ class Packages(metaclass=Singleton):
         """Copies the packages to the build directory."""
         if not self._pkg_names:
             return
-        if isinstance(dst, str):
-            dest = Path(dst)
-        else:
-            dest = dst
-
+        dest = Path(dst) if isinstance(dst, str) else dst
         if not dest.exists():
             dest.mkdir(parents=True)
 
@@ -86,11 +83,7 @@ class Packages(metaclass=Singleton):
         """Copies the files to the build directory."""
         if not self._pkg_files:
             return
-        if isinstance(dst, str):
-            dest = Path(dst)
-        else:
-            dest = dst
-
+        dest = Path(dst) if isinstance(dst, str) else dst
         if not dest.exists():
             dest.mkdir(parents=True)
 

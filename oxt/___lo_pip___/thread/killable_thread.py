@@ -58,15 +58,11 @@ class KillableThread(threading.Thread):
         self.run = self.__run_backup
 
     def global_trace(self, frame: Any, event: str, arg: Any) -> Optional[Union[Callable, None]]:  # type: ignore[override] # pylint: disable=line-too-long
-        if event == "call":
-            return self.local_trace
-        else:
-            return None
+        return self.local_trace if event == "call" else None
 
     def local_trace(self, frame: Any, event: str, arg: Any) -> Optional[Union[Callable, None]]:
-        if self.killed:
-            if event == "line":
-                raise SystemExit()
+        if event == "line" and self.killed:
+            raise SystemExit()
         return self.local_trace
 
     def kill(self) -> None:

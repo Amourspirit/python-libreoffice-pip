@@ -1,13 +1,10 @@
 from __future__ import annotations
-from typing import Any, cast, TYPE_CHECKING
+from typing import Any
 import threading
 import time
 import uno
 
 from .run_time_dialog_base import RuntimeDialogBase
-
-if TYPE_CHECKING:
-    from com.sun.star.awt import UnoControlEdit  # service
 
 
 class InfiniteProgressDialog(RuntimeDialogBase):

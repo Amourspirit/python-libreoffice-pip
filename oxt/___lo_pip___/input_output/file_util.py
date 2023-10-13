@@ -61,22 +61,18 @@ def find_files_matching_patterns(root_dir: str | Path, ext: Iterable[str]) -> Li
     Returns:
         List[str]: A list of absolute file paths.
     """
-    if isinstance(root_dir, str):
-        root_path = Path(root_dir)
-    else:
-        root_path = root_dir
+    root_path = Path(root_dir) if isinstance(root_dir, str) else root_dir
     if not root_path.exists():
         raise FileNotFoundError(f"Directory '{root_dir}' not found")
     if not ext:
         return []
 
-    file_paths = []
-    extensions = set([f".{e.lower()}" for e in ext])
-    for file_path in root_path.glob("**/*"):
-        if file_path.is_file() and (file_path.suffix in extensions):
-            file_paths.append(str(file_path.absolute()))
-
-    return file_paths
+    extensions = {f".{e.lower()}" for e in ext}
+    return [
+        str(file_path.absolute())
+        for file_path in root_path.glob("**/*")
+        if file_path.is_file() and (file_path.suffix in extensions)
+    ]
 
 
 def read_file(file_path: str, encoding="UTF-8") -> str:

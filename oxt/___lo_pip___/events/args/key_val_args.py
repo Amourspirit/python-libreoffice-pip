@@ -45,9 +45,9 @@ class KeyValArgs(AbstractKeyValArgs):
         Returns:
             KeyValArgs: args
         """
-        eargs = KeyValArgs(source=args.source, key=args.key, value=args.value)
-        eargs.default = args.default
-        eargs._event_name = args.event_name
-        eargs._event_source = args.event_source
-        eargs.event_data = args.event_data
-        return eargs
+        event_args = KeyValArgs(source=args.source, key=args.key, value=args.value)
+        event_args.default = args.default
+        event_args._event_name = args.event_name
+        event_args._event_source = args.event_source
+        event_args.event_data = args.event_data
+        return event_args

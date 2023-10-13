@@ -1,11 +1,7 @@
 from __future__ import annotations
-from typing import Any, cast, TYPE_CHECKING
-
+from typing import Any, TYPE_CHECKING
 
 from .run_time_dialog_base import RuntimeDialogBase
-
-if TYPE_CHECKING:
-    from com.sun.star.awt import UnoControlEdit  # service
 
 
 class TempDialog(RuntimeDialogBase):

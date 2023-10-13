@@ -135,6 +135,7 @@ class VerRules:
         Returns:
             bool: True if the installed version is valid, False otherwise.
         """
+        # sourcery skip: class-extract-method
         rules = self.get_matched_rules(vstr)
         is_valid = True
         for rule in rules:

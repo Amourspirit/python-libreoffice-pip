@@ -32,6 +32,7 @@ class Token(metaclass=Singleton):
 
     # region Methods
     def _validate_toml_dict(self, cfg: Dict[str, Any]) -> None:
+        # sourcery skip: extract-method
         key_types = {
             "lo_identifier": str,
             "lo_implementation_name": str,
@@ -53,9 +54,8 @@ class Token(metaclass=Singleton):
                 raise ValueError(f"Key '{key}' not found")
             if not isinstance(cfg[key], value):
                 raise ValueError(f"Key '{key}' must be {value.__name__}, got: {type(cfg[key]).__name__}")
-            if value is str:
-                if not cfg[key]:
-                    raise ValueError(f"Key '{key}' is empty")
+            if value is str and not cfg[key]:
+                raise ValueError(f"Key '{key}' is empty")
 
         allow_empty_key_types = {
             "pip_wheel_url": str,
@@ -139,9 +139,7 @@ class Token(metaclass=Singleton):
     def _get_authors(self, cfg: Dict[str, Any]) -> List[str]:
         """Returns the authors."""
         authors = cast(List[str], cfg["tool"]["poetry"]["authors"])
-        results: List[str] = []
-        for author in authors:
-            results.append(author.split("<")[0].strip())
+        results: List[str] = [author.split("<")[0].strip() for author in authors]
         return results
 
     # endregion Methods

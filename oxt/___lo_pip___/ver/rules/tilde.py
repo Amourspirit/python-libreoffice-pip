@@ -43,9 +43,7 @@ class Tilde(VerRuleBase):
             return False
         try:
             versions = self.get_versions()
-            if len(versions) == 2:
-                return True
-            return False
+            return len(versions) == 2
         except Exception:
             return False
 
@@ -60,9 +58,7 @@ class Tilde(VerRuleBase):
         if not self._starts_with_digits_and_dot(ver):
             return []
         v1 = ReqVersion(f">={ver}")
-        if v1.micro > 0:
-            v2 = ReqVersion(f"<{v1.major}.{v1.minor + 1}.0")
-        elif v1.minor > 0:
+        if v1.micro > 0 or v1.minor > 0:
             v2 = ReqVersion(f"<{v1.major}.{v1.minor + 1}.0")
         else:
             v2 = ReqVersion(f"<{v1.major + 1}.0.0")
@@ -120,9 +116,7 @@ class Tilde(VerRuleBase):
             v2 = versions[1]
             if check_ver >= v1 and check_ver < v2:
                 return 0
-            if check_ver < v1:
-                return -1
-            return 1
+            return -1 if check_ver < v1 else 1
         except Exception:
             return -2
 

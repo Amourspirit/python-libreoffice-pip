@@ -13,7 +13,6 @@ class JsonConfig(metaclass=Singleton):
     """Singleton Class the Config Json."""
 
     def __init__(self) -> None:
-        token = Token()
         self._config = Config()
         cfg = toml.load(self._config.toml_path)
         self._requirements = cast(Dict[str, str], cfg["tool"]["oxt"]["requirements"])

@@ -48,9 +48,7 @@ class Wildcard(VerRuleBase):
             return False
         try:
             versions = self.get_versions()
-            if len(versions) >= 1:
-                return True
-            return False
+            return len(versions) >= 1
         except Exception:
             return False
 
@@ -60,7 +58,7 @@ class Wildcard(VerRuleBase):
         ver = self.vstr[2:].strip()  # remove ==
 
         if ver[:-1].strip() == "":
-            return [ReqVersion(f">=0.0.0")]
+            return [ReqVersion(">=0.0.0")]
         ver = ver[:-2]  # remove .*
         v1 = ReqVersion(f">={ver}")
         if v1.minor > 0:
@@ -101,9 +99,7 @@ class Wildcard(VerRuleBase):
             v2 = versions[1]
             if check_ver >= v1 and check_ver < v2:
                 return 0
-            if check_ver < v1:
-                return -1
-            return 1
+            return -1 if check_ver < v1 else 1
         except Exception:
             return -2
 

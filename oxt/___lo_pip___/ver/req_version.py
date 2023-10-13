@@ -28,8 +28,7 @@ class ReqVersion(Version):
         return f"<ReqVersion('{self}')>"
 
     def _process_full_version(self, version: str) -> str:
-        match = re.search(r"\d", version)
-        if match:
+        if match := re.search(r"\d", version):
             prefix = version[: match.start()].strip() or "=="
             ver = version[match.start() :].strip()
         else:
@@ -42,9 +41,7 @@ class ReqVersion(Version):
         return ver
 
     def _validate_prefix(self, prefix: str) -> bool:
-        if prefix == "":
-            return True
-        return prefix in {"==", "!=", "<>", "<", "<=", ">", ">="}
+        return prefix in {"==", "!=", "<>", "<", "<=", ">", ">="} if prefix else True
 
     def get_ver_is_valid(self, version: str) -> bool:
         """Check if the version is valid."""
@@ -59,9 +56,7 @@ class ReqVersion(Version):
             return ver <= self
         if self._prefix == ">":
             return ver > self
-        if self._prefix == ">=":
-            return ver >= self
-        return False
+        return ver >= self if self._prefix == ">=" else False
 
     def get_pip_ver_str(self) -> str:
         """Get the pip version string."""

@@ -53,11 +53,11 @@ class KeyValCancelArgs(AbstractKeyValueArgs):
         Returns:
             KeyValCancelArgs: args
         """
-        eargs = KeyValCancelArgs(source=args.source, key=args.key, value=args.value)
-        eargs.default = args.default
-        eargs._event_name = args.event_name
-        eargs._event_source = args.event_source
-        eargs.event_data = args.event_data
-        eargs.cancel = args.cancel
-        eargs.handled = args.handled
-        return eargs
+        event_args = KeyValCancelArgs(source=args.source, key=args.key, value=args.value)
+        event_args.default = args.default
+        event_args._event_name = args.event_name
+        event_args._event_source = args.event_source
+        event_args.event_data = args.event_data
+        event_args.cancel = args.cancel
+        event_args.handled = args.handled
+        return event_args

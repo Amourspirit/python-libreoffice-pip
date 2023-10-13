@@ -44,6 +44,7 @@ class PipInstallBuild:
             pkg (str): The name of the package to install.
             ver (str): The version of the package to install.
         """
+        # sourcery skip: raise-specific-error
         target = str(self._pythonpath)
         if " " in target:
             target = f'"{target}"'

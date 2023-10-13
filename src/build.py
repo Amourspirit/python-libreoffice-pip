@@ -27,6 +27,7 @@ class Build:
 
     def build(self) -> None:
         """Builds the project."""
+        # sourcery skip: extract-method
         if self._args.clean:
             self.clean()
         # self._ensure_build()

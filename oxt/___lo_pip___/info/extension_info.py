@@ -31,6 +31,7 @@ class ExtensionInfo(metaclass=Singleton):
         Returns:
             Tuple[str, ...]: Extension info
         """
+        # sourcery skip: use-next
         try:
             pip = self.get_pip()
         except Exception:
@@ -51,6 +52,7 @@ class ExtensionInfo(metaclass=Singleton):
         Returns:
             XPackageInformationProvider: Package Information Provider
         """
+        # sourcery skip: raise-specific-error
         ctx: Any = uno.getComponentContext()
         pip = ctx.getValueByName("/singletons/com.sun.star.deployment.PackageInformationProvider")
         if pip is None:
@@ -108,10 +110,10 @@ class ExtensionInfo(metaclass=Singleton):
             pip = self.get_pip()
         except Exception:
             return ""
-        result = pip.getPackageLocation(pkg_id)
-        if not result:
+        if result := pip.getPackageLocation(pkg_id):
+            return uno.fileUrlToSystemPath(result) if as_sys_path else result
+        else:
             return ""
-        return uno.fileUrlToSystemPath(result) if as_sys_path else result
 
     def get_all_extensions(self) -> Tuple[Tuple[str, ...], ...]:
         """
