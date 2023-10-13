@@ -82,6 +82,7 @@ class ___lo_implementation_name___(unohelper.Base, XJob):
             user_path = self._get_user_profile_path(True, self.ctx)
             # logger.debug(f"Init: user_path: {user_path}")
             self._user_path = user_path
+
         if not TYPE_CHECKING:
             # run time
             from ___lo_pip___.lo_util import (
@@ -126,75 +127,6 @@ class ___lo_implementation_name___(unohelper.Base, XJob):
         self._requirements_check = RequirementsCheck()
 
     # endregion Init
-
-    def on_window_opened(self, source: Any, event_args: EventArgs, *args, **kwargs) -> None:
-        """is invoked when a window is activated."""
-        if self._twl is None:
-            return
-        self._start_timed_out = False
-        if self._window_timer:
-            # if we got to here then the timer is no longer needed
-            self._logger.debug("Stopping timer")
-            self._window_timer.cancel()
-        self._logger.debug("Window Opened Event took place.")
-        # event = cast("EventObject", event_args.event_data)
-        # self._logger.debug(dir(event.Source))
-        self._twl = None
-        self._fn_on_window_opened = None
-        self._events.trigger(StartupNamedEvent.WINDOW_STARTED, EventArgs(self))
-        if self._error_msg:
-            with contextlib.suppress(Exception):
-                title = self.resource_resolver.resolve_string("title01") or self._config.lo_implementation_name
-                self._display_message(msg=self._error_msg, title=title, suppress_error=False)
-            return
-        self._ex_thread = threading.Thread(target=self._real_execute, args=(self._start_time, True))
-        self._ex_thread.start()
-        # self._real_execute()
-
-    def _start_window_timer(self) -> None:
-        """Starts the timer to delay the execution of the execute method."""
-
-        def timer_tick() -> None:
-            self._logger.debug("Window timer elapsed.")
-            if self._start_timed_out:
-                self._logger.debug("Window timed out. Starting execute.")
-                t = threading.Thread(target=self._real_execute)
-                t.start()
-            else:
-                self._logger.debug("Window opened and did not time out. Not starting execute.")
-
-        self._logger.debug("Starting timer")
-        self._fn_timer_tick = timer_tick  # keep alive
-        self._delay_start = True
-        self._window_timer = threading.Timer(self._config.window_timeout, timer_tick)
-        self._window_timer.start()
-
-    def _get_event_name(self, args: Tuple[Tuple[NamedValue, ...], ...]) -> str:
-        """
-        Gets the event name from the args.
-
-        Args:
-            args (Tuple[Tuple[NamedValue, ...], ...]): Event args passed to execute.
-
-        Returns:
-            str: Event name.
-        """
-        if not args:
-            return ""
-        for tup in args:
-            if not tup:
-                continue
-            for arg in tup:
-                if arg.Name != "Environment":
-                    continue
-                named_vals = cast(Tuple["NamedValue", ...], arg.Value)
-                for val in named_vals:
-                    if val.Name == "EventName":
-                        return str(val.Value)
-        return ""
-
-    def _is_valid_job_event(self) -> bool:
-        return self._job_event_name in self._valid_job_event_names
 
     # region execute
     def execute(self, *args: Tuple[NamedValue, ...]) -> None:
@@ -330,35 +262,6 @@ class ___lo_implementation_name___(unohelper.Base, XJob):
 
     # endregion execute
 
-    def _display_message(self, msg: str, title: str = "Message", suppress_error: bool = False) -> None:
-        try:
-            from ___lo_pip___.dialog.message_dialog import MessageDialog
-
-            ctx = uno.getComponentContext()
-
-            if tk := ctx.ServiceManager.createInstance("com.sun.star.awt.Toolkit"):  # type: ignore
-                top_win = tk.getTopWindow(0)
-            else:
-                top_win = None
-            msg_box = MessageDialog(ctx=self.ctx, parent=top_win, message=msg, title=title)  # type: ignore
-            _ = msg_box.execute()
-        except Exception as err:
-            if not suppress_error:
-                self._logger.error(err, exc_info=True)
-
-    def _display_complete_dialog(self) -> None:
-        if not self._config.show_progress:
-            return
-        try:
-            from ___lo_pip___.dialog.count_down_dialog import CountDownDialog
-
-            msg = self.resource_resolver.resolve_string("msg06")
-            title = self.resource_resolver.resolve_string("title01") or self._config.lo_implementation_name
-            dlg = CountDownDialog(msg=msg, title=title, display_time=5)
-            dlg.start()
-        except Exception as err:
-            self._logger.error(err, exc_info=True)
-
     # region Destructor
     def __del__(self):
         if self._added_packaging and "packaging" in sys.modules:
@@ -466,6 +369,104 @@ class ___lo_implementation_name___(unohelper.Base, XJob):
     # endregion Register/Unregister sys paths
 
     # region other methods
+
+    def on_window_opened(self, source: Any, event_args: EventArgs, *args, **kwargs) -> None:
+        """is invoked when a LibreOffice top window is activated."""
+        if self._twl is None:
+            return
+        self._start_timed_out = False
+        if self._window_timer:
+            # if we got to here then the timer is no longer needed
+            self._logger.debug("Stopping timer")
+            self._window_timer.cancel()
+        self._logger.debug("Window Opened Event took place.")
+        # event = cast("EventObject", event_args.event_data)
+        # self._logger.debug(dir(event.Source))
+        self._twl = None
+        self._fn_on_window_opened = None
+        self._events.trigger(StartupNamedEvent.WINDOW_STARTED, EventArgs(self))
+        if self._error_msg:
+            with contextlib.suppress(Exception):
+                title = self.resource_resolver.resolve_string("title01") or self._config.lo_implementation_name
+                self._display_message(msg=self._error_msg, title=title, suppress_error=False)
+            return
+        self._ex_thread = threading.Thread(target=self._real_execute, args=(self._start_time, True))
+        self._ex_thread.start()
+        # self._real_execute()
+
+    def _start_window_timer(self) -> None:
+        """Starts the timer to delay the execution of the execute method."""
+
+        def timer_tick() -> None:
+            self._logger.debug("Window timer elapsed.")
+            if self._start_timed_out:
+                self._logger.debug("Window timed out. Starting execute.")
+                t = threading.Thread(target=self._real_execute)
+                t.start()
+            else:
+                self._logger.debug("Window opened and did not time out. Not starting execute.")
+
+        self._logger.debug("Starting timer")
+        self._fn_timer_tick = timer_tick  # keep alive
+        self._delay_start = True
+        self._window_timer = threading.Timer(self._config.window_timeout, timer_tick)
+        self._window_timer.start()
+
+    def _get_event_name(self, args: Tuple[Tuple[NamedValue, ...], ...]) -> str:
+        """
+        Gets the event name from the args.
+
+        Args:
+            args (Tuple[Tuple[NamedValue, ...], ...]): Event args passed to execute.
+
+        Returns:
+            str: Event name.
+        """
+        if not args:
+            return ""
+        for tup in args:
+            if not tup:
+                continue
+            for arg in tup:
+                if arg.Name != "Environment":
+                    continue
+                named_vals = cast(Tuple["NamedValue", ...], arg.Value)
+                for val in named_vals:
+                    if val.Name == "EventName":
+                        return str(val.Value)
+        return ""
+
+    def _is_valid_job_event(self) -> bool:
+        return self._job_event_name in self._valid_job_event_names
+
+    def _display_message(self, msg: str, title: str = "Message", suppress_error: bool = False) -> None:
+        try:
+            from ___lo_pip___.dialog.message_dialog import MessageDialog
+
+            ctx = uno.getComponentContext()
+
+            if tk := ctx.ServiceManager.createInstance("com.sun.star.awt.Toolkit"):  # type: ignore
+                top_win = tk.getTopWindow(0)
+            else:
+                top_win = None
+            msg_box = MessageDialog(ctx=self.ctx, parent=top_win, message=msg, title=title)  # type: ignore
+            _ = msg_box.execute()
+        except Exception as err:
+            if not suppress_error:
+                self._logger.error(err, exc_info=True)
+
+    def _display_complete_dialog(self) -> None:
+        if not self._config.show_progress:
+            return
+        try:
+            from ___lo_pip___.dialog.count_down_dialog import CountDownDialog
+
+            msg = self.resource_resolver.resolve_string("msg06")
+            title = self.resource_resolver.resolve_string("title01") or self._config.lo_implementation_name
+            dlg = CountDownDialog(msg=msg, title=title, display_time=5)
+            dlg.start()
+        except Exception as err:
+            self._logger.error(err, exc_info=True)
 
     def _log_ex_time(self, start_time: float, msg: str = "") -> None:
         if not self._logger:
