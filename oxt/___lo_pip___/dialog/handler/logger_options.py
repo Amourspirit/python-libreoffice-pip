@@ -30,6 +30,23 @@ if TYPE_CHECKING:
 
 IMPLEMENTATION_NAME = f"{BasicConfig().lo_implementation_name}.LoggingOptionsPage"
 
+_LOG_OPTS = {
+    "optLogNone": "NONE",
+    "optLogDebug": "DEBUG",
+    "optLogNormal": "INFO",
+    "optLogWarning": "WARNING",
+    "optLogError": "ERROR",
+    "optLogCritical": "CRITICAL",
+}
+_OPT_LOG = {
+    "NONE": "optLogNone",
+    "DEBUG": "optLogDebug",
+    "INFO": "optLogNormal",
+    "WARNING": "optLogWarning",
+    "ERROR": "optLogError",
+    "CRITICAL": "optLogCritical",
+}
+
 
 class ButtonListener(unohelper.Base, XActionListener):
     def __init__(self, cast: "OptionsDialogHandler"):
@@ -82,12 +99,8 @@ class RadioButtonListener(unohelper.Base, XPropertyChangeListener):
         try:
             # state (evn.NewValue) will be 1 for true and 0 for false
             src = cast("UnoControlRadioButtonModel", ev.Source)
-            if src.Name == "optLogNone":
-                self.cast.logging_level = "NONE"
-            elif src.Name == "optLogDebug":
-                self.cast.logging_level = "DEBUG"
-            else:
-                self.cast.logging_level = "INFO"
+            if src.Name in _LOG_OPTS:
+                self.cast.logging_level = _LOG_OPTS[src.Name]
         except Exception as err:
             self._logger.error(f"RadioButtonListener.propertyChange: {err}", exc_info=True)
             raise
@@ -182,32 +195,25 @@ class OptionsDialogHandler(unohelper.Base, XContainerWindowEventHandler):
                 btn_choose.addActionListener(btn_listener)
 
                 opt_listener = RadioButtonListener(self)
-                opt_log_model_none = cast("UnoControlRadioButtonModel", window.getControl("optLogNone").getModel())
-                opt_log_model_none.addPropertyChangeListener("State", opt_listener)
-                opt_log_model_debug = cast("UnoControlRadioButtonModel", window.getControl("optLogDebug").getModel())
-                opt_log_model_debug.addPropertyChangeListener("State", opt_listener)
-                opt_log_model_normal = cast("UnoControlRadioButtonModel", window.getControl("optLogNormal").getModel())
-                opt_log_model_normal.addPropertyChangeListener("State", opt_listener)
+
+                for opt in _LOG_OPTS.keys():
+                    opt_model = cast("UnoControlRadioButtonModel", window.getControl(opt).getModel())
+                    opt_model.addPropertyChangeListener("State", opt_listener)
 
                 for control in window.Controls:  # type: ignore
                     if not control.supportsService("com.sun.star.awt.UnoControlEdit"):
                         model = control.Model
                         model.Label = self._resource_resolver.resolve_string(model.Label)
+
             if settings := self._settings.current_settings:
                 self._logging_level_original = settings["LogLevel"]
                 self._logging_level = self._logging_level_original
                 self._logger.debug(
                     f"OptionsDialogHandler._load_data settings LogLevel: {self._logging_level_original}"
                 )
-                if self._logging_level == "NONE":
-                    opt_log_none = cast("UnoControlRadioButton", window.getControl("optLogNone"))
-                    opt_log_none.setState(True)
-                elif self._logging_level == "DEBUG":
-                    opt_log_debug = cast("UnoControlRadioButton", window.getControl("optLogDebug"))
-                    opt_log_debug.setState(True)
-                else:
-                    opt_log_normal = cast("UnoControlRadioButton", window.getControl("optLogNormal"))
-                    opt_log_normal.setState(True)
+                if self._logging_level in _OPT_LOG:
+                    opt_log = cast("UnoControlRadioButton", window.getControl(_OPT_LOG[self._logging_level]))
+                    opt_log.setState(True)
 
                 self._logging_format_original = str(settings["LogFormat"])
                 self._logging_format = self._logging_format_original
