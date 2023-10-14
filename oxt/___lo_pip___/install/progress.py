@@ -5,8 +5,7 @@ import os
 import signal
 
 from ..oxt_logger import OxtLogger
-from .term.term_rules import TermRules
-
+from .progress_window.progress_rules import ProgressRules
 from ..config import Config
 
 
@@ -16,19 +15,19 @@ class Progress:
         self._title = title
         self._config = Config()
         self._logger = OxtLogger(log_name=__name__)
-        rules = TermRules()
-        self._term = rules.get_terminal()
+        rules = ProgressRules()
+        self._progress_obj = rules.get_progress()
 
     def start(self) -> None:
         """Start the progress indicator as a terminal window."""
-        if self._term is None:
+        if self._progress_obj is None:
             self._logger.debug("No terminal found. Progress indicator will not be shown.")
             return
-        self._term.start(msg=self._start_msg, title=self._title)
+        self._progress_obj.start(msg=self._start_msg, title=self._title)
 
     def kill(self) -> None:
-        if self._term:
-            self._term.stop()
+        if self._progress_obj:
+            self._progress_obj.stop()
 
     def _kill_linux(self) -> None:
         # sourcery skip: extract-method

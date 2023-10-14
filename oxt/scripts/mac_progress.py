@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# This script works with oxt/___lo_pip___/install/term/mac_terminal.py to display a progress indicator in the terminal.
+# This script works with oxt/___lo_pip___/install/progress_window/mac_terminal.py to display a progress indicator in the terminal.
 # When mac_terminal calls start this script is called.
 # When mac_terminal calls stop it is done using SIGINT. This script catches the SIGINT and then exits.
 # It seems it is not possible to kill the terminal window from this script.

@@ -30,7 +30,7 @@ class MacTerminal(Term):
         """Check if matches for Mac"""
         return self.config.is_mac
 
-    def start(self, msg: str = "Installing Package:", title: str = "Terminal") -> None:
+    def start(self, msg: str = "Installing Package:", title: str = "Progress") -> None:
         """Start the terminal."""
         self._start_via_osascript(msg, title)
 

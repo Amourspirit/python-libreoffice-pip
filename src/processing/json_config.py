@@ -34,6 +34,10 @@ class JsonConfig(metaclass=Singleton):
             self._window_timeout = int(cfg["tool"]["oxt"]["config"]["window_timeout"])
         except Exception:
             self._window_timeout = 5
+        try:
+            self._dialog_desktop_owned = cast(bool, cfg["tool"]["oxt"]["config"]["dialog_desktop_owned"])
+        except Exception:
+            self._dialog_desktop_owned = False
 
     def update_json_config(self, json_config_path: Path) -> None:
         """Read and updates the config.json file."""
@@ -48,6 +52,7 @@ class JsonConfig(metaclass=Singleton):
         json_config["auto_install_in_site_packages"] = self._auto_install_in_site_packages
         json_config["install_wheel"] = self._install_wheel
         json_config["window_timeout"] = self._window_timeout
+        json_config["dialog_desktop_owned"] = self._dialog_desktop_owned
         # json_config["log_pip_installs"] = self._log_pip_installs
         # update the requirements
         json_config["requirements"] = self._requirements

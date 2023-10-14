@@ -14,12 +14,13 @@ from com.sun.star.task import XJob
 
 if TYPE_CHECKING:
     # just for design time
+    from com.sun.star.beans import NamedValue
+
+    # from com.sun.star.lang import EventObject
     from ___lo_pip___.install.install_pkg import InstallPkg
     from ___lo_pip___.oxt_logger import OxtLogger
     from ___lo_pip___.lo_util import Session, RegisterPathKind, UnRegisterPathKind
     from ___lo_pip___.install.requirements_check import RequirementsCheck
-    from com.sun.star.beans import NamedValue
-    from com.sun.star.lang import EventObject
     from ___lo_pip___.lo_util.resource_resolver import ResourceResolver
 else:
     RegisterPathKind = object
