@@ -1,9 +1,7 @@
 from __future__ import annotations
 from pathlib import Path
-from typing import Dict, List, cast
+from typing import Dict
 import json
-
-from .meta.singleton import Singleton
 
 
 class ConfigMeta(type):
