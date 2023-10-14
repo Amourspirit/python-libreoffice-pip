@@ -30,6 +30,8 @@ class BasicConfig(metaclass=ConfigMeta):
         self._install_wheel = bool(kwargs["install_wheel"])
         self._has_locals = bool(kwargs["has_locals"])
         self._window_timeout = int(kwargs["window_timeout"])
+        self._dialog_desktop_owned = bool(kwargs["dialog_desktop_owned"])
+
         if "requirements" not in kwargs:
             kwargs["requirements"] = {}
         self._requirements: Dict[str, str] = dict(**kwargs["requirements"])
@@ -50,6 +52,17 @@ class BasicConfig(metaclass=ConfigMeta):
             When running in a dev container (Codespace), this value is always set to ``True``.
         """
         return self._auto_install_in_site_packages
+
+    @property
+    def dialog_desktop_owned(self) -> bool:
+        """
+        Gets the flag indicating if the dialog is owned by LibreOffice desktop window.
+
+        The value for this property can be set in pyproject.toml (tool.oxt.config.dialog_desktop_owned)
+
+        If this is set to ``True`` then the dialog is owned by the LibreOffice desktop window.
+        """
+        return self._dialog_desktop_owned
 
     @property
     def has_locals(self) -> bool:

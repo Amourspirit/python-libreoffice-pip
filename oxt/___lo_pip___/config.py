@@ -328,6 +328,17 @@ class Config(metaclass=Singleton):
         return self._auto_install_in_site_packages
 
     @property
+    def dialog_desktop_owned(self) -> bool:
+        """
+        Gets the flag indicating if the dialog is owned by LibreOffice desktop window.
+
+        The value for this property can be set in pyproject.toml (tool.oxt.config.dialog_desktop_owned)
+
+        If this is set to ``True`` then the dialog is owned by the LibreOffice desktop window.
+        """
+        return self._basic_config._dialog_desktop_owned
+
+    @property
     def is_linux(self) -> bool:
         """
         Gets the flag indicating if the operating system is Linux.

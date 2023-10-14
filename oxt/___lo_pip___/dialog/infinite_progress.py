@@ -5,6 +5,7 @@ import time
 import uno
 
 from .run_time_dialog_base import RuntimeDialogBase
+from ..config import Config
 
 
 class InfiniteProgressDialog(RuntimeDialogBase):
@@ -33,7 +34,18 @@ class InfiniteProgressDialog(RuntimeDialogBase):
         if self._is_init:
             return
         margin = self.MARGIN
-        self.create_dialog(self.title, size=(self.WIDTH, self.HEIGHT))
+        cfg = Config()
+        prop_names = ["Closeable"]
+        prop_values = [False]
+        if cfg.dialog_desktop_owned:
+            prop_names.append("DesktopAsParent")
+            prop_values.append(True)
+        self.create_dialog(
+            self.title,
+            size=(self.WIDTH, self.HEIGHT),
+            prop_names=prop_names,
+            prop_values=prop_values,
+        )
         self.create_label(
             name="label",
             command="",

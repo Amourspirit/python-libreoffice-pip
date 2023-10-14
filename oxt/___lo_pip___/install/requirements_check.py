@@ -28,10 +28,7 @@ class RequirementsCheck(metaclass=Singleton):
         Returns:
             bool: ``True`` if requirements are installed; Otherwise, ``False``.
         """
-        for name, ver in self._config.requirements.items():
-            if self._is_valid_version(name=name, ver=ver) != 0:
-                return False
-        return True
+        return all(self._is_valid_version(name=name, ver=ver) == 0 for name, ver in self._config.requirements.items())
 
     def _get_package_version(self, package_name: str) -> str:
         """

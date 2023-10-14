@@ -6,6 +6,7 @@ import uno
 
 from .temp_dialog import TempDialog
 from ..thread.runners import run_in_thread
+from ..config import Config
 
 
 class CountDownDialog:
@@ -20,13 +21,25 @@ class CountDownDialog:
         self._ctx = ctx
 
     def start(self) -> None:
-        """Start the terminal."""
+        """Start the progress."""
 
         @run_in_thread
         def show_some_progress(ctx, s_title: str, s_msg: str, display_time: int) -> None:
             # from ___lo_pip___.dialog.infinite_progress import InfiniteProgress
             count = display_time
-            tmp_dialog = TempDialog(ctx, title=s_title, msg=s_msg)
+            cfg = Config()
+            prop_names = ["Closeable"]
+            prop_values = [False]
+            if cfg.dialog_desktop_owned:
+                prop_names.append("DesktopAsParent")
+                prop_values.append(True)
+            tmp_dialog = TempDialog(
+                ctx=ctx,
+                title=s_title,
+                msg=s_msg,
+                prop_names=prop_names,
+                prop_values=prop_values,
+            )
             while True:
                 with self._lock:
                     if self._is_stopped or count <= 0:
@@ -41,5 +54,5 @@ class CountDownDialog:
         show_some_progress(ctx, self._title, self._msg, self._display_time)
 
     def stop(self) -> None:
-        """Stop the terminal."""
+        """Stop the progress."""
         self._is_stopped = True

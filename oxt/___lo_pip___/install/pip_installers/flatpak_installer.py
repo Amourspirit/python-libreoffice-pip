@@ -44,9 +44,7 @@ class FlatpakInstaller(BaseInstaller):
         if cfg.show_progress:
             self._logger.debug("Starting Progress Window")
             msg = self.resource_resolver.resolve_string("msg08")
-            title = self.resource_resolver.resolve_string("title01")
-            if not title:
-                title = self.config.lo_implementation_name
+            title = self.resource_resolver.resolve_string("title01") or self.config.lo_implementation_name
             progress = Progress(start_msg=f"{msg} PIP", title=title)
             progress.start()
         else:

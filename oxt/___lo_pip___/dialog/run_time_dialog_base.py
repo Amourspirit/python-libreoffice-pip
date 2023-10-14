@@ -52,8 +52,8 @@ class RuntimeDialogBase(DialogBase):
         type_: str,
         pos: Tuple[int, int],
         size: Tuple[int, int],
-        prop_names: Sequence[str] | None,
-        prop_values: Sequence[Any] | None,
+        prop_names: Sequence[str] | None = None,
+        prop_values: Sequence[Any] | None = None,
         full_name: bool = False,
     ):
         """Create and insert control."""
@@ -81,7 +81,14 @@ class RuntimeDialogBase(DialogBase):
         return tuple(PropertyValue(Name=name, Value=value) for name, value in zip(prop_names, prop_values))
 
     def create_dialog(
-        self, title, pos: Tuple[int, int] | None = None, size: Tuple[int, int] | None = None, parent: Any = None
+        self,
+        title: str,
+        *,
+        pos: Tuple[int, int] | None = None,
+        size: Tuple[int, int] | None = None,
+        parent: Any = None,
+        prop_names: Sequence[str] | None = None,
+        prop_values: Sequence[Any] | None = None,
     ):
         """Create base dialog."""
         dialog = cast("UnoControlDialog", self.create("com.sun.star.awt.UnoControlDialog"))
@@ -90,10 +97,14 @@ class RuntimeDialogBase(DialogBase):
         dialog.setModel(dialog_model)
         dialog.setVisible(False)
         dialog.setTitle(title)
+
         if isinstance(size, tuple) and len(size) == 2:
             dialog.setPosSize(0, 0, size[0], size[1], SIZE)
         if isinstance(pos, tuple) and len(pos) == 2:
             dialog.setPosSize(pos[0], pos[1], 0, 0, POS)
+        if prop_names and prop_values and len(prop_names) == len(prop_values):
+            dialog_model.setPropertyValues(tuple(prop_names), tuple(prop_values))
+
         self._dialog = dialog
 
     def create_label(

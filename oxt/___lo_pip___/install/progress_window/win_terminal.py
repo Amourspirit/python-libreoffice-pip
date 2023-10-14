@@ -24,7 +24,7 @@ class WindowsTerminal(Term):
         """Get the list of versions."""
         return [str(self.config.python_path), "-c", self.get_code(msg)]
 
-    def start(self, msg: str, title: str = "Terminal") -> None:
+    def start(self, msg: str, title: str = "Progress") -> None:
         """Start the terminal."""
         try:
             proc_cmd = self._get_command(msg, title)

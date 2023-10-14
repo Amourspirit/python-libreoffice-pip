@@ -44,14 +44,14 @@ class GnomeTerminal(Term):
             cmd,
         ]
 
-    def start(self, msg: str, title: str = "Terminal") -> None:
+    def start(self, msg: str, title: str = "Progress") -> None:
         """Start the terminal."""
         try:
             proc_cmd = self._get_command(msg, title)
             proc = subprocess.Popen(
                 proc_cmd,
                 shell=False,
-                preexec_fn=os.setpgrp,
+                preexec_fn=os.setpgrp,  # type: ignore
             )
             self._pid = proc.pid
         except Exception as err:
@@ -64,7 +64,7 @@ class GnomeTerminal(Term):
             self.logger.debug("No terminal to stop.")
             return
         try:
-            os.killpg(self._pid, signal.SIGINT)
+            os.killpg(self._pid, signal.SIGINT)  # type: ignore
         except Exception as err:
             self.logger.error(f"Error stopping progress indicator: {err}")
         self._pid = -1
