@@ -9,6 +9,7 @@ from .processing.packages import Packages
 from .processing.req_packages import ReqPackages
 from .processing.update import Update
 from .processing.json_config import JsonConfig
+from .processing.default_resource import DefaultResource
 from .install.pre_install_pure import PreInstallPure
 
 
@@ -55,6 +56,8 @@ class Build:
         if self._args.pre_install_pure_packages:
             self._pre_install_pure_packages()
 
+        self._ensure_default_resource()
+
         if self._args.make_dist:
             self._zip_build()
             self._process_update()
@@ -82,6 +85,11 @@ class Build:
         """Ensures the build directory exists."""
         if not self._build_path.exists():
             self._build_path.mkdir(parents=True, exist_ok=True)
+
+    def _ensure_default_resource(self) -> None:
+        """Ensures the default resource file exists."""
+        default_resource = DefaultResource()
+        default_resource.ensure_default()
 
     def _copy_src_dest(self) -> None:
         """Copies the source files to the build directory."""
