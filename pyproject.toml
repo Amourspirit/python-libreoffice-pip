@@ -37,6 +37,7 @@ log_file = "pip_install.log"
 log_name = "OOO PIP Installer"
 log_level = "DEBUG" # NONE, DEBUG, INFO, WARNING, ERROR, CRITICAL
 log_format = "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+log_add_console = false # should be false for production
 lo_pip = "lo_pip"
 platform = "all"
 startup_event = "OnStartApp" # OnStartApp or onFirstVisibleTask

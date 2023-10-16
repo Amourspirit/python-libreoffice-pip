@@ -48,6 +48,7 @@ class Token(metaclass=Singleton):
             "show_progress": bool,
             "delay_startup": bool,
             "log_pip_installs": bool,
+            "log_add_console": bool
         }
         for key, value in key_types.items():
             if key not in cfg:
