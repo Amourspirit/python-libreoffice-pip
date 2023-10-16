@@ -106,7 +106,7 @@ class InfiniteProgress(threading.Thread):
                 # possibly sleep and update a label to show progress
                 self._ellipsis += 1
                 in_progress.dialog.setVisible(True)
-                in_progress.update(f"{self._msg}{'.' * self._ellipsis}")
+                in_progress.update(f"{self._msg} {'.' * self._ellipsis}")
                 if self._ellipsis > 300:
                     self._ellipsis = 0
                 time.sleep(1)
