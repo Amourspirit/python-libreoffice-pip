@@ -36,7 +36,7 @@ class ProgressDialog:
                         break
                 ellipsis += 1
                 in_progress.dialog.setVisible(True)
-                in_progress.update(f"{s_msg}{'.' * ellipsis}")
+                in_progress.update(f"{s_msg} {'.' * ellipsis}")
                 if ellipsis == 300:
                     ellipsis = 0
                 time.sleep(1)
