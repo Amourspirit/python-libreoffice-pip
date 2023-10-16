@@ -13,6 +13,9 @@ update_file = "update.xml"
 zip_preinstall_pure = true
 window_timeout = 5 # number of seconds to wait for window to appear
 dialog_desktop_owned = true # determines if the dialog is owned by the desktop window
+resource_dir_name = "resources"
+resource_properties_prefix = "pipstrings"
+default_locale = ["en", "US"]
 
 [tool.oxt.token]
 # in the form of "token_name": "token_value"

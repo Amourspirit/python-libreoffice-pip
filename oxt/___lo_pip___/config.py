@@ -54,8 +54,6 @@ class Config(metaclass=Singleton):
         self._logger = OxtLogger(log_name=__name__)
         self._logger.debug("Initializing Config")
         try:
-            self._resource_dir_name = "resources"
-            self._resource_properties_prefix = "pipstrings"
             self._log_file = logger_config.log_file
             self._log_name = logger_config.log_name
             self._log_format = logger_config.log_format
@@ -214,6 +212,28 @@ class Config(metaclass=Singleton):
         Gets the flag indicating if the startup should be delayed.
         """
         return self._delay_startup
+
+    @property
+    def default_locale(self) -> List[str]:
+        """
+        Gets the default locale such as ``['en', 'US']``.
+
+        The value for this property can be set in pyproject.toml (tool.oxt.config.default_locale)
+
+        This is the default locale to use if the locale is not set in the LibreOffice configuration.
+        """
+        return self._basic_config._default_locale
+
+    @property
+    def default_locale_str(self) -> str:
+        """
+        Gets the default locale as string separated by ``-`` such as ``en-US``.
+
+        The value for this property can be set in pyproject.toml (tool.oxt.config.default_locale)
+
+        This is the default locale to use if the locale is not set in the LibreOffice configuration.
+        """
+        return "-".join(self.default_locale)
 
     @property
     def url_pip(self) -> str:
@@ -494,16 +514,24 @@ class Config(metaclass=Singleton):
     @property
     def resource_dir_name(self) -> str:
         """
-        Gets the name of the resources directory.
+        Gets the resource directory name.
+
+        The value for this property can be set in pyproject.toml (tool.oxt.config.resource_dir_name)
+
+        This is the name of the directory containing the resource files.
         """
-        return self._resource_dir_name
+        return self._basic_config._resource_dir_name
 
     @property
     def resource_properties_prefix(self) -> str:
         """
-        Gets the prefix for resource properties.
+        Gets the resource properties prefix.
+
+        The value for this property can be set in pyproject.toml (tool.oxt.config.resource_properties_prefix)
+
+        This is the prefix for the resource properties.
         """
-        return self._resource_properties_prefix
+        return self._basic_config._resource_properties_prefix
 
     @property
     def show_progress(self) -> bool:
