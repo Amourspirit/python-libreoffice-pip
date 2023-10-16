@@ -33,6 +33,15 @@
                     <desc>Log Format. Eg: %(asctime)s - %(name)s - %(levelname)s - %(message)s</desc>
                 </info>
             </prop>
+            <prop oor:name="LogAddConsole" oor:type="xs:boolean">
+                <info>
+                    <desc>
+                        Determins if a logging console is to be added.
+                        This can be useful log to the APSO terminal and any other console that LibreOffice is started from.
+                        For production this value should be false as it may have some unintended side effects.
+                    </desc>
+                </info>
+            </prop>
             <prop oor:name="TestText" oor:type="xs:string">
                 <info>
                     <desc>Test</desc>

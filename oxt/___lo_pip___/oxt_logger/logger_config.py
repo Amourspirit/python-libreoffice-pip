@@ -30,6 +30,7 @@ class LoggerConfig(metaclass=Singleton):
         log_level = str(configuration_settings["LogLevel"])
         self._log_level = self._get_log_level(log_level)
         self._log_ready_event_raised = False
+        self._log_add_console = bool(configuration_settings["LogAddConsole"])
 
     def _get_settings(self) -> Dict[str, Any]:
         # sourcery skip: dict-assign-update-to-union
@@ -78,6 +79,11 @@ class LoggerConfig(metaclass=Singleton):
     @property
     def lo_implementation_name(self) -> str:
         return self._lo_implementation_name
+
+    @property
+    def log_add_console(self) -> bool:
+        """Gets if a console logger should be added to logging."""
+        return self._log_add_console
 
     @property
     def log_file(self) -> str:

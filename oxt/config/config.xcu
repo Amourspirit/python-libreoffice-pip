@@ -20,6 +20,9 @@
     <prop oor:name="LogFormat" oor:type="xs:string">
       <value>___log_format___</value>
     </prop>
+    <prop oor:name="LogAddConsole" oor:type="xs:boolean">
+      <value>___log_add_console___</value>
+    </prop>
     <prop oor:name="TestText" oor:type="xs:string">
       <value>TestText</value>
     </prop>
