@@ -25,9 +25,9 @@ test_internet_url = "https://duckduckgo.com"
 log_pip_installs = false
 lo_identifier = "org.openoffice.extensions.ooopip"
 lo_implementation_name = "OooPipRunner"
-display_name_en_us = "LibreOffice Python Pip Template"
-description_en_us = "Template for creating pip based extensions for for LibreOffice"
-publisher_en_us = "AmourSpirit"
+display_name = "LibreOffice Python Pip Template"
+description = "Template for creating pip based extensions for for LibreOffice"
+publisher = "AmourSpirit"
 publisher_url = "https://github.com/Amourspirit/python-libreoffice-pip"
 update_url_xml = "https://raw.githubusercontent.com/Amourspirit/python-libreoffice-pip/main/___dist_dir___/___update_file___"
 update_url_oxt = "https://raw.githubusercontent.com/Amourspirit/python-libreoffice-pip/main/___dist_dir___/___oxt_name___.oxt"
@@ -52,6 +52,25 @@ verr = ">=1.1.2"
 [tool.oxt.preinstall.pure]
 # verr = ">=1.1.2"
 
+[tool.oxt.locale.publisher]
+en = { name = "___publisher___", url="___publisher_url___" }
+fr = { name = "AmourEsprit", url="___publisher_url___/fr" }
+
+[tool.oxt.locale.name]
+en = "___display_name___"
+fr = "Modèle LibreOffice Python Pip"
+de = "LibreOffice Python Pip Vorlage"
+pt = "Modelo LibreOffice Python Pip"
+es = "Plantilla LibreOffice Python Pip"
+
+[tool.oxt.locale.desc]
+en = "___description___"
+fr = "Modèle pour créer des extensions basées sur pip pour LibreOffice"
+de = "Vorlage zum Erstellen von pip-basierten Erweiterungen für LibreOffice"
+pt = "Modelo para criar extensões baseadas em pip para o LibreOffice"
+es = "Plantilla para crear extensiones basadas en pip para LibreOffice"
+
+
 [tool.poetry]
 name = "libreoffice pip template"
 version = "0.1.0"
@@ -75,6 +94,7 @@ pytest-dotenv = "^0.5.2"
 black = "^23.7.0"
 oooscript = "^1.1.3"
 oooenv = "^0.2.2"
+lxml = "^4.9.3"
 
 [build-system]
 requires = ["poetry-core"]
