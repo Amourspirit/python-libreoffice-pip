@@ -27,7 +27,10 @@ Tested on the following:
 
 For more information see the [Wiki](https://github.com/Amourspirit/python-libreoffice-pip/wiki)
 
-For a working example see [LibreOffice Extension - OooDev GUI Automation for Windows](https://github.com/Amourspirit/ooodev-gui-win-ext)
+For a working example see the following extensions:
+
+- [OOO Development Tools Extension](https://github.com/Amourspirit/libreoffice_ooodev_ext#readme)
+- [OooDev GUI Automation for Windows](https://github.com/Amourspirit/ooodev-gui-win-ext#readme)
 
 <details>
 <summary>Original Template Readme</summary>
