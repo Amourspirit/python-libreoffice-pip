@@ -248,6 +248,8 @@ class ___lo_implementation_name___(unohelper.Base, XJob):
             self._logger.debug("Created InstallPkg instance")
             pkg_installer.install()
 
+            self._post_install()
+
             if has_window:
                 self._display_complete_dialog()
 
@@ -526,6 +528,27 @@ class ___lo_implementation_name___(unohelper.Base, XJob):
         return OxtLogger(log_name=__name__)
 
     # endregion Logging
+
+    # region Post Install
+    def _post_install(self) -> None:
+        self._logger.debug("Post Install starting")
+        if not self._config.sym_link_cpython:
+            self._logger.debug("Not creating CPython link because configuration has it turned off. Skipping post install.")
+            return
+        if not self._config.is_mac and not self._config._is_app_image:
+            self._logger.debug("Not Mac or AppImage. Skipping post install.")
+            return
+        try:
+            from ___lo_pip___.install.post.cpython_link import CPythonLink
+
+            link = CPythonLink()
+            link.link()
+        except Exception as err:
+            self._logger.error(err, exc_info=True)
+            return
+        self._logger.debug("Post Install Done")
+
+    # endregion Post Install
 
     # region Isolate
     def _init_isolated(self) -> None:

@@ -33,6 +33,7 @@ class BasicConfig(metaclass=ConfigMeta):
         self._resource_dir_name = str(kwargs["resource_dir_name"])
         self._resource_properties_prefix = str(kwargs["resource_properties_prefix"])
         self._isolate_windows = set(kwargs["isolate_windows"])
+        self._sym_link_cpython = bool(kwargs["sym_link_cpython"])
 
         if "requirements" not in kwargs:
             kwargs["requirements"] = {}
@@ -158,6 +159,17 @@ class BasicConfig(metaclass=ConfigMeta):
         This is the prefix for the resource properties.
         """
         return self._resource_properties_prefix
+
+    @property
+    def sym_link_cpython(self) -> bool:
+        """
+        Gets the flag indicating if CPython files should be symlinked on Linux AppImage and Mac OS.
+
+        The value for this property can be set in pyproject.toml (tool.oxt.config.sym_link_cpython)
+
+        If this is set to ``True`` then CPython will be symlinked on Linux AppImage and Mac OS.
+        """
+        return self._sym_link_cpython
 
     @property
     def window_timeout(self) -> int:
