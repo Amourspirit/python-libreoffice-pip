@@ -126,6 +126,7 @@ class ___lo_implementation_name___(unohelper.Base, XJob):
             except Exception as err:
                 self._logger.error(err, exc_info=True)
         self._requirements_check = RequirementsCheck()
+        self._init_isolated()
 
     # endregion Init
 
@@ -525,6 +526,23 @@ class ___lo_implementation_name___(unohelper.Base, XJob):
         return OxtLogger(log_name=__name__)
 
     # endregion Logging
+
+    # region Isolate
+    def _init_isolated(self) -> None:
+        if not self._config.is_win:
+            self._logger.debug("Not Windows, not isolating")
+            return
+
+        from ___lo_pip___.lo_util.target_path import TargetPath
+
+        target_path = TargetPath()
+        if target_path.has_other_target is False:
+            self._logger.debug("No other target, not isolating")
+            return
+        result = self._session.register_path(target_path.target, True)
+        self._log_sys_path_register_result(target_path.target, result)
+
+    # endregion Isolate
 
     # region Debug
 

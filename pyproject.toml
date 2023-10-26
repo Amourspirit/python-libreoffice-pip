@@ -49,6 +49,9 @@ delay_startup = true # determines if installing waits fo the window to load befo
 typing-extensions = ">=4.7.0"
 verr = ">=1.1.2"
 
+[tool.oxt.isolate]
+windows = [] # ["odfpy"]
+
 [tool.oxt.preinstall.pure]
 # verr = ">=1.1.2"
 

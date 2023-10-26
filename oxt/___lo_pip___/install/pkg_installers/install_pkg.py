@@ -10,11 +10,12 @@ from importlib.metadata import PackageNotFoundError, version
 from pathlib import Path
 
 from ...config import Config
-from ...ver.rules.ver_rules import VerRules, VerProto
+from ...lo_util.resource_resolver import ResourceResolver
+from ...lo_util.target_path import TargetPath
 from ...oxt_logger import OxtLogger
+from ...ver.rules.ver_rules import VerRules, VerProto
 from ..download import Download
 from ..progress import Progress
-from ...lo_util.resource_resolver import ResourceResolver
 
 
 # https://docs.python.org/3.8/library/importlib.metadata.html#module-importlib.metadata
@@ -53,6 +54,7 @@ class InstallPkg:
         self._flag_upgrade = flag_upgrade
         self._show_progress = bool(kwargs.get("show_progress", self._config.show_progress))
         self._resource_resolver = ResourceResolver(ctx=self.ctx)
+        self._target_path = TargetPath()
 
     def _get_logger(self) -> OxtLogger:
         return OxtLogger(log_name=__name__)
@@ -111,8 +113,11 @@ class InstallPkg:
         elif self.flag_upgrade:
             cmd.append("--upgrade")
 
+        if not auto_target and self.config.is_win and len(self.config.isolate_windows) > 0:
+            auto_target = True
+
         if auto_target:
-            cmd.append(f"--target={self.config.site_packages}")
+            cmd.append(f"--target={self._target_path.get_package_target(pkg)}")
         elif self.config.is_user_installed:
             cmd.append("--user")
 
