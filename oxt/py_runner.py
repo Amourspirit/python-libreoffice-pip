@@ -126,6 +126,7 @@ class ___lo_implementation_name___(unohelper.Base, XJob):
             except Exception as err:
                 self._logger.error(err, exc_info=True)
         self._requirements_check = RequirementsCheck()
+        self._init_isolated()
 
     # endregion Init
 
@@ -246,6 +247,8 @@ class ___lo_implementation_name___(unohelper.Base, XJob):
             pkg_installer = InstallPkg(ctx=self.ctx)
             self._logger.debug("Created InstallPkg instance")
             pkg_installer.install()
+
+            self._post_install()
 
             if has_window:
                 self._display_complete_dialog()
@@ -525,6 +528,44 @@ class ___lo_implementation_name___(unohelper.Base, XJob):
         return OxtLogger(log_name=__name__)
 
     # endregion Logging
+
+    # region Post Install
+    def _post_install(self) -> None:
+        self._logger.debug("Post Install starting")
+        if not self._config.sym_link_cpython:
+            self._logger.debug("Not creating CPython link because configuration has it turned off. Skipping post install.")
+            return
+        if not self._config.is_mac and not self._config._is_app_image:
+            self._logger.debug("Not Mac or AppImage. Skipping post install.")
+            return
+        try:
+            from ___lo_pip___.install.post.cpython_link import CPythonLink
+
+            link = CPythonLink()
+            link.link()
+        except Exception as err:
+            self._logger.error(err, exc_info=True)
+            return
+        self._logger.debug("Post Install Done")
+
+    # endregion Post Install
+
+    # region Isolate
+    def _init_isolated(self) -> None:
+        if not self._config.is_win:
+            self._logger.debug("Not Windows, not isolating")
+            return
+
+        from ___lo_pip___.lo_util.target_path import TargetPath
+
+        target_path = TargetPath()
+        if target_path.has_other_target is False:
+            self._logger.debug("No other target, not isolating")
+            return
+        result = self._session.register_path(target_path.target, True)
+        self._log_sys_path_register_result(target_path.target, result)
+
+    # endregion Isolate
 
     # region Debug
 
