@@ -188,7 +188,14 @@ class InstallPkg:
         else:
             self._logger.error(err_msg)
             try:
-                self._logger.error(process.stderr.decode("utf-8"))
+                # if permission denied then raise exception.
+                last_line = process.stderr.decode("utf-8").strip().split("\n")[-1]
+                if last_line.startswith("PermissionError: [Errno 13] Permission denied:"):
+                    raise PermissionError(last_line)
+                else:
+                    self._logger.error(process.stderr.decode("utf-8"))
+            except PermissionError:
+                raise
             except Exception as err:
                 self._logger.error(f"Error decoding stderr: {err}")
 
@@ -242,8 +249,23 @@ class InstallPkg:
             if self.config.uninstall_on_update:
                 pkg_ver = self.get_package_version(name)
                 if pkg_ver:
-                    if not self._uninstall_pkg(name):
-                        return False
+                    try:
+                        if not self._uninstall_pkg(name):
+                            return False
+                    except PermissionError as e:
+                        if self.config.install_on_no_uninstall_permission:
+                            self._logger.error(f"Unable to uninstall {name}. {e}")
+                            self._logger.info(
+                                f"Permission error is usually because the package is installed as a system package that LibreOffice does not have permission to uninstall."
+                            )
+                            self._logger.info(
+                                f"Continuing to install {name} {ver} even though it is already installed. Probably because it is installed as a system package."
+                            )
+                        else:
+                            self._logger.error(
+                                f"Unable to uninstall {name}. {e}\nThis is usually because the package is installed as a system package that LibreOffice does not have permission to uninstall."
+                            )
+                            return False
             result = result and self._install_pkg(name, ",".join(ver_lst), force)
         self._logger.info("Installing packages Done!")
         return result
