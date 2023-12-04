@@ -34,6 +34,7 @@ class BasicConfig(metaclass=ConfigMeta):
         self._resource_properties_prefix = str(kwargs["resource_properties_prefix"])
         self._isolate_windows = set(kwargs["isolate_windows"])
         self._sym_link_cpython = bool(kwargs["sym_link_cpython"])
+        self._uninstall_on_update = bool(kwargs["uninstall_on_update"])
 
         if "requirements" not in kwargs:
             kwargs["requirements"] = {}
@@ -170,6 +171,13 @@ class BasicConfig(metaclass=ConfigMeta):
         If this is set to ``True`` then CPython will be symlinked on Linux AppImage and Mac OS.
         """
         return self._sym_link_cpython
+
+    @property
+    def uninstall_on_update(self) -> bool:
+        """
+        Gets the flag indicating if python packages should be uninstalled before updating.
+        """
+        return self._uninstall_on_update
 
     @property
     def window_timeout(self) -> int:

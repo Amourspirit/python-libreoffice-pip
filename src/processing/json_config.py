@@ -57,11 +57,15 @@ class JsonConfig(metaclass=Singleton):
             self._isolate_windows = cast(List[str], cfg["tool"]["oxt"]["isolate"]["windows"])
         except Exception:
             self._isolate_windows = []
-        
+
         try:
             self._sym_link_cpython = cast(bool, cfg["tool"]["oxt"]["config"]["sym_link_cpython"])
         except Exception:
             self._sym_link_cpython = False
+        try:
+            self._uninstall_on_update = cast(bool, cfg["tool"]["oxt"]["config"]["uninstall_on_update"])
+        except Exception:
+            self._uninstall_on_update = False
 
         self._validate()
 
@@ -84,6 +88,7 @@ class JsonConfig(metaclass=Singleton):
         json_config["resource_properties_prefix"] = self._resource_properties_prefix
         json_config["isolate_windows"] = self._isolate_windows
         json_config["sym_link_cpython"] = self._sym_link_cpython
+        json_config["uninstall_on_update"] = self._uninstall_on_update
         # json_config["log_pip_installs"] = self._log_pip_installs
         # update the requirements
         json_config["requirements"] = self._requirements

@@ -550,6 +550,13 @@ class Config(metaclass=Singleton):
         return self._startup_event
 
     @property
+    def uninstall_on_update(self) -> bool:
+        """
+        Gets the flag indicating if python packages should be uninstalled before updating.
+        """
+        return self.basic_config.uninstall_on_update
+
+    @property
     def window_timeout(self) -> int:
         """
         Gets the window timeout value.
@@ -579,6 +586,7 @@ class Config(metaclass=Singleton):
         If this is set to ``True`` then CPython will be symlinked on Linux AppImage and Mac OS.
         """
         return self._basic_config.sym_link_cpython
+
     # endregion Properties
 
 
