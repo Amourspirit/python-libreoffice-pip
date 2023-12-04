@@ -114,3 +114,4 @@ class JsonConfig(metaclass=Singleton):
         assert isinstance(self._resource_properties_prefix, str), "resource_properties_prefix must be a string"
         assert len(self._resource_properties_prefix) > 0, "resource_properties_prefix must not be an empty string"
         assert isinstance(self._sym_link_cpython, bool), "sym_link_cpython must be a bool"
+        assert isinstance(self._uninstall_on_update, bool), "uninstall_on_update must be a bool"
