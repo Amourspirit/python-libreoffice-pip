@@ -65,7 +65,7 @@ class JsonConfig(metaclass=Singleton):
         try:
             self._uninstall_on_update = cast(bool, cfg["tool"]["oxt"]["config"]["uninstall_on_update"])
         except Exception:
-            self._uninstall_on_update = False
+            self._uninstall_on_update = True
 
         self._validate()
 
