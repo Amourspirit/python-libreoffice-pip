@@ -438,6 +438,15 @@ class Config(metaclass=Singleton):
         return self._pip_wheel_url
 
     @property
+    def install_on_no_uninstall_permission(self) -> bool:
+        """
+        Gets the flag indicating if a package cannot be uninstalled due to permission error,
+        then it will be installed anyway. This is usually the case when a package is installed
+        in the system packages folder.
+        """
+        return self._basic_config.install_on_no_uninstall_permission
+
+    @property
     def install_wheel(self) -> bool:
         """
         Gets the flag indicating if wheel should be installed.

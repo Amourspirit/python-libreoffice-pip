@@ -35,6 +35,7 @@ class BasicConfig(metaclass=ConfigMeta):
         self._isolate_windows = set(kwargs["isolate_windows"])
         self._sym_link_cpython = bool(kwargs["sym_link_cpython"])
         self._uninstall_on_update = bool(kwargs["uninstall_on_update"])
+        self._install_on_no_uninstall_permission = bool(kwargs["install_on_no_uninstall_permission"])
 
         if "requirements" not in kwargs:
             kwargs["requirements"] = {}
@@ -85,6 +86,15 @@ class BasicConfig(metaclass=ConfigMeta):
         Gets the flag indicating if the extension has local pip files to install.
         """
         return self._has_locals
+
+    @property
+    def install_on_no_uninstall_permission(self) -> bool:
+        """
+        Gets the flag indicating if a package cannot be uninstalled due to permission error,
+        then it will be installed anyway. This is usually the case when a package is installed
+        in the system packages folder.
+        """
+        return self._install_on_no_uninstall_permission
 
     @property
     def install_wheel(self) -> bool:
