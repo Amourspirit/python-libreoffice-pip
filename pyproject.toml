@@ -85,7 +85,7 @@ es = "Plantilla para crear extensiones basadas en pip para LibreOffice"
 
 [tool.poetry]
 name = "libreoffice pip template"
-version = "0.2.1"
+version = "0.2.2"
 description = "Template for creating pip based extensions for for LibreOffice"
 authors = [":Barry-Thomas-Paul: Moss <bigbytetech@gmail.com>"]
 license = "MIT"
@@ -95,8 +95,8 @@ packages = [{ include = "src" }]
 [tool.poetry.dependencies]
 python = "^3.8"
 ooouno = "^2.1.2"
-ooo-dev-tools = "0.12.2"
 toml = "^0.10.2"
+typing-extensions = ">=4.9.0"
 
 
 [tool.poetry.group.dev.dependencies]
@@ -107,6 +107,7 @@ black = "^23.7.0"
 oooscript = "^1.1.3"
 oooenv = "^0.2.2"
 lxml = "^4.9.3"
+ooo-dev-tools = ">=0.29.0"
 
 [build-system]
 requires = ["poetry-core"]
