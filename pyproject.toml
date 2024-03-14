@@ -107,7 +107,7 @@ black = "^23.7.0"
 oooscript = "^1.1.3"
 oooenv = "^0.2.2"
 lxml = "^4.9.3"
-ooo-dev-tools = ">=0.29.0"
+ooo-dev-tools = ">=0.34.0"
 
 [build-system]
 requires = ["poetry-core"]
