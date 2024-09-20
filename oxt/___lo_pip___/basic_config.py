@@ -36,6 +36,7 @@ class BasicConfig(metaclass=ConfigMeta):
         self._sym_link_cpython = bool(kwargs["sym_link_cpython"])
         self._uninstall_on_update = bool(kwargs["uninstall_on_update"])
         self._install_on_no_uninstall_permission = bool(kwargs["install_on_no_uninstall_permission"])
+        self._run_imports = set(kwargs["run_imports"])
 
         if "requirements" not in kwargs:
             kwargs["requirements"] = {}
@@ -170,6 +171,15 @@ class BasicConfig(metaclass=ConfigMeta):
         This is the prefix for the resource properties.
         """
         return self._resource_properties_prefix
+
+    @property
+    def run_imports(self) -> Set[str]:
+        """
+        Gets the set of imports that are required to run this extension.
+
+        The value for this property can be set in pyproject.toml (tool.oxt.isolate.run_imports)
+        """
+        return self._run_imports
 
     @property
     def sym_link_cpython(self) -> bool:

@@ -20,7 +20,10 @@ RUN apk update \
     subversion \
     make \
     openssh-client-default \
-    openssh
+    openssh \
+    zip
+    # libreoffice-sdk
+
 # https://pkgs.alpinelinux.org/package/edge/main/x86/subversion
 # subversion can be used to download github repos subfolders. Great for downloading just a single folder from a repo.
 # Can be run as examples.
@@ -53,10 +56,10 @@ RUN sed -i "s/\/bin\/ash/\/bin\/bash/g" /etc/passwd \
     && sed -i "s/--writer/--writer --accept=\"socket,host=localhost,port=${CODE_PORT},tcpNoDelay=1;urp;StarOffice.ServiceManager\"/g" /usr/lib/libreoffice/share/xdg/writer.desktop
 
 # Codespaces mounts its own /tmp directory, so we need to create a new one
-COPY ./.devcontainer/res $CONFIG_DIR/.tmp/res
-COPY ./.devcontainer/root/rc.sh /etc/profile.d/10bashrc.sh
-COPY ./.devcontainer/root/bashrc.sh $CONFIG_DIR/.bashrc
-COPY ./.devcontainer/root/bash_custom.sh $CONFIG_DIR/.bashrc_custom
+COPY ../.devcontainer/res $CONFIG_DIR/.tmp/res
+COPY ../.devcontainer/root/rc.sh /etc/profile.d/10bashrc.sh
+COPY ../.devcontainer/root/bashrc.sh $CONFIG_DIR/.bashrc
+COPY .//.devcontainer/root/bash_custom.sh $CONFIG_DIR/.bashrc_custom
 
 
 # ENV HOME=$CONFIG_DIR \
@@ -89,7 +92,7 @@ RUN  /usr/bin/pip install "poetry==$POETRY_VERSION" \
     /usr/bin/pip install --no-cache-dir -r "$CONFIG_DIR/.tmp/res/req/requirements.txt"; fi
 
 WORKDIR /workspace/libreoffice_pip_ext
-COPY ./*.toml ./*.lock ./
+COPY ../*.toml ../*.lock ./
 RUN poetry config virtualenvs.in-project true \
     && poetry install $(test "$RUN_ENV" == production && echo "--no-dev") --no-interaction --no-ansi --no-root --no-cache \
     && sed -i "s/include-system-site-packages = false/include-system-site-packages = false/g" /workspace/libreoffice_pip_ext/.venv/pyvenv.cfg
@@ -110,7 +113,10 @@ ENV PATH="/workspace/libreoffice_pip_ext/.venv/bin:/usr/lib/libreoffice/program:
     # PYTHONPATH="/usr/lib/libreoffice/program/../program:$PYTHONPATH" \
     PYTHONPATH="/usr/lib/libreoffice/program:$PYTHONPATH" \
     UNO_PATH="/usr/lib/libreoffice/program" \
-    LD_LIBRARY_PATH="/usr/lib/jvm/java-1.8-openjdk/jre/lib/amd64/client:/usr/lib/jvm/java-1.8-openjdk/jre/lib/amd64/server:/usr/lib/jvm/java-1.8-openjdk/jre/lib/amd64/native_threads:/usr/lib/jvm/java-1.8-openjdk/jre/lib/amd64"
+    LD_LIBRARY_PATH="/usr/lib/libreoffice/sdk/lib:/usr/lib/libreoffice/program:/usr/lib/jvm/java-1.8-openjdk/jre/lib/amd64/client:/usr/lib/jvm/java-1.8-openjdk/jre/lib/amd64/server:/usr/lib/jvm/java-1.8-openjdk/jre/lib/amd64/native_threads:/usr/lib/jvm/java-1.8-openjdk/jre/lib/amd64" \
+    OFFICE_HOME="/usr/lib/libreoffice" \
+    OFFICE_PROGRAM_PATH="/usr/lib/libreoffice/program" \
+    UNO_PATH="/usr/lib/libreoffice/program"
 
 # Cannot persist python version into build here so, get the python version and run all the commands the use it.
 RUN MY_PY_VER=$(python -c "import sys; major, minor = sys.version_info[:2]; print(f'{major}.{minor}');" ) \
@@ -121,8 +127,8 @@ RUN MY_PY_VER=$(python -c "import sys; major, minor = sys.version_info[:2]; prin
 WORKDIR /workspace/libreoffice_pip_ext
 
 # EXPOSE $CODE_PORT
-COPY ./.devcontainer/root/defaults /defaults
-COPY ./.devcontainer/startup.sh /usr/local/bin/startup.sh
+COPY ../.devcontainer/root/defaults /defaults
+COPY ../.devcontainer/startup.sh /usr/local/bin/startup.sh
 
 # Moved extension install to to here 
 RUN chmod -R +x "$CONFIG_DIR/.tmp/res/scripts" \

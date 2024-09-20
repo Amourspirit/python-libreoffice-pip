@@ -17,6 +17,10 @@ class JsonConfig(metaclass=Singleton):
         cfg = toml.load(self._config.toml_path)
         self._requirements = cast(Dict[str, str], cfg["tool"]["oxt"]["requirements"])
         try:
+            self._run_imports = cast(list, cfg["tool"]["oxt"]["config"]["run_imports"])
+        except Exception:
+            self._run_imports = []
+        try:
             self._zip_preinstall_pure = cast(bool, cfg["tool"]["oxt"]["config"]["zip_preinstall_pure"])
         except Exception:
             self._zip_preinstall_pure = False
@@ -80,6 +84,8 @@ class JsonConfig(metaclass=Singleton):
         with open(json_config_path, "r") as f:
             json_config = json.load(f)
         token = Token()
+
+        json_config["run_imports"] = self._run_imports
         json_config["py_pkg_dir"] = token.get_token_value("py_pkg_dir")
         json_config["lo_identifier"] = token.get_token_value("lo_identifier")
         json_config["lo_implementation_name"] = token.get_token_value("lo_implementation_name")
@@ -107,6 +113,7 @@ class JsonConfig(metaclass=Singleton):
 
     def _validate(self) -> None:
         """Validate"""
+        assert isinstance(self._run_imports, list), "run_imports must be a list"
         assert isinstance(self._requirements, dict), "requirements must be a dict"
         assert isinstance(self._zip_preinstall_pure, bool), "zip_preinstall_pure must be a bool"
         assert isinstance(self._auto_install_in_site_packages, bool), "auto_install_in_site_packages must be a bool"

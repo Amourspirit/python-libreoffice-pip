@@ -8,7 +8,7 @@ oxt_name = "OooPip" # https://tinyurl.com/ymeh4c9j#oxt_name
 py_pkg_dir = "py_pkgs" # https://tinyurl.com/ymeh4c9j#py_pkg_dir
 py_pkg_files = [] # https://tinyurl.com/ymeh4c9j#py_pkg_files
 py_pkg_names = [] # ["ooodev", "ooo"] https://tinyurl.com/ymeh4c9j#py_pkg_names
-token_file_ext = ["txt", "xml", "xcu", "xcs"] # https://tinyurl.com/ymeh4c9j#token_file_ext
+token_file_ext = ["txt", "xml", "xcu", "xcs", "py","components"] # https://tinyurl.com/ymeh4c9j#token_file_ext
 update_file = "update.xml" # https://tinyurl.com/ymeh4c9j#update_file
 zip_preinstall_pure = true # https://tinyurl.com/ymeh4c9j#zip_preinstall_pure
 window_timeout = 5 # https://tinyurl.com/ymeh4c9j#window_timeout number of seconds to wait for window to appear
@@ -19,6 +19,10 @@ default_locale = ["en", "US"] # https://tinyurl.com/ymeh4c9j#default_locale
 sym_link_cpython = false # https://tinyurl.com/ymeh4c9j#sym_link_cpython
 uninstall_on_update = true # https://tinyurl.com/ymeh4c9j#uninstall_on_update uninstall previous python packages on update
 install_on_no_uninstall_permission = true # https://tinyurl.com/ymeh4c9j#install_on_no_uninstall_permission
+oo_types_uno = "/usr/lib/libreoffice/program/types.rdb"
+oo_types_office = "/usr/lib/libreoffice/program/types/offapi.rdb"
+run_imports = [] # ["ooodev", "verr", "sortedcontainers"]
+tokes_files = [] # ["python_impl.py"]
 
 [tool.oxt.token]
 # in the form of "token_name": "token_value"
@@ -50,7 +54,7 @@ delay_startup = true # determines if installing waits fo the window to load befo
 [tool.oxt.requirements]
 # https://tinyurl.com/ymeh4c9j#tooloxtrequirements
 # https://python-poetry.org/docs/dependency-specification/
-typing-extensions = ">=4.8.0"
+typing-extensions = ">=4.12.2"
 verr = ">=1.1.2"
 
 [tool.oxt.isolate]
@@ -82,10 +86,24 @@ de = "Vorlage zum Erstellen von pip-basierten Erweiterungen für LibreOffice"
 pt = "Modelo para criar extensões baseadas em pip para o LibreOffice"
 es = "Plantilla para crear extensiones basadas en pip para LibreOffice"
 
+[tool.oxt.bz2.32_bit]
+"3.8" = { url = "https://www.python.org/ftp/python/3.8.10/python-3.8.10-embed-win32.zip", md5="659adf421e90fba0f56a9631f79e70fb" }
+"3.9" = { url = "https://www.python.org/ftp/python/3.9.13/python-3.9.13-embed-win32.zip", md5="fec0bc06857502a56dd1aeaea6488ef8" }
+"3.10" = { url = "https://www.python.org/ftp/python/3.10.11/python-3.10.11-embed-win32.zip", md5="fee70dae06c25c60cbe825d6a1bfda57" }
+"3.11" = { url = "https://www.python.org/ftp/python/3.11.6/python-3.11.6-embed-win32.zip", md5="d035d12d72e2d62b6e5219ea8f3bda39" }
+"3.12" = { url = "https://www.python.org/ftp/python/3.12.0/python-3.12.0rc3-embed-win32.zip", md5="b6ed11598c929af946a110ca4db0d95c" }
+
+[tool.oxt.bz2.64_bit]
+"3.8" = { url = "https://www.python.org/ftp/python/3.8.10/python-3.8.10-embed-amd64.zip", md5="3acb1d7d9bde5a79f840167b166bb633" }
+"3.9" = { url = "https://www.python.org/ftp/python/3.9.13/python-3.9.13-embed-amd64.zip", md5="57731cf80b1c429a0be7133266d7d7cf" }
+"3.10" = { url = "https://www.python.org/ftp/python/3.10.11/python-3.10.11-embed-amd64.zip", md5="f1c0538b060e03cbb697ab3581cb73bc" }
+"3.11" = { url = "https://www.python.org/ftp/python/3.11.6/python-3.11.6-embed-amd64.zip", md5="ff5f34b8d2504c49fc94ffc29998b8a0" }
+"3.12" = { url = "https://www.python.org/ftp/python/3.12.0/python-3.12.0rc3-embed-arm64.zip", md5="728cbbfd0d5fc485233e1aba7884a773" }
+
 
 [tool.poetry]
 name = "libreoffice pip template"
-version = "0.2.2"
+version = "0.3.0"
 description = "Template for creating pip based extensions for for LibreOffice"
 authors = [":Barry-Thomas-Paul: Moss <bigbytetech@gmail.com>"]
 license = "MIT"
@@ -94,20 +112,20 @@ packages = [{ include = "src" }]
 
 [tool.poetry.dependencies]
 python = "^3.8"
-ooouno = "^2.1.2"
+ooouno = ">=3.0.0"
 toml = "^0.10.2"
-typing-extensions = ">=4.9.0"
+typing-extensions = ">=4.12.2"
 
 
 [tool.poetry.group.dev.dependencies]
 types-scriptforge = ">=2.0.1"
-pytest = "^7.4.0"
+pytest = ">=8.3.3"
 pytest-dotenv = "^0.5.2"
-black = "^23.7.0"
-oooscript = "^1.1.3"
-oooenv = "^0.2.2"
+black = ">=24.8"
+oooscript = ">=1.1.4"
+oooenv = ">=0.2.4"
 lxml = "^4.9.3"
-ooo-dev-tools = ">=0.34.0"
+ooo-dev-tools = ">=0.47.13"
 
 [build-system]
 requires = ["poetry-core"]
