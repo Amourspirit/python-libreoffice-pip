@@ -23,11 +23,12 @@ oo_types_uno = "/usr/lib/libreoffice/program/types.rdb"
 oo_types_office = "/usr/lib/libreoffice/program/types/offapi.rdb"
 run_imports = [] # ["ooodev", "verr", "sortedcontainers"]
 tokes_files = [] # ["python_impl.py"]
+no_pip_remove = ["pip", "setuptools", "wheel"]
 
 [tool.oxt.token]
 # in the form of "token_name": "token_value"
 # in the files the token will have a prefix and suffix of ___
-pip_wheel_url = "https://files.pythonhosted.org/packages/50/c2/e06851e8cc28dcad7c155f4753da8833ac06a5c704c109313b8d5a62968a/pip-23.2.1-py3-none-any.whl" # https://tinyurl.com/ymeh4c9j#pip_wheel_url
+pip_wheel_url = "https://files.pythonhosted.org/packages/d4/55/90db48d85f7689ec6f81c0db0622d704306c5284850383c090e6c7195a5c/pip-24.2-py3-none-any.whl" # https://tinyurl.com/ymeh4c9j#pip_wheel_url
 test_internet_url = "https://duckduckgo.com" # https://tinyurl.com/ymeh4c9j#test_internet_url
 log_pip_installs = false # https://tinyurl.com/ymeh4c9j#log_pip_installs
 lo_identifier = "org.openoffice.extensions.ooopip" # https://tinyurl.com/ymeh4c9j#lo_identifier
@@ -103,7 +104,7 @@ es = "Plantilla para crear extensiones basadas en pip para LibreOffice"
 
 [tool.poetry]
 name = "libreoffice pip template"
-version = "0.3.0"
+version = "0.3.1"
 description = "Template for creating pip based extensions for for LibreOffice"
 authors = [":Barry-Thomas-Paul: Moss <bigbytetech@gmail.com>"]
 license = "MIT"

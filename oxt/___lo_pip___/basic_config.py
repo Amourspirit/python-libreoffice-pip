@@ -37,6 +37,9 @@ class BasicConfig(metaclass=ConfigMeta):
         self._uninstall_on_update = bool(kwargs["uninstall_on_update"])
         self._install_on_no_uninstall_permission = bool(kwargs["install_on_no_uninstall_permission"])
         self._run_imports = set(kwargs["run_imports"])
+        self._oxt_name = str(kwargs["oxt_name"])
+        self._no_pip_remove = set(kwargs["no_pip_remove"])
+        self._extension_version = str(kwargs["extension_version"])
 
         if "requirements" not in kwargs:
             kwargs["requirements"] = {}
@@ -80,6 +83,15 @@ class BasicConfig(metaclass=ConfigMeta):
         If this is set to ``True`` then the dialog is owned by the LibreOffice desktop window.
         """
         return self._dialog_desktop_owned
+
+    @property
+    def extension_version(self) -> str:
+        """
+        Gets extension version.
+
+        The value for this property can be set in pyproject.toml (tool.poetry.version)
+        """
+        return self._extension_version
 
     @property
     def has_locals(self) -> bool:
@@ -130,6 +142,26 @@ class BasicConfig(metaclass=ConfigMeta):
         The value for this property can be set in pyproject.toml (tool.oxt.token.lo_implementation_name)
         """
         return self._lo_implementation_name
+
+    @property
+    def no_pip_remove(self) -> Set[str]:
+        """
+        Gets the pip packages that are not allowed to be removed.
+
+        The value for this property can be set in pyproject.toml (tool.oxt.config.no_pip_remove)
+
+        This is the packages that are not allowd to be removed by the installer.
+        """
+        return self._no_pip_remove
+
+    @property
+    def oxt_name(self) -> str:
+        """
+        Gets the Otx name of the extension without the ``.otx`` extension.
+
+        The value for this property can be set in pyproject.toml (tool.oxt.token.oxt_name)
+        """
+        return self._oxt_name
 
     @property
     def py_pkg_dir(self) -> str:
