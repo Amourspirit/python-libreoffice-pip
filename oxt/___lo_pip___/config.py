@@ -586,6 +586,17 @@ class Config(metaclass=Singleton):
         return self._basic_config.isolate_windows
 
     @property
+    def no_pip_remove(self) -> Set[str]:
+        """
+        Gets the pip packages that are not allowed to be removed.
+
+        The value for this property can be set in pyproject.toml (tool.oxt.config.no_pip_remove)
+
+        This is the packages that are not allowed to be removed by the installer.
+        """
+        return self._basic_config.no_pip_remove
+
+    @property
     def sym_link_cpython(self) -> bool:
         """
         Gets the flag indicating if CPython files should be symlinked on Linux AppImage and Mac OS.
@@ -604,6 +615,24 @@ class Config(metaclass=Singleton):
         The value for this property can be set in pyproject.toml (tool.oxt.isolate.run_imports)
         """
         return self._basic_config.run_imports
+
+    @property
+    def oxt_name(self) -> str:
+        """
+        Gets the Otx name of the extension without the ``.otx`` extension.
+
+        The value for this property can be set in pyproject.toml (tool.oxt.token.oxt_name)
+        """
+        return self._basic_config.oxt_name
+
+    @property
+    def extension_version(self) -> str:
+        """
+        Gets extension version.
+
+        The value for this property can be set in pyproject.toml (tool.poetry.version)
+        """
+        return self._basic_config.extension_version
 
     # endregion Properties
 

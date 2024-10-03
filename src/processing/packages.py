@@ -25,7 +25,9 @@ class Packages(metaclass=Singleton):
             # windows
             self._site_packages_path = self._venv_path / "Lib" / "site-packages"
         if not self._site_packages_path.exists():
-            raise FileNotFoundError("Unable to get Site Packages Path")
+            raise FileNotFoundError(
+                f"Unable to get Site Packages Path. venv path = {self._venv_path}, site-packages path = {self._site_packages_path}, python{major}.{minor}"
+            )
 
     # region Methods
 
