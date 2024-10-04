@@ -36,6 +36,7 @@ class BasicConfig(metaclass=ConfigMeta):
         self._sym_link_cpython = bool(kwargs["sym_link_cpython"])
         self._uninstall_on_update = bool(kwargs["uninstall_on_update"])
         self._install_on_no_uninstall_permission = bool(kwargs["install_on_no_uninstall_permission"])
+        self._unload_after_install = bool(kwargs["unload_after_install"])
         self._run_imports = set(kwargs["run_imports"])
         self._oxt_name = str(kwargs["oxt_name"])
         self._no_pip_remove = set(kwargs["no_pip_remove"])
@@ -150,7 +151,7 @@ class BasicConfig(metaclass=ConfigMeta):
 
         The value for this property can be set in pyproject.toml (tool.oxt.config.no_pip_remove)
 
-        This is the packages that are not allowd to be removed by the installer.
+        This is the packages that are not allowed to be removed by the installer.
         """
         return self._no_pip_remove
 
@@ -230,6 +231,13 @@ class BasicConfig(metaclass=ConfigMeta):
         Gets the flag indicating if python packages should be uninstalled before updating.
         """
         return self._uninstall_on_update
+
+    @property
+    def unload_after_install(self) -> bool:
+        """
+        Gets the flag indicating if the extension installer should unload after installation.
+        """
+        return self._unload_after_install
 
     @property
     def window_timeout(self) -> int:

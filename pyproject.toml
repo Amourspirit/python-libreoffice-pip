@@ -16,7 +16,7 @@ dialog_desktop_owned = false # https://tinyurl.com/ymeh4c9j#dialog_desktop_owned
 resource_dir_name = "resources" # https://tinyurl.com/ymeh4c9j#resource_dir_name
 resource_properties_prefix = "pipstrings" # https://tinyurl.com/ymeh4c9j#resource_properties_prefix
 default_locale = ["en", "US"] # https://tinyurl.com/ymeh4c9j#default_locale
-sym_link_cpython = false # https://tinyurl.com/ymeh4c9j#sym_link_cpython
+sym_link_cpython = true # https://tinyurl.com/ymeh4c9j#sym_link_cpython
 uninstall_on_update = true # https://tinyurl.com/ymeh4c9j#uninstall_on_update uninstall previous python packages on update
 install_on_no_uninstall_permission = true # https://tinyurl.com/ymeh4c9j#install_on_no_uninstall_permission
 oo_types_uno = "/usr/lib/libreoffice/program/types.rdb"
@@ -24,6 +24,7 @@ oo_types_office = "/usr/lib/libreoffice/program/types/offapi.rdb"
 run_imports = [] # ["ooodev", "verr", "sortedcontainers"]
 tokes_files = [] # ["python_impl.py"]
 no_pip_remove = ["pip", "setuptools", "wheel"]
+unload_after_install = true
 
 [tool.oxt.token]
 # in the form of "token_name": "token_value"
@@ -104,7 +105,7 @@ es = "Plantilla para crear extensiones basadas en pip para LibreOffice"
 
 [tool.poetry]
 name = "libreoffice pip template"
-version = "0.3.1"
+version = "0.4.0"
 description = "Template for creating pip based extensions for for LibreOffice"
 authors = [":Barry-Thomas-Paul: Moss <bigbytetech@gmail.com>"]
 license = "MIT"
