@@ -91,6 +91,11 @@ class JsonConfig(metaclass=Singleton):
         except Exception:
             self._no_pip_remove = ["pip", "setuptools", "wheel"]
 
+        try:
+            self._unload_after_install = cast(bool, self._cfg["tool"]["oxt"]["config"]["unload_after_install"])
+        except Exception:
+            self._unload_after_install = True
+
         self._validate()
         self._warnings()
 
@@ -119,6 +124,7 @@ class JsonConfig(metaclass=Singleton):
         json_config["uninstall_on_update"] = self._uninstall_on_update
         json_config["install_on_no_uninstall_permission"] = self._install_on_no_uninstall_permission
         json_config["extension_version"] = self._extension_version
+        json_config["unload_after_install"] = self._unload_after_install
         # json_config["log_pip_installs"] = self._log_pip_installs
         # update the requirements
         json_config["requirements"] = self._requirements
@@ -152,6 +158,7 @@ class JsonConfig(metaclass=Singleton):
         ), "_install_on_no_uninstall_permission must be a bool"
         assert isinstance(self._no_pip_remove, list), "no_pip_remove must be a list"
         assert self._extension_version.count(".") == 2, "extension_version must contain two periods"
+        assert isinstance(self._unload_after_install, bool), "unload_after_install must be a bool"
 
     def _warnings(self) -> None:
         warnings = []
