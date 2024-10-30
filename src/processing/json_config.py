@@ -16,10 +16,42 @@ class JsonConfig(metaclass=Singleton):
         self._config = Config()
         self._cfg = toml.load(self._config.toml_path)
         self._requirements = cast(Dict[str, str], self._cfg["tool"]["oxt"]["requirements"])
+
+        try:
+            self._requirements_linux = cast(Dict[str, str], self._cfg["tool"]["oxt"]["requirements_linux"])
+        except Exception:
+            self._requirements_linux = {}
+
+        try:
+            self._requirements_macos = cast(Dict[str, str], self._cfg["tool"]["oxt"]["requirements_macos"])
+        except Exception:
+            self._requirements_macos = {}
+
+        try:
+            self._requirements_win = cast(Dict[str, str], self._cfg["tool"]["oxt"]["requirements_win"])
+        except Exception:
+            self._requirements_win = {}
+
         try:
             self._run_imports = cast(list, self._cfg["tool"]["oxt"]["config"]["run_imports"])
         except Exception:
             self._run_imports = []
+
+        try:
+            self._run_imports_linux = cast(list, self._cfg["tool"]["oxt"]["config"]["run_imports_linux"])
+        except Exception:
+            self._run_imports_linux = []
+
+        try:
+            self._run_imports_macos = cast(list, self._cfg["tool"]["oxt"]["config"]["run_imports_macos"])
+        except Exception:
+            self._run_imports_macos = []
+
+        try:
+            self._run_imports_win = cast(list, self._cfg["tool"]["oxt"]["config"]["run_imports_win"])
+        except Exception:
+            self._run_imports_win = []
+
         try:
             self._zip_preinstall_pure = cast(bool, self._cfg["tool"]["oxt"]["config"]["zip_preinstall_pure"])
         except Exception:
@@ -106,6 +138,9 @@ class JsonConfig(metaclass=Singleton):
         token = Token()
 
         json_config["run_imports"] = self._run_imports
+        json_config["run_imports_linux"] = self._run_imports_linux
+        json_config["run_imports_macos"] = self._run_imports_macos
+        json_config["run_imports_win"] = self._run_imports_win
         json_config["py_pkg_dir"] = token.get_token_value("py_pkg_dir")
         json_config["lo_identifier"] = token.get_token_value("lo_identifier")
         json_config["lo_implementation_name"] = token.get_token_value("lo_implementation_name")
@@ -127,6 +162,9 @@ class JsonConfig(metaclass=Singleton):
         json_config["unload_after_install"] = self._unload_after_install
         # json_config["log_pip_installs"] = self._log_pip_installs
         # update the requirements
+        json_config["requirements_linux"] = self._requirements_linux
+        json_config["requirements_macos"] = self._requirements_macos
+        json_config["requirements_win"] = self._requirements_win
         json_config["requirements"] = self._requirements
         json_config["has_locals"] = self._config.has_locals
         json_config["no_pip_remove"] = self._no_pip_remove
@@ -138,6 +176,12 @@ class JsonConfig(metaclass=Singleton):
     def _validate(self) -> None:
         """Validate"""
         assert isinstance(self._run_imports, list), "run_imports must be a list"
+        assert isinstance(self._run_imports_linux, list), "run_imports_linux must be a list"
+        assert isinstance(self._run_imports_macos, list), "run_imports_macos must be a list"
+        assert isinstance(self._run_imports_win, list), "run_imports_win must be a list"
+        assert isinstance(self._requirements_linux, dict), "requirements must be a dict"
+        assert isinstance(self._requirements_macos, dict), "requirements must be a dict"
+        assert isinstance(self._requirements_win, dict), "requirements must be a dict"
         assert isinstance(self._requirements, dict), "requirements must be a dict"
         assert isinstance(self._zip_preinstall_pure, bool), "zip_preinstall_pure must be a bool"
         assert isinstance(self._auto_install_in_site_packages, bool), "auto_install_in_site_packages must be a bool"

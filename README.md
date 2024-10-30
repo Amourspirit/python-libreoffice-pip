@@ -29,6 +29,7 @@ For more information see the [Wiki](https://github.com/Amourspirit/python-libreo
 
 For a working example see the following extensions:
 
+- [LibrePythonista](https://github.com/Amourspirit/python_libre_pythonista_ext#readme)
 - [OOO Development Tools Extension](https://github.com/Amourspirit/libreoffice_ooodev_ext#readme)
 - [OooDev GUI Automation for Windows](https://github.com/Amourspirit/ooodev-gui-win-ext#readme)
 
