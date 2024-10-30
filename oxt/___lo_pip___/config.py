@@ -334,7 +334,7 @@ class Config(metaclass=Singleton):
         """
         Gets the set of requirements.
 
-        The value for this property can be set in pyproject.toml (tool.oxt.token.requirements)
+        The value for this property can be set in pyproject.toml (tool.oxt.requirements)
 
         The key is the name of the package and the value is the version number.
         Example: {"requests": ">=2.25.1"}
@@ -345,9 +345,7 @@ class Config(metaclass=Singleton):
     def requirements_linux(self) -> Dict[str, str]:
         """
         Gets the set of requirements for Linux.
-
-        The value for this property can be set in pyproject.toml (tool.oxt.token.requirements_linux)
-
+        The value for this property can be set in pyproject.toml (tool.oxt.requirements_linux)
         The key is the name of the package and the value is the version number.
         Example: {"requests": ">=2.25.1"}
         """
@@ -357,9 +355,7 @@ class Config(metaclass=Singleton):
     def requirements_macos(self) -> Dict[str, str]:
         """
         Gets the set of requirements for macOS.
-
-        The value for this property can be set in pyproject.toml (tool.oxt.token.requirements_macos)
-
+        The value for this property can be set in pyproject.toml (tool.oxt.requirements_macos)
         The key is the name of the package and the value is the version number.
         Example: {"requests": ">=2.25.1"}
         """
@@ -369,9 +365,7 @@ class Config(metaclass=Singleton):
     def requirements_win(self) -> Dict[str, str]:
         """
         Gets the set of requirements for Windows.
-
-        The value for this property can be set in pyproject.toml (tool.oxt.token.requirements_win)
-
+        The value for this property can be set in pyproject.toml (tool.oxt.requirements_win)
         The key is the name of the package and the value is the version number.
         Example: {"requests": ">=2.25.1"}
         """
