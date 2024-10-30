@@ -123,11 +123,11 @@ typing-extensions = ">=4.12.2"
 types-scriptforge = ">=2.0.1"
 pytest = ">=8.3.3"
 pytest-dotenv = "^0.5.2"
-black = ">=24.8"
 oooscript = ">=1.1.4"
 oooenv = ">=0.2.4"
 lxml = "^4.9.3"
 ooo-dev-tools = ">=0.47.13"
+ruff = "^0.7.1"
 
 [build-system]
 requires = ["poetry-core"]
@@ -145,11 +145,43 @@ disable = """
 include = ["src"]
 reportMissingModuleSource = false
 
+# https://docs.astral.sh/ruff/configuration/
 [tool.ruff]
-extended-select = ["ANN", "C4", "N", "SIM", "TCH"]
-ignore = ["E501"]
-show-fixes = true
-target = "py38"
+line-length = 119
+
+target-version = "py38"
+exclude = [
+    ".bzr",
+    ".direnv",
+    ".eggs",
+    ".git",
+    ".git-rewrite",
+    ".hg",
+    ".mypy_cache",
+    ".nox",
+    ".pants.d",
+    ".pytype",
+    ".ruff_cache",
+    ".svn",
+    ".tox",
+    "__pypackages__",
+    "_build",
+    "buck-out",
+    "build",
+    "dist",
+    "node_modules",
+    ".venv",
+    "venv",
+    "tmp",
+]
+src = ["otx", "src"]
+
+[tool.ruff.lint]
+exclude = ["tmp", ".devcontainer", ".githooks", ".github", ".hypothesis", ".idea", ".pytest_cache", ".venv", ".vscode", "cmds", "dist", "docs"]
+
+[tool.ruff.lint.pylint]
+max-args = 10
+max-returns = 10
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
