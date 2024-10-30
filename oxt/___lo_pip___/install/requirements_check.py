@@ -29,7 +29,39 @@ class RequirementsCheck(metaclass=Singleton):
         Returns:
             bool: ``True`` if requirements are installed; Otherwise, ``False``.
         """
-        return all(self._is_valid_version(name=name, ver=ver) == 0 for name, ver in self._config.requirements.items())
+
+        result = all(
+            self._is_valid_version(name=name, ver=ver) == 0 for name, ver in self._config.requirements.items()
+        )
+        if not result:
+            self._logger.error("Requirements not met.")
+            return False
+        if self._config.is_linux:
+            result = all(
+                self._is_valid_version(name=name, ver=ver) == 0
+                for name, ver in self._config.requirements_linux.items()
+            )
+            if not result:
+                self._logger.error("Linux Requirements not met.")
+                return False
+
+        if self._config.is_win:
+            result = all(
+                self._is_valid_version(name=name, ver=ver) == 0 for name, ver in self._config.requirements_win.items()
+            )
+            if not result:
+                self._logger.error("Windows Requirements not met.")
+                return False
+        if self._config.is_mac:
+            result = all(
+                self._is_valid_version(name=name, ver=ver) == 0
+                for name, ver in self._config.requirements_macos.items()
+            )
+            if not result:
+                self._logger.error("Mac Requirements not met.")
+                return False
+        self._logger.info("Requirements met.")
+        return True
 
     def _get_package_version(self, package_name: str) -> str:
         """
@@ -75,7 +107,7 @@ class RequirementsCheck(metaclass=Singleton):
             return -1
 
         rules_pass = self._ver_rules.get_installed_is_valid_by_rules(rules=rules, check_version=pkg_ver)
-        if rules_pass == False:
+        if rules_pass is False:
             self._logger.info(
                 f"Package {name} {pkg_ver} already installed. It does not meet requirements specified by: {ver}"
             )
@@ -92,10 +124,35 @@ class RequirementsCheck(metaclass=Singleton):
         """
         if not self._config.run_imports:
             return True
+
         for imp in self._config.run_imports:
             try:
                 __import__(imp)
             except (ModuleNotFoundError, ImportError):
                 self._logger.warning(f"Import {imp} failed.")
                 return False
+
+        if self._config.is_linux:
+            for imp in self._config.run_imports_linux:
+                try:
+                    __import__(imp)
+                except (ModuleNotFoundError, ImportError):
+                    self._logger.warning(f"Linux Import {imp} failed.")
+                    return False
+
+        if self._config.is_mac:
+            for imp in self._config.run_imports_macos:
+                try:
+                    __import__(imp)
+                except (ModuleNotFoundError, ImportError):
+                    self._logger.warning(f"Mac Import {imp} failed.")
+                    return False
+
+        if self._config.is_win:
+            for imp in self._config.run_imports_win:
+                try:
+                    __import__(imp)
+                except (ModuleNotFoundError, ImportError):
+                    self._logger.warning(f"Windows Import {imp} failed.")
+                    return False
         return True

@@ -38,6 +38,9 @@ class BasicConfig(metaclass=ConfigMeta):
         self._install_on_no_uninstall_permission = bool(kwargs["install_on_no_uninstall_permission"])
         self._unload_after_install = bool(kwargs["unload_after_install"])
         self._run_imports = set(kwargs["run_imports"])
+        self._run_imports_linux = set(kwargs["run_imports_linux"])
+        self._run_imports_macos = set(kwargs["run_imports_macos"])
+        self._run_imports_win = set(kwargs["run_imports_win"])
         self._oxt_name = str(kwargs["oxt_name"])
         self._no_pip_remove = set(kwargs["no_pip_remove"])
         self._extension_version = str(kwargs["extension_version"])
@@ -45,6 +48,18 @@ class BasicConfig(metaclass=ConfigMeta):
         if "requirements" not in kwargs:
             kwargs["requirements"] = {}
         self._requirements: Dict[str, str] = dict(**kwargs["requirements"])
+
+        if "requirements_linux" not in kwargs:
+            kwargs["requirements_linux"] = {}
+        self._requirements_linux: Dict[str, str] = dict(**kwargs["requirements_linux"])
+
+        if "requirements_macos" not in kwargs:
+            kwargs["requirements_macos"] = {}
+        self._requirements_macos: Dict[str, str] = dict(**kwargs["requirements_macos"])
+
+        if "requirements_win" not in kwargs:
+            kwargs["requirements_win"] = {}
+        self._requirements_win: Dict[str, str] = dict(**kwargs["requirements_win"])
 
     # region Properties
     @property
@@ -184,6 +199,42 @@ class BasicConfig(metaclass=ConfigMeta):
         return self._requirements
 
     @property
+    def requirements_linux(self) -> Dict[str, str]:
+        """
+        Gets the set of requirements specific to Linux.
+
+        The value for this property can be set in pyproject.toml (tool.oxt.token.requirements_linux)
+
+        The key is the name of the package and the value is the version number.
+        Example: {"requests": ">=2.25.1"}
+        """
+        return self._requirements_linux
+
+    @property
+    def requirements_macos(self) -> Dict[str, str]:
+        """
+        Gets the set of requirements specific to Mac OS.
+
+        The value for this property can be set in pyproject.toml (tool.oxt.token.requirements_macos)
+
+        The key is the name of the package and the value is the version number.
+        Example: {"requests": ">=2.25.1"}
+        """
+        return self._requirements_macos
+
+    @property
+    def requirements_win(self) -> Dict[str, str]:
+        """
+        Gets the set of requirements specific to Windows.
+
+        The value for this property can be set in pyproject.toml (tool.oxt.token.requirements_win)
+
+        The key is the name of the package and the value is the version number.
+        Example: {"requests": ">=2.25.1"}
+        """
+        return self._requirements_win
+
+    @property
     def resource_dir_name(self) -> str:
         """
         Gets the resource directory name.
@@ -210,9 +261,36 @@ class BasicConfig(metaclass=ConfigMeta):
         """
         Gets the set of imports that are required to run this extension.
 
-        The value for this property can be set in pyproject.toml (tool.oxt.isolate.run_imports)
+        The value for this property can be set in pyproject.toml (tool.oxt.config.run_imports)
         """
         return self._run_imports
+
+    @property
+    def run_imports_linux(self) -> Set[str]:
+        """
+        Gets the set of imports that are required to run this extension on Linux.
+
+        The value for this property can be set in pyproject.toml (tool.oxt.config.run_imports_linux)
+        """
+        return self._run_imports_linux
+
+    @property
+    def run_imports_macos(self) -> Set[str]:
+        """
+        Gets the set of imports that are required to run this extension on Mac OS.
+
+        The value for this property can be set in pyproject.toml (tool.oxt.config.run_imports_macos)
+        """
+        return self._run_imports_macos
+
+    @property
+    def run_imports_win(self) -> Set[str]:
+        """
+        Gets the set of imports that are required to run this extension on Windows.
+
+        The value for this property can be set in pyproject.toml (tool.oxt.config.run_imports_win)
+        """
+        return self._run_imports_win
 
     @property
     def sym_link_cpython(self) -> bool:
