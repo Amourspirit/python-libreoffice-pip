@@ -65,6 +65,7 @@ delay_startup = true # determines if installing waits fo the window to load befo
 typing-extensions = ">=4.12.2"
 
 [[tool.oxt.py_packages]]
+# https://tinyurl.com/ymeh4c9j#tooloxtpy_packages
 name="verr"
 version="1.1.2"
 platforms=["all"]
