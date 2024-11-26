@@ -19,6 +19,7 @@ from ...oxt_logger import OxtLogger
 from ...ver.rules.ver_rules import VerRules, VerProto
 from ..download import Download
 from ..progress import Progress
+from ..py_packages.packages import Packages
 
 
 # https://docs.python.org/3.8/library/importlib.metadata.html#module-importlib.metadata
@@ -349,13 +350,12 @@ class InstallPkg:
         self._logger.info("Installing packages…")
 
         if req is None:
+            packages = Packages()
+
             req = self._config.requirements.copy()
-            if self._config.is_linux:
-                req.update(self._config.requirements_linux)
-            if self._config.is_win:
-                req.update(self._config.requirements_win)
-            if self._config.is_mac:
-                req.update(self._config.requirements_macos)
+            req.update(packages.to_dict())
+        else:
+            self._logger.debug("Using requirements from parameter.")
 
         if not req:
             self._logger.warning("No packages to install.")
