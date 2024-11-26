@@ -18,21 +18,6 @@ class JsonConfig(metaclass=Singleton):
         self._requirements = cast(Dict[str, str], self._cfg["tool"]["oxt"]["requirements"])
 
         try:
-            self._requirements_linux = cast(Dict[str, str], self._cfg["tool"]["oxt"]["requirements_linux"])
-        except Exception:
-            self._requirements_linux = {}
-
-        try:
-            self._requirements_macos = cast(Dict[str, str], self._cfg["tool"]["oxt"]["requirements_macos"])
-        except Exception:
-            self._requirements_macos = {}
-
-        try:
-            self._requirements_win = cast(Dict[str, str], self._cfg["tool"]["oxt"]["requirements_win"])
-        except Exception:
-            self._requirements_win = {}
-
-        try:
             self._run_imports = cast(list, self._cfg["tool"]["oxt"]["config"]["run_imports"])
         except Exception:
             self._run_imports = []
@@ -128,6 +113,14 @@ class JsonConfig(metaclass=Singleton):
         except Exception:
             self._unload_after_install = True
 
+        # region Requirements Rule
+        # Access a specific table
+        try:
+            self._py_packages = cast(List[Dict[str, str]], self._cfg["tool"]["oxt"]["py_packages"])
+        except Exception:
+            self._py_packages = []
+        # endregion Requirements Rule
+
         self._validate()
         self._warnings()
 
@@ -145,6 +138,7 @@ class JsonConfig(metaclass=Singleton):
         json_config["lo_identifier"] = token.get_token_value("lo_identifier")
         json_config["lo_implementation_name"] = token.get_token_value("lo_implementation_name")
         json_config["oxt_name"] = token.get_token_value("oxt_name")
+        json_config["lo_pip"] = token.get_token_value("lo_pip")
 
         json_config["zipped_preinstall_pure"] = self._zip_preinstall_pure
         json_config["auto_install_in_site_packages"] = self._auto_install_in_site_packages
@@ -162,12 +156,13 @@ class JsonConfig(metaclass=Singleton):
         json_config["unload_after_install"] = self._unload_after_install
         # json_config["log_pip_installs"] = self._log_pip_installs
         # update the requirements
-        json_config["requirements_linux"] = self._requirements_linux
-        json_config["requirements_macos"] = self._requirements_macos
-        json_config["requirements_win"] = self._requirements_win
         json_config["requirements"] = self._requirements
         json_config["has_locals"] = self._config.has_locals
         json_config["no_pip_remove"] = self._no_pip_remove
+
+        # region Requirements Rule
+        json_config["py_packages"] = self._py_packages
+        # endregion Requirements Rule
 
         # save the file
         with open(json_config_path, "w", encoding="utf-8") as f:
@@ -179,9 +174,6 @@ class JsonConfig(metaclass=Singleton):
         assert isinstance(self._run_imports_linux, list), "run_imports_linux must be a list"
         assert isinstance(self._run_imports_macos, list), "run_imports_macos must be a list"
         assert isinstance(self._run_imports_win, list), "run_imports_win must be a list"
-        assert isinstance(self._requirements_linux, dict), "requirements must be a dict"
-        assert isinstance(self._requirements_macos, dict), "requirements must be a dict"
-        assert isinstance(self._requirements_win, dict), "requirements must be a dict"
         assert isinstance(self._requirements, dict), "requirements must be a dict"
         assert isinstance(self._zip_preinstall_pure, bool), "zip_preinstall_pure must be a bool"
         assert isinstance(self._auto_install_in_site_packages, bool), "auto_install_in_site_packages must be a bool"

@@ -21,6 +21,7 @@ class ConfigMeta(type):
 class BasicConfig(metaclass=ConfigMeta):
     def __init__(self, **kwargs) -> None:
         self._py_pkg_dir = str(kwargs["py_pkg_dir"])
+        self._lo_pip_dir = str(kwargs["lo_pip"])
         self._lo_identifier = str(kwargs["lo_identifier"])
         self._lo_implementation_name = str(kwargs["lo_implementation_name"])
         self._zipped_preinstall_pure = bool(kwargs["zipped_preinstall_pure"])
@@ -48,18 +49,6 @@ class BasicConfig(metaclass=ConfigMeta):
         if "requirements" not in kwargs:
             kwargs["requirements"] = {}
         self._requirements: Dict[str, str] = dict(**kwargs["requirements"])
-
-        if "requirements_linux" not in kwargs:
-            kwargs["requirements_linux"] = {}
-        self._requirements_linux: Dict[str, str] = dict(**kwargs["requirements_linux"])
-
-        if "requirements_macos" not in kwargs:
-            kwargs["requirements_macos"] = {}
-        self._requirements_macos: Dict[str, str] = dict(**kwargs["requirements_macos"])
-
-        if "requirements_win" not in kwargs:
-            kwargs["requirements_win"] = {}
-        self._requirements_win: Dict[str, str] = dict(**kwargs["requirements_win"])
 
     # region Properties
     @property
@@ -151,6 +140,15 @@ class BasicConfig(metaclass=ConfigMeta):
         return self._lo_identifier
 
     @property
+    def lo_pip_dir(self) -> str:
+        """
+        Gets the Main Library directory name for this extension.
+
+        The value for this property can be set in pyproject.toml (tool.oxt.token.lo_pip)
+        """
+        return self._lo_pip_dir
+
+    @property
     def lo_implementation_name(self) -> str:
         """
         Gets the LibreOffice implementation name, such as ``OooPipRunner``
@@ -197,36 +195,6 @@ class BasicConfig(metaclass=ConfigMeta):
         Example: {"requests": ">=2.25.1"}
         """
         return self._requirements
-
-    @property
-    def requirements_linux(self) -> Dict[str, str]:
-        """
-        Gets the set of requirements specific to Linux.
-        The value for this property can be set in pyproject.toml (tool.oxt.requirements_linux)
-        The key is the name of the package and the value is the version number.
-        Example: {"requests": ">=2.25.1"}
-        """
-        return self._requirements_linux
-
-    @property
-    def requirements_macos(self) -> Dict[str, str]:
-        """
-        Gets the set of requirements specific to Mac OS.
-        The value for this property can be set in pyproject.toml (tool.oxt.requirements_macos)
-        The key is the name of the package and the value is the version number.
-        Example: {"requests": ">=2.25.1"}
-        """
-        return self._requirements_macos
-
-    @property
-    def requirements_win(self) -> Dict[str, str]:
-        """
-        Gets the set of requirements specific to Windows.
-        The value for this property can be set in pyproject.toml (tool.oxt.requirements_win)
-        The key is the name of the package and the value is the version number.
-        Example: {"requests": ">=2.25.1"}
-        """
-        return self._requirements_win
 
     @property
     def resource_dir_name(self) -> str:

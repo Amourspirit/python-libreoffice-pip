@@ -342,36 +342,6 @@ class Config(metaclass=Singleton):
         return self._basic_config.requirements
 
     @property
-    def requirements_linux(self) -> Dict[str, str]:
-        """
-        Gets the set of requirements for Linux.
-        The value for this property can be set in pyproject.toml (tool.oxt.requirements_linux)
-        The key is the name of the package and the value is the version number.
-        Example: {"requests": ">=2.25.1"}
-        """
-        return self._basic_config.requirements_linux
-
-    @property
-    def requirements_macos(self) -> Dict[str, str]:
-        """
-        Gets the set of requirements for macOS.
-        The value for this property can be set in pyproject.toml (tool.oxt.requirements_macos)
-        The key is the name of the package and the value is the version number.
-        Example: {"requests": ">=2.25.1"}
-        """
-        return self._basic_config.requirements_macos
-
-    @property
-    def requirements_win(self) -> Dict[str, str]:
-        """
-        Gets the set of requirements for Windows.
-        The value for this property can be set in pyproject.toml (tool.oxt.requirements_win)
-        The key is the name of the package and the value is the version number.
-        Example: {"requests": ">=2.25.1"}
-        """
-        return self._basic_config.requirements_win
-
-    @property
     def zipped_preinstall_pure(self) -> bool:
         """
         Gets the flag indicating if pure python packages are be zipped.
@@ -718,6 +688,15 @@ class Config(metaclass=Singleton):
         Gets the flag indicating if the extension installer should unload after installation.
         """
         return self.basic_config.unload_after_install
+
+    @property
+    def lo_pip_dir(self) -> str:
+        """
+        Gets the Main Library directory name for this extension.
+
+        The value for this property can be set in pyproject.toml (tool.oxt.token.lo_pip)
+        """
+        return self._basic_config.lo_pip_dir
 
     # endregion Properties
 
