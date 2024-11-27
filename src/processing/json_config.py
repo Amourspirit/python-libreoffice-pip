@@ -113,6 +113,13 @@ class JsonConfig(metaclass=Singleton):
         except Exception:
             self._unload_after_install = True
 
+        try:
+            self._require_install_name_match = cast(
+                bool, self._cfg["tool"]["oxt"]["config"]["require_install_name_match"]
+            )
+        except Exception:
+            self._require_install_name_match = False
+
         # region Requirements Rule
         # Access a specific table
         try:
@@ -159,6 +166,7 @@ class JsonConfig(metaclass=Singleton):
         json_config["requirements"] = self._requirements
         json_config["has_locals"] = self._config.has_locals
         json_config["no_pip_remove"] = self._no_pip_remove
+        json_config["require_install_name_match"] = self._require_install_name_match
 
         # region Requirements Rule
         json_config["py_packages"] = self._py_packages
@@ -195,6 +203,7 @@ class JsonConfig(metaclass=Singleton):
         assert isinstance(self._no_pip_remove, list), "no_pip_remove must be a list"
         assert self._extension_version.count(".") == 2, "extension_version must contain two periods"
         assert isinstance(self._unload_after_install, bool), "unload_after_install must be a bool"
+        assert isinstance(self._require_install_name_match, bool), "require_install_name_match must be a bool"
 
     def _warnings(self) -> None:
         warnings = []

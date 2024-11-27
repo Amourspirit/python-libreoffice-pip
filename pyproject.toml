@@ -27,6 +27,7 @@ run_imports_macos = [] # https://tinyurl.com/ymeh4c9j#run_imports_macos
 run_imports_win = [] # https://tinyurl.com/ymeh4c9j#run_imports_win
 tokes_files = [] # ["python_impl.py"] https://tinyurl.com/ymeh4c9j#tokes_files
 no_pip_remove = ["pip", "setuptools", "wheel"] # https://tinyurl.com/ymeh4c9j#no_pip_remove
+require_install_name_match = false # if true then an error will be raised if the installed package name does not match oxt_name
 unload_after_install = true # https://tinyurl.com/ymeh4c9j#unload_after_install
 
 [tool.oxt.token]
@@ -119,7 +120,7 @@ es = "Plantilla para crear extensiones basadas en pip para LibreOffice"
 
 [tool.poetry]
 name = "libreoffice pip template"
-version = "0.6.0"
+version = "0.6.1"
 description = "Template for creating pip based extensions for for LibreOffice"
 authors = [":Barry-Thomas-Paul: Moss <bigbytetech@gmail.com>"]
 license = "MIT"
