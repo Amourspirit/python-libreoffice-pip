@@ -27,7 +27,7 @@ run_imports_macos = [] # https://tinyurl.com/ymeh4c9j#run_imports_macos
 run_imports_win = [] # https://tinyurl.com/ymeh4c9j#run_imports_win
 tokes_files = [] # ["python_impl.py"] https://tinyurl.com/ymeh4c9j#tokes_files
 no_pip_remove = ["pip", "setuptools", "wheel"] # https://tinyurl.com/ymeh4c9j#no_pip_remove
-require_install_name_match = false # if true then an error will be raised if the installed package name does not match oxt_name
+require_install_name_match = false # https://tinyurl.com/ymeh4c9j#require_install_name_match
 unload_after_install = true # https://tinyurl.com/ymeh4c9j#unload_after_install
 
 [tool.oxt.token]
