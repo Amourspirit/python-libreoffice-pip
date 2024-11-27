@@ -88,6 +88,7 @@ class Config(metaclass=Singleton):
 
             # self._package_location = Path(file_util.get_package_location(self._lo_identifier, True))
             self._package_location = Path(self._extension_info.get_extension_loc(self.lo_identifier, True)).resolve()
+            self._package_name = self._package_location.stem
             self._python_major_minor = self._get_python_major_minor()
 
             self._is_user_installed = False
@@ -697,6 +698,21 @@ class Config(metaclass=Singleton):
         The value for this property can be set in pyproject.toml (tool.oxt.token.lo_pip)
         """
         return self._basic_config.lo_pip_dir
+
+    @property
+    def package_name(self) -> str:
+        """
+        Gets the LibreOffice package name minus the ``.oxt`` extension.
+        This value is derived from the package location.
+        """
+        return self._package_name
+
+    @property
+    def require_install_name_match(self) -> bool:
+        """
+        Gets the flag indicating if the package name must match the install name.
+        """
+        return self._basic_config.require_install_name_match
 
     # endregion Properties
 

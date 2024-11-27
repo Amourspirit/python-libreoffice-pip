@@ -45,6 +45,7 @@ class BasicConfig(metaclass=ConfigMeta):
         self._oxt_name = str(kwargs["oxt_name"])
         self._no_pip_remove = set(kwargs["no_pip_remove"])
         self._extension_version = str(kwargs["extension_version"])
+        self._require_install_name_match = bool(kwargs.get("require_install_name_match", False))
 
         if "requirements" not in kwargs:
             kwargs["requirements"] = {}
@@ -183,6 +184,13 @@ class BasicConfig(metaclass=ConfigMeta):
         The value for this property can be set in pyproject.toml (tool.oxt.config.py_pkg_dir)
         """
         return self._py_pkg_dir
+
+    @property
+    def require_install_name_match(self) -> bool:
+        """
+        Gets the flag indicating if the package name must match the install name.
+        """
+        return self._require_install_name_match
 
     @property
     def requirements(self) -> Dict[str, str]:

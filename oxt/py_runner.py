@@ -3,12 +3,12 @@ from __future__ import unicode_literals, annotations
 import contextlib
 from typing import TYPE_CHECKING, Any, cast, Tuple
 from pathlib import Path
-import uno
-import unohelper
 import sys
 import os
 import time
 import threading
+import uno
+import unohelper
 
 # os.environ["OOODEV_SKIP_AUTOLOAD"] = "1"
 
@@ -19,10 +19,10 @@ if TYPE_CHECKING:
     from com.sun.star.beans import NamedValue
 
     # from com.sun.star.lang import EventObject
-    from .___lo_pip___.install.install_pkg import InstallPkg  # type: ignore
+    from .___lo_pip___.install.install_pkg import InstallPkg  # type: ignore  # noqa: F401
     from .___lo_pip___.oxt_logger import OxtLogger  # type: ignore
-    from .___lo_pip___.lo_util import Session, RegisterPathKind, UnRegisterPathKind  # type: ignore
-    from .___lo_pip___.install.requirements_check import RequirementsCheck  # type: ignore
+    from .___lo_pip___.lo_util import Session, RegisterPathKind, UnRegisterPathKind  # type: ignore  # noqa: F401
+    from .___lo_pip___.install.requirements_check import RequirementsCheck  # type: ignore  # noqa: F401
     from .___lo_pip___.lo_util.resource_resolver import ResourceResolver  # type: ignore
 else:
     RegisterPathKind = object
@@ -124,7 +124,7 @@ class ___lo_implementation_name___(unohelper.Base, XJob):
         # A Log file will only be created if log_file is set and log_level is not NONE, set in pyproject.toml file, tool.oxt.token section.
         if self._logger.log_file:
             log_env_name = self._config.lo_identifier.upper().replace(".", "_") + "_LOG_FILE"
-            self._logger.debug(f"Log Path Environment Name: {log_env_name}")
+            self._logger.debug("Log Path Environment Name: %s", log_env_name)
             os.environ[log_env_name] = self._logger.log_file
 
         self._session = Session()
@@ -145,18 +145,38 @@ class ___lo_implementation_name___(unohelper.Base, XJob):
     # endregion Init
 
     # region execute
-    def execute(self, *args: Tuple[NamedValue, ...]) -> None: # type: ignore
+    def execute(self, *args: Tuple[NamedValue, ...]) -> None:  # type: ignore
         # make sure our pythonpath is in sys.path
         self._start_time = time.time()
         self._logger.debug("___lo_implementation_name___ executing")
+        if self._config.require_install_name_match:
+            if self._config.oxt_name != self._config.package_name:
+                msg = f"Oxt name: {self._config.oxt_name} does not match installed name: {self._config.package_name}. The extensions must be named {self._config.oxt_name}.oxt before installing. Rename extension to {self._config.oxt_name}.oxt and reinstall."
+                self._logger.error(msg)
+                try:
+                    msg = self.resource_resolver.resolve_string("msg22").format(
+                        self._config.oxt_name,
+                        self._config.package_name,
+                        self._config.oxt_name,
+                        self._config.oxt_name,
+                    )
+                    self._display_message(
+                        msg=msg,
+                        title=self.resource_resolver.resolve_string("msg01"),
+                        suppress_error=True,
+                    )
+                    # self._error_msg = self.resource_resolver.resolve_string("msg05")
+                except Exception as err:
+                    self._logger.error(err, exc_info=True)
+                return
         try:
             self._job_event_name = self._get_event_name(args)
         except Exception as err:
             self._logger.error(err, exc_info=True)
             self._job_event_name = ""
         if not self._is_valid_job_event():
-            self._logger.error(f"Invalid job event name: {self._job_event_name}")
-            self._logger.info(f"Valid job event names: {self._valid_job_event_names}")
+            self._logger.error("Invalid job event name: %s", self._job_event_name)
+            self._logger.info("Valid job event names: %s", self._valid_job_event_names)
             return
         self._logger.debug(f"Job event name: {self._job_event_name}")
         try:
@@ -182,7 +202,7 @@ class ___lo_implementation_name___(unohelper.Base, XJob):
                 pth = os.path.join(os.path.dirname(__file__), f"{self._config.py_pkg_dir}.zip")
 
                 if os.path.exists(pth) and os.path.isfile(pth) and os.path.getsize(pth) > 0 and pth not in sys.path:
-                    self._logger.debug(f"sys.path appended: {pth}")
+                    self._logger.debug("sys.path appended: %s", pth)
                     sys.path.append(pth)
 
             if not self.has_internet_connection:
@@ -306,7 +326,7 @@ class ___lo_implementation_name___(unohelper.Base, XJob):
             installer = InstallWheel(ctx=self.ctx)
             installer.install()
         except Exception as err:
-            self._logger.error(f"Unable to install wheel: {err}", exc_info=True)
+            self._logger.error("Unable to install wheel: %s", err, exc_info=True)
             return
         self._logger.debug("Install wheel done.")
 
@@ -380,11 +400,11 @@ class ___lo_implementation_name___(unohelper.Base, XJob):
             if not pth:
                 self._logger.debug("Path not unregistered. Can't unregister empty string")
             else:
-                self._logger.debug(f"Path Not unregistered, unknown reason: {pth}")
+                self._logger.debug("Path Not unregistered, unknown reason: %s", pth)
         elif result == UnRegisterPathKind.ALREADY_UN_REGISTERED:
-            self._logger.debug(f"Path already unregistered: {pth}")
+            self._logger.debug("Path already unregistered: %s", pth)
         else:
-            self._logger.debug(f"Path unregistered: {pth}")
+            self._logger.debug("Path unregistered: %s", pth)
 
     # endregion Register/Unregister sys paths
 
@@ -461,15 +481,12 @@ class ___lo_implementation_name___(unohelper.Base, XJob):
 
     def _display_message(self, msg: str, title: str = "Message", suppress_error: bool = False) -> None:
         try:
-            from ___lo_pip___.dialog.message_dialog import MessageDialog  # type: ignore
-
-            ctx = uno.getComponentContext()
-
-            if tk := ctx.ServiceManager.createInstance("com.sun.star.awt.Toolkit"):  # type: ignore
-                top_win = tk.getTopWindow(0)
+            if TYPE_CHECKING:
+                from .___lo_pip___.dialog.message_dialog import MessageDialog
             else:
-                top_win = None
-            msg_box = MessageDialog(ctx=self.ctx, parent=top_win, message=msg, title=title)  # type: ignore
+                from ___lo_pip___.dialog.message_dialog import MessageDialog
+
+            msg_box = MessageDialog(ctx=self.ctx, parent=None, message=msg, title=title)  # type: ignore
             _ = msg_box.execute()
         except Exception as err:
             if not suppress_error:
@@ -493,7 +510,7 @@ class ___lo_implementation_name___(unohelper.Base, XJob):
             return
         end_time = time.time()
         total_time = end_time - start_time
-        self._logger.info(f"{self._config.lo_implementation_name} execution time: {total_time:.3f} seconds")
+        self._logger.info("%s execution time: %.3f seconds", self._config.lo_implementation_name, total_time)
 
     def _get_user_profile_path(self, as_sys_path: bool = True, ctx: Any = None) -> str:
         """
@@ -505,9 +522,7 @@ class ___lo_implementation_name___(unohelper.Base, XJob):
         """
         if ctx is None:
             ctx = uno.getComponentContext()
-        result = ctx.ServiceManager.createInstance(
-            "com.sun.star.util.PathSubstitution"
-        ).substituteVariables(  # type: ignore
+        result = ctx.ServiceManager.createInstance("com.sun.star.util.PathSubstitution").substituteVariables(  # type: ignore
             "$(user)", True
         )
         return uno.fileUrlToSystemPath(result) if as_sys_path else result
@@ -527,7 +542,7 @@ class ___lo_implementation_name___(unohelper.Base, XJob):
             installer = InstallPkgLocal(ctx=self.ctx)
             _ = installer.install()
         except Exception as err:
-            self._logger.error(f"Unable to install local packages: {err}", exc_info=True)
+            self._logger.error("Unable to install local packages: %s", err, exc_info=True)
             return
         self._logger.debug("Install local done.")
 
@@ -566,7 +581,7 @@ class ___lo_implementation_name___(unohelper.Base, XJob):
             if not self._get_needs_bz2():
                 import _bz2
 
-                self._logger.debug(f"_bz2 is already installed. Skipping _bz2 install:  {_bz2.__file__}")
+                self._logger.debug("_bz2 is already installed. Skipping _bz2 install: %s", _bz2.__file__)
                 return
             if TYPE_CHECKING:
                 from .___lo_pip___.bz2_config import BZ2Config
@@ -605,7 +620,7 @@ class ___lo_implementation_name___(unohelper.Base, XJob):
                 cfg = BZ2Config()
                 pth = cfg.install_dir
             if not pth.exists():  # type: ignore
-                self._logger.debug(f"Dir no found: {pth}")
+                self._logger.debug("Dir no found: %s", pth)
                 return
             result = self._session.register_path(pth, True)
             self._log_sys_path_register_result(pth, result)  # type: ignore
@@ -689,25 +704,32 @@ class ___lo_implementation_name___(unohelper.Base, XJob):
     # region Debug
 
     def _show_extra_debug_info(self):
-        self._logger.debug(f"Config Package Location: {self._config.package_location}")
-        self._logger.debug(f"Config Python Path: {self._config.python_path}")
-        self._logger.debug(f"Config Site Packages Path: {self._config.site_packages}")
-        self._logger.debug(f"Config Is User Installed: {self._config.is_user_installed}")
-        self._logger.debug(f"Config Is Share Installed: {self._config.is_shared_installed}")
-        self._logger.debug(f"Config Is Bundle Installed: {self._config.is_bundled_installed}")
+        self._logger.debug("Config Package Location: %s", self._config.package_location)
+        self._logger.debug("Config Package Name: %s", self._config.package_name)
+        self._logger.debug("Config Python Path: %s", self._config.python_path)
+        self._logger.debug("Config Site Packages Path: %s", self._config.site_packages)
+        self._logger.debug("Config Is User Installed: %s", self._config.is_user_installed)
+        self._logger.debug("Config Is Share Installed: %s", self._config.is_shared_installed)
+        self._logger.debug("Config Is Bundle Installed: %s", self._config.is_bundled_installed)
 
-        self._logger.debug(f"Session - LibreOffice Share: {self._session.share}")
-        self._logger.debug(f"Session - LibreOffice Share Python: {self._session.shared_py_scripts}")
-        self._logger.debug(f"Session - LibreOffice Share Scripts: {self._session.shared_scripts}")
-        self._logger.debug(f"Session - LibreOffice Username: {self._session.user_name}")
-        self._logger.debug(f"Session - LibreOffice User Profile: {self._session.user_profile}")
-        self._logger.debug(f"Session - LibreOffice User Scripts: {self._session.user_scripts}")
+        self._logger.debug("Session - LibreOffice Share: %s", self._session.share)
+        self._logger.debug("Session - LibreOffice Share Python: %s", self._session.shared_py_scripts)
+        self._logger.debug("Session - LibreOffice Share Scripts: %s", self._session.shared_scripts)
+        self._logger.debug("Session - LibreOffice Username: %s", self._session.user_name)
+        self._logger.debug("Session - LibreOffice User Profile: %s", self._session.user_profile)
+        self._logger.debug("Session - LibreOffice User Scripts: %s", self._session.user_scripts)
 
-        self._logger.debug(f"Util.config - Module: {self._util.config('Module')}")
-        self._logger.debug(f"Util.config - UserConfig: {self._util.config('UserConfig')}")
-        self._logger.debug(f"Util.config - Config: {self._util.config('Config')}")
-        self._logger.debug(f"Util.config - BasePathUserLayer: {self._util.config('BasePathUserLayer')}")
-        self._logger.debug(f"Util.config - BasePathShareLayer: {self._util.config('BasePathShareLayer')}")
+        self._logger.debug("Util.config - Module: %s", self._util.config("Module"))
+        self._logger.debug("Util.config - UserConfig: %s", self._util.config("UserConfig"))
+        self._logger.debug("Util.config - Config: %s", self._util.config("Config"))
+        self._logger.debug(
+            "Util.config - BasePathUserLayer: %s",
+            self._util.config("BasePathUserLayer"),
+        )
+        self._logger.debug(
+            "Util.config - BasePathShareLayer: %s",
+            self._util.config("BasePathShareLayer"),
+        )
 
     # endregion Debug
 
@@ -728,7 +750,10 @@ class ___lo_implementation_name___(unohelper.Base, XJob):
         try:
             return self._has_internet_connection
         except AttributeError:
-            from ___lo_pip___.install.download import Download  # type: ignore
+            if TYPE_CHECKING:
+                from .___lo_pip___.install.download import Download
+            else:
+                from ___lo_pip___.install.download import Download
 
             self._has_internet_connection = Download().is_internet
         return self._has_internet_connection
