@@ -12,7 +12,6 @@ from ..config import Config
 from ..ver.rules.ver_rules import VerRules
 from ..oxt_logger import OxtLogger
 from ..meta.singleton import Singleton
-from ..install.py_packages.packages import Packages
 
 
 class RequirementsCheck(metaclass=Singleton):
@@ -23,48 +22,6 @@ class RequirementsCheck(metaclass=Singleton):
         self._config = Config()
         self._ver_rules = VerRules()
 
-    def run_imports_ready(self) -> bool:
-        """
-        Check if the run imports are ready.
-
-        Returns:
-            bool: ``True`` if all run imports are ready; Otherwise, ``False``.
-        """
-        if not self._config.run_imports:
-            return True
-
-        for imp in self._config.run_imports:
-            try:
-                __import__(imp)
-            except (ModuleNotFoundError, ImportError):
-                self._logger.warning(f"Import {imp} failed.")
-                return False
-
-        if self._config.is_linux:
-            for imp in self._config.run_imports_linux:
-                try:
-                    __import__(imp)
-                except (ModuleNotFoundError, ImportError):
-                    self._logger.warning(f"Linux Import {imp} failed.")
-                    return False
-
-        if self._config.is_mac:
-            for imp in self._config.run_imports_macos:
-                try:
-                    __import__(imp)
-                except (ModuleNotFoundError, ImportError):
-                    self._logger.warning(f"Mac Import {imp} failed.")
-                    return False
-
-        if self._config.is_win:
-            for imp in self._config.run_imports_win:
-                try:
-                    __import__(imp)
-                except (ModuleNotFoundError, ImportError):
-                    self._logger.warning(f"Windows Import {imp} failed.")
-                    return False
-        return True
-
     def check_requirements(self) -> bool:
         """
         Check requirements that have been set in file ``pyproject.toml`` in the ``tool.oxt.requirements`` section.
@@ -72,26 +29,7 @@ class RequirementsCheck(metaclass=Singleton):
         Returns:
             bool: ``True`` if requirements are installed; Otherwise, ``False``.
         """
-        try:
-            packages = Packages()
-            req_dic = self._config.requirements.copy()
-
-            # let packages override requirements
-            for pkg in packages.packages:
-                req_dic[pkg.name] = f"{pkg.restriction}{pkg.version}"
-
-            for name, ver in req_dic.items():
-                result = self._is_valid_version(name=name, ver=ver) == 0
-                if not result:
-                    self._logger.error(f"Requirements not met for {name} {ver}")
-                    return False
-
-        except Exception:
-            self._logger.exception("Error checking requirements.")
-            return False
-
-        self._logger.info("Requirements met.")
-        return True
+        return all(self._is_valid_version(name=name, ver=ver) == 0 for name, ver in self._config.requirements.items())
 
     def _get_package_version(self, package_name: str) -> str:
         """
@@ -121,26 +59,34 @@ class RequirementsCheck(metaclass=Singleton):
         """
         pkg_ver = self._get_package_version(name)
         if not pkg_ver:
-            self._logger.debug(f"Package {name} not installed.")
+            self._logger.debug("Package %s not installed.", name)
             return 2
 
         if not ver:
             # set default version to >=0.0.0
             ver = "==*"
         rules = self._ver_rules.get_matched_rules(ver)
-        self._logger.debug(f"Found Package {name} {pkg_ver} already installed ...")
+        self._logger.debug("Found Package %s %s already installed ...", name, pkg_ver)
         if not rules:
             if pkg_ver:
-                self._logger.info(f"Package {name} {pkg_ver} already installed, no rules")
+                self._logger.info("Package %s %s already installed, no rules", name, pkg_ver)
             else:
-                self._logger.error(f"Unable to find rules for {name} {ver}")
+                self._logger.error("Unable to find rules for %s %s", name, ver)
             return -1
 
         rules_pass = self._ver_rules.get_installed_is_valid_by_rules(rules=rules, check_version=pkg_ver)
         if rules_pass is False:
             self._logger.info(
-                f"Package {name} {pkg_ver} already installed. It does not meet requirements specified by: {ver}"
+                "Package %s %s already installed. It does not meet requirements specified by: %s",
+                name,
+                pkg_ver,
+                ver,
             )
             return 1
-        self._logger.info(f"Package {name} {pkg_ver} already installed. Requirements met for constraints: {ver}")
+        self._logger.info(
+            "Package %s %s already installed. Requirements met for constraints: %s",
+            name,
+            pkg_ver,
+            ver,
+        )
         return 0

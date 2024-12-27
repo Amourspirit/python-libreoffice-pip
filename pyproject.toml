@@ -118,35 +118,48 @@ es = "Plantilla para crear extensiones basadas en pip para LibreOffice"
 "3.13" = { url = "https://www.python.org/ftp/python/3.13.0/python-3.13.0rc3-embed-amd64.zip", md5="93d8329cd1c8d09f64c28191942c11ce" }
 
 
-[tool.poetry]
-name = "libreoffice pip template"
+[project]
+name = "libreoffice_pip_template"
 version = "0.6.1"
 description = "Template for creating pip based extensions for for LibreOffice"
-authors = [":Barry-Thomas-Paul: Moss <bigbytetech@gmail.com>"]
-license = "MIT"
 readme = "README.md"
-packages = [{ include = "src" }]
+requires-python = ">=3.8"
+license = "MIT"
+keywords = ["pip", "libreoffice","uno", "pyuno"]
+dependencies = [
+    "ooouno>=3.0.0",
+    "toml>=0.10.2",
+    "typing-extensions>=0.10.2",
+]
+authors = [
+    {name = ":Barry-Thomas-Paul: Moss", email = "libreofficepip.kitchen756@passmail.net"}]
 
-[tool.poetry.dependencies]
-python = "^3.8"
-ooouno = ">=3.0.0"
-toml = "^0.10.2"
-typing-extensions = ">=4.12.2"
 
+[dependency-groups]
+dev = [
+    "types-scriptforge>=2.0.1",
+    "lxml>=5.3.0",
+    "ooo-dev-tools>=0.50.0",
+    "packaging>=24.2",
+    "oooscript>=1.1.4",
+    "pytest-mock>=3.14.0",
+    "pytest>=8.3.4",
+    "pytest-dotenv>=0.5.2",
+    "ruff>=0.8.4",
+    "toml>=0.10.2",
+    "typing-extensions>=4.12.2",
+    "oooenv>=0.2.4",
+]
 
-[tool.poetry.group.dev.dependencies]
-types-scriptforge = ">=2.0.1"
-pytest = ">=8.3.3"
-pytest-dotenv = "^0.5.2"
-oooscript = ">=1.1.4"
-oooenv = ">=0.2.4"
-lxml = "^4.9.3"
-ooo-dev-tools = ">=0.47.13"
-ruff = "^0.7.1"
 
 [build-system]
-requires = ["poetry-core"]
-build-backend = "poetry.core.masonry.api"
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build]
+include = [
+    "build/**/*",
+]
 
 
 [tool.pylint.'MESSAGES CONTROL']
