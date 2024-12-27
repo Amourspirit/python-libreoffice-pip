@@ -2,10 +2,10 @@
     "terminal.integrated.shellIntegration.enabled": true,
     "testExplorer.useNativeTesting": false,
     "[python]": {
-        "editor.defaultFormatter": "charliermarsh.ruff",
+        "editor.formatOnPaste": false,
+        "editor.formatOnSaveMode": "file",
         "editor.formatOnSave": true,
-        "editor.formatOnPaste": true,
-        "editor.formatOnSaveMode": "file"
+        "editor.defaultFormatter": "charliermarsh.ruff"
     },
     "python.defaultInterpreterPath": "${workspaceRoot}/.venv/bin/python3",
     "autoDocstring.docstringFormat": "google",

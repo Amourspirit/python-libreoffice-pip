@@ -8,8 +8,8 @@ services:
       dockerfile: .devcontainer/lo_only/Dockerfile
       args:
         LO_VERSION: "version-7.6.7.2-r0"
-        POETRY_VERSION: "1.8.3"
         CONFIG_DIR: /config
+        UV_VERSION: "0.5.5"
     # user: root
     container_name: lo_pip_app
     security_opt:

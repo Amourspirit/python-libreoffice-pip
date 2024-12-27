@@ -99,7 +99,7 @@ class JsonConfig(metaclass=Singleton):
             self._install_on_no_uninstall_permission = True
 
         try:
-            self._extension_version = cast(str, self._cfg["tool"]["poetry"]["version"])
+            self._extension_version = cast(str, self._cfg["project"]["version"])
         except Exception:
             self._extension_version = ""
 

@@ -1,9 +1,18 @@
 ARG LO_VERSION
+ARG UV_VERSION=0.5.5
+ARG UVSRC=ghcr.io/astral-sh/uv:$UV_VERSION
+
+# Lifehack
+# see https://stackoverflow.com/questions/43473236/docker-build-arg-and-copy
+FROM $UVSRC AS uv_full_src
+
 FROM linuxserver/libreoffice:${LO_VERSION}
 
 ARG POETRY_VERSION
 ARG CODE_PORT=2002
 ARG CONFIG_DIR=/config
+
+
 
 # Had Error: Compilation error in psutil/_psutil_linux
 # See Github: https://github.com/giampaolo/psutil//issues/664
@@ -61,8 +70,6 @@ COPY ../.devcontainer/root/rc.sh /etc/profile.d/10bashrc.sh
 COPY ../.devcontainer/root/bashrc.sh $CONFIG_DIR/.bashrc
 COPY .//.devcontainer/root/bash_custom.sh $CONFIG_DIR/.bashrc_custom
 
-
-# ENV HOME=$CONFIG_DIR \
 ENV RUN_ENV=${RUN_ENV} \
     LANG=C.UTF-8 \
     PYTHONFAULTHANDLER=1 \
@@ -71,10 +78,9 @@ ENV RUN_ENV=${RUN_ENV} \
     PIP_NO_CACHE_DIR=off \
     PIP_DISABLE_PIP_VERSION_CHECK=on \
     PIP_DEFAULT_TIMEOUT=100 \
-    POETRY_VERSION=${POETRY_VERSION} \
-    LO_CONN_PORT=${CODE_PORT}
-    # ENV=$CONFIG_DIR/.bashrc
-    # PATH="$CONFIG_DIR/.cargo/bin:$PATH"
+    LO_CONN_PORT=${CODE_PORT} \
+    UV_LINK_MODE=copy
+
 
 
 RUN if [ x"$LOCAL_GIT_AUTHOR_NAME" != "x" ]; then git config --global user.name "$LOCAL_GIT_AUTHOR_NAME" || true; fi \
@@ -86,16 +92,23 @@ RUN MY_PY_VER=$(python -c "import sys; major, minor = sys.version_info[:2]; prin
     && if [ -f "/usr/lib/python$MY_PY_VER/EXTERNALLY-MANAGED" ]; then \
     rm "/usr/lib/python$MY_PY_VER/EXTERNALLY-MANAGED"; fi
 
-# install poetry and requirements.txt using pip
-RUN  /usr/bin/pip install "poetry==$POETRY_VERSION" \
-    && if [ -f "$CONFIG_DIR/.tmp/res/req/requirements.txt" ]; then \
-    /usr/bin/pip install --no-cache-dir -r "$CONFIG_DIR/.tmp/res/req/requirements.txt"; fi
 
 WORKDIR /workspace/libreoffice_pip_ext
 COPY ../*.toml ../*.lock ./
-RUN poetry config virtualenvs.in-project true \
-    && poetry install $(test "$RUN_ENV" == production && echo "--no-dev") --no-interaction --no-ansi --no-root --no-cache \
-    && sed -i "s/include-system-site-packages = false/include-system-site-packages = false/g" /workspace/libreoffice_pip_ext/.venv/pyvenv.cfg
+
+
+# COPY --from=ghcr.io/astral-sh/uv:0.5.5 /uv /uvx /bin/
+COPY --from=uv_full_src /uv /uvx /bin/
+ENV VIRTUAL_ENV=/workspace/libreoffice_pip_ext/.venv
+
+RUN --mount=type=cache,target=/root/.cache/uv \
+    uv sync --frozen --no-install-project $(test "$RUN_ENV" == production && echo "--no-dev") \
+    && sed -i "s/include-system-site-packages = false/include-system-site-packages = false/g" /workspace/libreoffice_pip_ext/.venv/pyvenv.cfg \
+    && if [ -f "$CONFIG_DIR/.tmp/res/req/requirements.txt" ]; then \
+    uv pip install --requirement "$CONFIG_DIR/.tmp/res/req/requirements.txt"; fi
+
+
+
 
 # Many of these environment variable are required for python and LibreOffice imports to work correctly.
 # For instance without proper environment vars: from com.sun.star.frame import XComponentLoader # results in error
