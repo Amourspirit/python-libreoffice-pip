@@ -138,32 +138,22 @@ class VerRules:
         Returns:
             bool: True if the installed version is valid, False otherwise.
         """
-        # sourcery skip: class-extract-method
         rules = self.get_matched_rules(vstr)
-        is_valid = True
-        for rule in rules:
-            is_valid = is_valid and rule.get_installed_is_valid(check_version)
+        return self.get_installed_is_valid_by_rules(rules, check_version)
 
-        return is_valid
-
-    def get_installed_is_valid_by_rules(
-        self, rules: Iterable[VerProto], check_version: str
-    ) -> bool:
+    def get_installed_is_valid_by_rules(self, rules: Iterable[VerProto], check_version: str) -> bool:
         """
         Gets if the installed version is valid when compared to this rule.
 
         Args:
-            rules (List[VerProto]): List of rules to check
+            rules (Iterable[VerProto]): List of rules to check
             check_version (str): The installed version to check. Eg: ``1.2.3``
 
         Returns:
             bool: True if the installed version is valid, False otherwise.
         """
-        for rule in rules:
-            is_valid = rule.get_installed_is_valid(check_version)
-            if not is_valid:
-                return False
-
-        return True
+        if not rules:
+            return False
+        return all(rule.get_installed_is_valid(check_version) for rule in rules)
 
     # endregion Methods

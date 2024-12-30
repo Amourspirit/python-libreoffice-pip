@@ -130,7 +130,7 @@ class EqualsStar(VerRuleBase):
         return True
 
     def get_versions(self) -> List[ReqVersion]:
-        """Get the list of versions. In this case it will be a single version, unless vstr is invalid in which case it will be an empty list."""
+        """Get the list of versions. In this case it will be a two versions, unless vstr is invalid in which case it will be an empty list."""
         ver = self.vstr[2:].strip()
         vp = _VersionParts(ver)
         major, minor, micro = vp.version_parts

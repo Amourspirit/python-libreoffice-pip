@@ -30,7 +30,7 @@ wheels = [
 
 [[package]]
 name = "libreoffice-pip-template"
-version = "0.6.1"
+version = "1.0.0"
 source = { editable = "." }
 dependencies = [
     { name = "ooouno" },

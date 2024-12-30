@@ -68,7 +68,7 @@ RUN sed -i "s/\/bin\/ash/\/bin\/bash/g" /etc/passwd \
 COPY ../.devcontainer/res $CONFIG_DIR/.tmp/res
 COPY ../.devcontainer/root/rc.sh /etc/profile.d/10bashrc.sh
 COPY ../.devcontainer/root/bashrc.sh $CONFIG_DIR/.bashrc
-COPY .//.devcontainer/root/bash_custom.sh $CONFIG_DIR/.bashrc_custom
+COPY ./.devcontainer/root/bash_custom.sh $CONFIG_DIR/.bashrc_custom
 
 ENV RUN_ENV=${RUN_ENV} \
     LANG=C.UTF-8 \
@@ -94,7 +94,7 @@ RUN MY_PY_VER=$(python -c "import sys; major, minor = sys.version_info[:2]; prin
 
 
 WORKDIR /workspace/libreoffice_pip_ext
-COPY ../*.toml ../*.lock ./
+COPY ../*.toml ../*.lock ../*.md ./
 
 
 # COPY --from=ghcr.io/astral-sh/uv:0.5.5 /uv /uvx /bin/
