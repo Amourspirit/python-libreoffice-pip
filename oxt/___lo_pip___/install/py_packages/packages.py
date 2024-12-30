@@ -1,11 +1,12 @@
 from __future__ import annotations
 from typing import List, Dict
-
+import sys
 
 from .py_package import PyPackage
 from .package_config import PackageConfig
 from ...config import Config
 from ...oxt_logger import OxtLogger
+from ...ver.rules.ver_rules import VerRules
 
 
 class Packages:
@@ -18,42 +19,49 @@ class Packages:
         self._config = Config()
         self._log = OxtLogger(log_name=self.__class__.__name__)
         self._packages: List[PyPackage] = []
+        self._py_ver = self._get_py_ver()
         self._load_packages()
+
+    def _get_py_ver(self) -> str:
+        # This is here for easier testing. It can be mocked in tests.
+        return f"{sys.version_info[0]}.{sys.version_info[1]}.{sys.version_info[2]}"
 
     def _load_packages(self) -> None:
         """
         Load rules from config
         """
+        ver_rules = VerRules()
 
         def is_valid(rule: PyPackage) -> bool:
-            if self._config.is_flatpak:
-                if rule.is_ignored_platform("flatpak"):
-                    self._log.debug("%s is ignored for flatpak", rule.name)
-                    return False
-                else:
-                    self._log.debug("%s is valid for flatpak", rule.name)
-            else:
-                self._log.debug("Not flatpak")
+            nonlocal ver_rules
 
-            if self._config.is_snap:
-                if rule.is_ignored_platform("snap"):
-                    self._log.debug("%s is ignored for snap}", rule.name)
-                    return False
+            if rule.python_versions:
+                is_package_valid_python = any(
+                    ver_rules.get_installed_is_valid(f">={ver}", self._py_ver) for ver in rule.python_versions
+                )
+                if is_package_valid_python:
+                    self._log.debug(
+                        "Python version %s for %s is valid for python requirement", self._py_ver, rule.name
+                    )
                 else:
-                    self._log.debug("%s is valid for snap}", rule.name)
-            else:
-                self._log.debug("Not snap")
-
-            if rule.is_platform("all"):
-                return True
+                    self._log.debug(
+                        "Python version %s for %s is NOT valid for python requirement %s", self._py_ver, rule.name
+                    )
+                    return False
 
             if self._config.is_win:
-                os_name = "win"
+                platform = "win"
             elif self._config.is_mac:
-                os_name = "mac"
+                platform = "mac"
+            elif self._config.is_flatpak:
+                platform = "flatpak"
+            elif self._config.is_snap:
+                platform = "snap"
             else:
-                os_name = "linux"
-            return rule.is_platform(os_name)
+                platform = "linux"
+            if rule.is_ignored_platform(platform):
+                return False
+            return rule.is_platform(platform)
 
         pkg_cfg = PackageConfig()
         for rule in pkg_cfg.py_packages:
