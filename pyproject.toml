@@ -120,7 +120,7 @@ es = "Plantilla para crear extensiones basadas en pip para LibreOffice"
 
 [project]
 name = "libreoffice_pip_template"
-version = "1.0.0"
+version = "1.1.0"
 description = "Template for creating pip based extensions for for LibreOffice"
 readme = "README.md"
 requires-python = ">=3.8"
