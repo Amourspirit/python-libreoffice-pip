@@ -103,17 +103,19 @@ class VersionParts:
 class ReqVersion(Version):
     """A class to represent a version requirement."""
 
-    def __init__(self, version: str) -> None:
+    def __init__(self, version: str, default_prefix="==") -> None:
         """Initialize a Version object.
 
         Args:
             version (str): The string representation of a version which will be parsed and normalized
                 before use.
+            default_prefix (str, optional): The default prefix to use if none is provided. Defaults to "==".
 
         Raises:
             InvalidVersion: If the ``version`` does not conform to PEP 440 in any way then this exception will be raised.
         """
         self.__prefix = ""
+        self.__default_prefix = default_prefix
         self.__ver = self._process_full_version(version)
         self.__version_parts = VersionParts(self.__ver)
         super().__init__(self.__ver)
@@ -128,11 +130,11 @@ class ReqVersion(Version):
 
     def _process_full_version(self, version: str) -> str:
         if match := re.search(r"\d", version):
-            prefix = version[: match.start()].strip() or "=="
+            prefix = version[: match.start()].strip() or self.__default_prefix
             ver = version[match.start() :].strip()
         else:
-            # no prefix means equal.
-            prefix = "=="
+            # no prefix means use default.
+            prefix = self.__default_prefix
             ver = version.strip()
         if not self._validate_prefix(prefix):
             raise ValueError(f"Invalid prefix: {prefix}")

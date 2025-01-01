@@ -65,10 +65,42 @@ if TYPE_CHECKING:
         pytest.param(
             False,
             False,
+            "mac",
+            "3.9.0",
+            1,
+            [
+                {
+                    "name": "spam1",
+                    "version": "1.2",
+                    "restriction": ">=",
+                    "python_versions": ["==3.9"],
+                }
+            ],
+            id="spam1 Python ==3.9",
+        ),
+        pytest.param(
+            False,
+            False,
+            "mac",
+            "3.9.0",
+            0,
+            [
+                {
+                    "name": "spam1",
+                    "version": "1.2",
+                    "restriction": ">=",
+                    "python_versions": ["!=3.9"],
+                }
+            ],
+            id="spam1 Python !=3.9",
+        ),
+        pytest.param(
+            False,
+            False,
             "linux",
             "3.12.0",
             1,
-            [{"name": "requests", "version": "3.9.0", "python_versions": ["3.9"]}],
+            [{"name": "requests", "version": "3.9.0", "python_versions": ["3.12"]}],
             id="matched python version",
         ),
         pytest.param(
@@ -77,7 +109,7 @@ if TYPE_CHECKING:
             "linux",
             "3.12.0",
             0,
-            [{"name": "requests", "version": "3.9.0", "python_versions": [">=3.9, !=3.12"]}],
+            [{"name": "requests", "version": "3.9.0", "python_versions": [">=3.9", "!=3.12"]}],
             id="Not equal python version 3.12",
         ),
         pytest.param(

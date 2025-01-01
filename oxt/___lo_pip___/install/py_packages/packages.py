@@ -6,6 +6,7 @@ from .py_package import PyPackage
 from .package_config import PackageConfig
 from ...config import Config
 from ...oxt_logger import OxtLogger
+from ...ver.req_version import ReqVersion
 from ...ver.rules.ver_rules import VerRules
 
 
@@ -32,22 +33,46 @@ class Packages:
         """
         ver_rules = VerRules()
 
+        def check_version_constraints(rule: PyPackage) -> bool:
+            if not rule.python_versions:
+                return True
+            current_ver = ReqVersion(self._py_ver)
+            for py_ver in rule.python_versions:
+                constraint_ver = ReqVersion(py_ver)
+                if constraint_ver.prefix == ">":
+                    if current_ver >= constraint_ver:
+                        return False
+                elif constraint_ver.prefix == ">=":
+                    if current_ver < constraint_ver:
+                        return False
+                elif constraint_ver.prefix == "<":
+                    if current_ver >= constraint_ver:
+                        return False
+                elif constraint_ver.prefix == "<=":
+                    if current_ver > constraint_ver:
+                        return False
+                elif constraint_ver.prefix == "!=":
+                    if constraint_ver == current_ver:
+                        return False
+                elif constraint_ver.prefix == "==":
+                    if constraint_ver != current_ver:
+                        return False
+                else:
+                    raise ValueError(f"Unsupported operator: {constraint_ver.prefix}")
+            return True
+
         def is_valid(rule: PyPackage) -> bool:
             nonlocal ver_rules
 
-            if rule.python_versions:
-                is_package_valid_python = any(
-                    ver_rules.get_installed_is_valid(f">={ver}", self._py_ver) for ver in rule.python_versions
+            if check_version_constraints(rule):
+                self._log.debug("Python version %s for %s satisfies all constraints.", self._py_ver, rule.name)
+            else:
+                self._log.debug(
+                    self._log.debug(
+                        "Python version %s for %s does not satisfies all constraints.", self._py_ver, rule.name
+                    )
                 )
-                if is_package_valid_python:
-                    self._log.debug(
-                        "Python version %s for %s is valid for python requirement", self._py_ver, rule.name
-                    )
-                else:
-                    self._log.debug(
-                        "Python version %s for %s is NOT valid for python requirement %s", self._py_ver, rule.name
-                    )
-                    return False
+                return False
 
             if self._config.is_win:
                 platform = "win"
