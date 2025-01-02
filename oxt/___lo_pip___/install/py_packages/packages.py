@@ -127,7 +127,7 @@ class Packages:
         if pkg in self._packages:
             self._log.debug("add_pkg() Rule Already added: %s", pkg)
             return
-        self._log.debug("add_pkg() Adding Rule %s", self.__class__.__name__, pkg)
+        self._log.debug("add_pkg() Adding Rule %s", pkg)
         self._add_pkg(pkg=pkg)
 
     def remove_package(self, pkg: PyPackage):

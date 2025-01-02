@@ -67,10 +67,19 @@ typing-extensions = ">=4.12.2"
 
 [[tool.oxt.py_packages]]
 # https://tinyurl.com/ymeh4c9j#tooloxtpy_packages
+# https://amour_spirit.pyscriptapps.com/version-runner/latest/py_packages.html
 name="verr"
 version="1.1.2"
 platforms=["all"]
 # ignore_platforms=["flatpak", "snap"]
+
+[[tool.oxt.py_packages]]
+name="pacote-hello-world"
+version="0.0.1"
+restriction="=="
+platforms=["linux"]
+python_versions=["<=3.12"]
+
 
 [tool.oxt.isolate]
 # https://tinyurl.com/ymeh4c9j#tooloxtisolate
@@ -120,7 +129,7 @@ es = "Plantilla para crear extensiones basadas en pip para LibreOffice"
 
 [project]
 name = "libreoffice_pip_template"
-version = "1.1.0"
+version = "1.1.1"
 description = "Template for creating pip based extensions for for LibreOffice"
 readme = "README.md"
 requires-python = ">=3.8"
