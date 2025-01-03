@@ -579,10 +579,15 @@ class InstallPkg:
     def _get_json_data(self, path: str, pkg: str) -> Dict[str, Any]:
         """Get the JSON data from the file if it exists."""
         json_path = os.path.join(path, f"{self._config.lo_implementation_name}_{pkg}.json")
+        j_contents = {}
         if os.path.exists(json_path):
             with open(json_path, "r") as f:
-                return json.load(f)
-        return {}
+                j_contents = json.load(f)
+                data = j_contents.get("data", {})
+                if "bin" not in data:
+                    data["bin"] = []
+
+        return j_contents
 
     def _remove_json_data(self, path: str, pkg: str) -> None:
         """Remove the JSON data if it exists."""
