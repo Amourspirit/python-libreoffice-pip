@@ -5,8 +5,6 @@ No Internet needed.
 """
 
 from __future__ import annotations
-import sys
-from packaging.version import Version as PkgVersion
 
 from importlib.metadata import PackageNotFoundError, version
 
