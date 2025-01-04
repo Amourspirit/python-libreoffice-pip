@@ -35,12 +35,12 @@ class RequirementsCheck(metaclass=Singleton):
             self._is_valid_version(name=name, ver=ver) == 0 for name, ver in self._config.requirements.items()
         )
         if not requirements_met:
-            self._logger.error("Requirements not met.")
+            self._logger.debug("Requirements not met.")
             return False
 
         ver_rules = VerRules()
 
-        def check_installed_valid(pkg: PyPackage):
+        def check_installed_valid(pkg: PyPackage) -> bool:
             nonlocal ver_rules
             ver_str = self._get_package_version(pkg.name)
             if not ver_str:

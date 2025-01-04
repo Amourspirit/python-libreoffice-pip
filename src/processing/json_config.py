@@ -4,6 +4,7 @@ from pathlib import Path
 import json
 import toml
 
+from oxt.___lo_pip___.ver.req_version import ReqVersion
 from ..meta.singleton import Singleton
 from ..config import Config
 from .token import Token
@@ -204,6 +205,49 @@ class JsonConfig(metaclass=Singleton):
         assert self._extension_version.count(".") == 2, "extension_version must contain two periods"
         assert isinstance(self._unload_after_install, bool), "unload_after_install must be a bool"
         assert isinstance(self._require_install_name_match, bool), "require_install_name_match must be a bool"
+
+        # region Requirements Rule
+        platforms = {"linux", "macos", "win", "flatpak", "snap", "all"}
+        restrictions = {"<", "<=", "==", "!=", ">", ">=", "^", "~", "~="}
+        for pkg in self._py_packages:
+            assert isinstance(pkg, dict), "py_packages must be a list of dicts"
+            assert "name" in pkg, "py_packages must contain a 'name' key"
+            assert "version" in pkg, "py_packages must contain a 'version' key"
+            assert isinstance(pkg["name"], str), "py_packages name must be a string"
+            assert isinstance(pkg["version"], str), "py_packages ver must be a string"
+            if "platforms" in pkg:
+                assert isinstance(pkg["platforms"], list), "py_packages platforms must be a list"
+                for platform in pkg["platforms"]:
+                    assert isinstance(platform, str), "py_packages platforms must be a list of strings"
+                    assert (
+                        platform in platforms
+                    ), "py_packages platforms must be in ['linux', 'macos', 'win', 'flatpak', 'snap', 'all']"
+
+            if "ignore_platforms" in pkg:
+                assert isinstance(pkg["ignore_platforms"], list), "py_packages platforms must be a list"
+                for platform in pkg["ignore_platforms"]:
+                    assert isinstance(platform, str), "py_packages ignore_platforms must be a list of strings"
+                    assert (
+                        platform in platforms
+                    ), "py_packages ignore_platforms must be in ['linux', 'macos', 'win', 'flatpak', 'snap', 'all']"
+            if "python_versions" in pkg:
+                assert isinstance(pkg["python_versions"], list), "py_packages python_versions must be a list"
+                for py_ver in pkg["python_versions"]:
+                    assert isinstance(py_ver, str), "py_packages python_versions must be a list of strings"
+                    assert len(py_ver) != 0, "py_packages python_versions must be not be an empty string"
+                    try:
+                        # validate python version by converting to ReqVersion
+                        py_ver = ReqVersion(py_ver)
+                    except Exception as err:
+                        raise Exception(f"Error in py_packages python_versions: {err}") from err
+
+            if "restriction" in pkg:
+                assert isinstance(pkg["restriction"], str), "py_packages python_versions must be a list"
+                assert (
+                    pkg["restriction"] in restrictions
+                ), "py_packages restriction must be in ['<', '<=', '==', '!=', '>', '>=', '^', '~', '~=']"
+
+        # endregion Requirements Rule
 
     def _warnings(self) -> None:
         warnings = []

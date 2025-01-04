@@ -78,7 +78,7 @@ name="pacote-hello-world"
 version="0.0.1"
 restriction="=="
 platforms=["linux"]
-python_versions=["<=3.12"]
+python_versions=[">=3.12"]
 
 
 [tool.oxt.isolate]
@@ -185,6 +185,7 @@ reportMissingModuleSource = false
 # https://docs.astral.sh/ruff/configuration/
 [tool.ruff]
 line-length = 119
+indent-width = 4
 
 target-version = "py38"
 exclude = [
