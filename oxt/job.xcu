@@ -9,12 +9,22 @@
         <value>___lo_identifier___.___lo_implementation_name___.py_runner</value>
       </prop>
     </node>
+    <node oor:name="DebugJob" oor:op="fuse">
+      <prop oor:name="Service">
+        <value>___lo_identifier___.DebugJob</value>
+      </prop>
+    </node>
   </node>
   <node oor:name="Events">
     <node oor:name="___startup_event___" oor:op="fuse">
       <node oor:name="JobList">
         <node oor:name="___lo_identifier___.___lo_implementation_name___.py_runner_job"
           oor:op="fuse" />
+      </node>
+    </node>
+    <node oor:name="OnViewCreated" oor:op="fuse">
+      <node oor:name="JobList">
+        <node oor:name="DebugJob" oor:op="fuse" />
       </node>
     </node>
   </node>

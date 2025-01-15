@@ -160,6 +160,7 @@ class JsonConfig(metaclass=Singleton):
         json_config["lo_implementation_name"] = token.get_token_value("lo_implementation_name")
         json_config["oxt_name"] = token.get_token_value("oxt_name")
         json_config["lo_pip"] = token.get_token_value("lo_pip")
+        json_config["libreoffice_debug_port"] = token.get_unprocessed_token_value("libreoffice_debug_port", 0)
 
         json_config["zipped_preinstall_pure"] = self._zip_preinstall_pure
         json_config["auto_install_in_site_packages"] = self._auto_install_in_site_packages
@@ -188,9 +189,42 @@ class JsonConfig(metaclass=Singleton):
         json_config["py_packages"] = self._py_packages
         # endregion Requirements Rule
 
+        self._validate_config_dict(json_config)
+
         # save the file
         with open(json_config_path, "w", encoding="utf-8") as f:
             json.dump(json_config, f, indent=4)
+
+    def _validate_config_dict(self, config_dict: Dict[str, str]) -> None:
+        def has_whitespace(value: str) -> bool:
+            return any(char.isspace() for char in value)
+
+        value = config_dict["py_pkg_dir"]
+        assert isinstance(value, str), "py_pkg_dir must be an int"
+        assert len(value) > 0, "py_pkg_dir must not be an empty string"
+        assert not has_whitespace(value), "py_pkg_dir must not contain whitespace"
+
+        value = config_dict["lo_identifier"]
+        assert isinstance(value, str), "lo_identifier must be an int"
+        assert len(value) > 0, "lo_identifier must not be an empty string"
+        assert not has_whitespace(value), "lo_identifier must not contain whitespace"
+
+        value = config_dict["lo_implementation_name"]
+        assert isinstance(value, str), "lo_implementation_name must be an int"
+        assert len(value) > 0, "lo_implementation_name must not be an empty string"
+        assert not has_whitespace(value), "lo_implementation_name must not contain whitespace"
+
+        value = config_dict["oxt_name"]
+        assert isinstance(value, str), "oxt_name must be an int"
+        assert len(value) > 0, "oxt_name must not be an empty string"
+
+        value = config_dict["lo_pip"]
+        assert isinstance(value, str), "lo_pip must be an int"
+        assert len(value) > 0, "lo_pip must not be an empty string"
+        assert not has_whitespace(value), "lo_pip must not contain whitespace"
+
+        value = config_dict["libreoffice_debug_port"]
+        assert isinstance(value, int), "libreoffice_debug_port must be an int"
 
     def _validate(self) -> None:
         """Validate"""
@@ -223,7 +257,6 @@ class JsonConfig(metaclass=Singleton):
         assert isinstance(self._cmd_clean_file_prefix, str), "cmd_clean_file_prefix must be a string"
         assert len(self._cmd_clean_file_prefix) > 0, "cmd_clean_file_prefix must not be an empty string"
         assert isinstance(self._cmd_clean_file_enabled, bool), "cmd_clean_file_enabled must be a bool"
-
         # region Requirements Rule
         platforms = {"linux", "macos", "win", "flatpak", "snap", "all"}
         restrictions = {"<", "<=", "==", "!=", ">", ">=", "^", "~", "~="}

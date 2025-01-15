@@ -48,6 +48,7 @@ class BasicConfig(metaclass=ConfigMeta):
         self._require_install_name_match = bool(kwargs.get("require_install_name_match", False))
         self._cmd_clean_file_prefix = str(kwargs["cmd_clean_file_prefix"])
         self._cmd_clean_file_enabled = bool(kwargs["cmd_clean_file_enabled"])
+        self._libreoffice_debug_port = int(kwargs.get("libreoffice_debug_port", 0))
 
         if "requirements" not in kwargs:
             kwargs["requirements"] = {}
@@ -178,6 +179,15 @@ class BasicConfig(metaclass=ConfigMeta):
         The value for this property can be set in pyproject.toml (tool.oxt.token.lo_implementation_name)
         """
         return self._lo_implementation_name
+
+    @property
+    def libreoffice_debug_port(self) -> int:
+        """
+        Gets the LibreOffice debug port.
+
+        The value for this property can be set in pyproject.toml (tool.oxt.token.libreoffice_debug_port)
+        """
+        return self._libreoffice_debug_port
 
     @property
     def no_pip_remove(self) -> Set[str]:
