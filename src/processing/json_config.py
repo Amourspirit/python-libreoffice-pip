@@ -121,6 +121,19 @@ class JsonConfig(metaclass=Singleton):
         except Exception:
             self._require_install_name_match = False
 
+        try:
+            self._cmd_clean_file_prefix = cast(
+                str,
+                self._cfg["tool"]["oxt"]["config"]["cmd_clean_file_prefix"],
+            )
+        except Exception:
+            self._cmd_clean_file_prefix = ""
+
+        try:
+            self._cmd_clean_file_enabled = cast(bool, self._cfg["tool"]["oxt"]["config"]["cmd_clean_file_enabled"])
+        except Exception:
+            self._cmd_clean_file_enabled = False
+
         # region Requirements Rule
         # Access a specific table
         try:
@@ -168,6 +181,8 @@ class JsonConfig(metaclass=Singleton):
         json_config["has_locals"] = self._config.has_locals
         json_config["no_pip_remove"] = self._no_pip_remove
         json_config["require_install_name_match"] = self._require_install_name_match
+        json_config["cmd_clean_file_prefix"] = self._cmd_clean_file_prefix
+        json_config["cmd_clean_file_enabled"] = self._cmd_clean_file_enabled
 
         # region Requirements Rule
         json_config["py_packages"] = self._py_packages
@@ -205,6 +220,9 @@ class JsonConfig(metaclass=Singleton):
         assert self._extension_version.count(".") == 2, "extension_version must contain two periods"
         assert isinstance(self._unload_after_install, bool), "unload_after_install must be a bool"
         assert isinstance(self._require_install_name_match, bool), "require_install_name_match must be a bool"
+        assert isinstance(self._cmd_clean_file_prefix, str), "cmd_clean_file_prefix must be a string"
+        assert len(self._cmd_clean_file_prefix) > 0, "cmd_clean_file_prefix must not be an empty string"
+        assert isinstance(self._cmd_clean_file_enabled, bool), "cmd_clean_file_enabled must be a bool"
 
         # region Requirements Rule
         platforms = {"linux", "macos", "win", "flatpak", "snap", "all"}

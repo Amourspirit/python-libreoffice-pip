@@ -29,6 +29,8 @@ tokes_files = [] # ["python_impl.py"] https://tinyurl.com/ymeh4c9j#tokes_files
 no_pip_remove = ["pip", "setuptools", "wheel"] # https://tinyurl.com/ymeh4c9j#no_pip_remove
 require_install_name_match = false # https://tinyurl.com/ymeh4c9j#require_install_name_match
 unload_after_install = true # https://tinyurl.com/ymeh4c9j#unload_after_install
+cmd_clean_file_enabled = true
+cmd_clean_file_prefix = "cleanup_"
 
 [tool.oxt.token]
 # in the form of "token_name": "token_value"
@@ -182,12 +184,14 @@ disable = """
 include = ["src"]
 reportMissingModuleSource = false
 
-# https://docs.astral.sh/ruff/configuration/
 [tool.ruff]
-line-length = 119
-indent-width = 4
+# https://docs.astral.sh/ruff/configuration/
 
+ignore = ["E501"]
+show-fixes = true
 target-version = "py38"
+line-length = 119
+
 exclude = [
     ".bzr",
     ".direnv",
@@ -203,19 +207,24 @@ exclude = [
     ".svn",
     ".tox",
     "__pypackages__",
-    "_build",
+    "build",
     "buck-out",
     "build",
     "dist",
     "node_modules",
+    "site-packages",
     ".venv",
-    "venv",
     "tmp",
 ]
 src = ["otx", "src"]
 
+
 [tool.ruff.lint]
-exclude = ["tmp", ".devcontainer", ".githooks", ".github", ".hypothesis", ".idea", ".pytest_cache", ".venv", ".vscode", "cmds", "dist", "docs"]
+select = ["ANN", "C4", "N", "SIM"]
+ignore = []
+
+[tool.ruff.format]
+exclude = ["tmp", ".devcontainer", ".githooks", ".github", ".hypothesis", ".idea", ".pytest_cache", ".venv", ".vscode", "cmds", "dist", "docs", "*.pyi"]
 
 [tool.ruff.lint.pylint]
 max-args = 10

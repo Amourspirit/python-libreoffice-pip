@@ -21,6 +21,7 @@ class Packages:
         self._log = OxtLogger(log_name=self.__class__.__name__)
         self._packages: List[PyPackage] = []
         self._py_ver = self._get_py_ver()
+        self._pkg_cfg = PackageConfig()
         self._load_packages()
 
     def _get_py_ver(self) -> str:
@@ -34,7 +35,10 @@ class Packages:
         ver_rules = VerRules()
 
         def check_version_constraints(rule: PyPackage) -> bool:
-            if not rule.python_versions:
+            if rule.python_versions:
+                self._log.debug("Checking Python version constraints for %s", rule.name)
+            else:
+                self._log.debug("No Python version constraints for %s", rule.name)
                 return True
             current_ver = ReqVersion(self._py_ver)
             for py_ver in rule.python_versions:
@@ -65,12 +69,14 @@ class Packages:
             nonlocal ver_rules
 
             if check_version_constraints(rule):
-                self._log.debug("Python version %s for %s satisfies all constraints.", self._py_ver, rule.name)
+                self._log.debug(
+                    "is_valid() Python version %s for %s satisfies all constraints.", self._py_ver, rule.name
+                )
             else:
                 self._log.debug(
-                    self._log.debug(
-                        "Python version %s for %s does not satisfies all constraints.", self._py_ver, rule.name
-                    )
+                    "is_valid() Python version %s for %s does not satisfies all constraints.",
+                    self._py_ver,
+                    rule.name,
                 )
                 return False
 
@@ -85,11 +91,17 @@ class Packages:
             else:
                 platform = "linux"
             if rule.is_ignored_platform(platform):
+                self._log.debug(
+                    "is_valid() Package %s not valid for platform %s. Ignored platform", rule.name, platform
+                )
                 return False
-            return rule.is_platform(platform)
+            if rule.is_platform(platform):
+                self._log.debug("is_valid() Package %s valid for platform %s", rule.name, platform)
+                return True
+            self._log.debug("is_valid() Package %s not valid for platform %s", rule.name, platform)
+            return False
 
-        pkg_cfg = PackageConfig()
-        for rule in pkg_cfg.py_packages:
+        for rule in self._pkg_cfg.py_packages:
             gi = PyPackage.from_dict(**rule)
             if is_valid(gi):
                 self._log.debug("Adding rule: %s}", gi)
@@ -130,7 +142,7 @@ class Packages:
         self._log.debug("add_pkg() Adding Rule %s", pkg)
         self._add_pkg(pkg=pkg)
 
-    def remove_package(self, pkg: PyPackage):
+    def remove_package(self, pkg: PyPackage) -> None:
         """
         Removes Package
 
@@ -148,7 +160,7 @@ class Packages:
             self._log.error(msg)
             raise ValueError(msg) from e
 
-    def _add_pkg(self, pkg: PyPackage):
+    def _add_pkg(self, pkg: PyPackage) -> None:
         self._packages.append(pkg)
 
     def __repr__(self) -> str:
@@ -166,6 +178,42 @@ class Packages:
         for pkg in self.packages:
             result[pkg.name] = f"{pkg.restriction}{pkg.version}"
         return result
+
+    def get_all_packages(self, all_pkg: bool = False, include_non_removable_packages: bool = False) -> List[PyPackage]:
+        """
+        Gets all packages from the config.
+        Args:
+            all_pkg (bool, optional): Include all packages. Defaults to False.
+                When True, all packages are included. When False, only ``py_packages`` and ``requirements`` are included.
+            include_non_removable_packages (bool, optional): Include packages that are not removable. Defaults to False.
+                In the config this would be the values for ``no_pip_remove``.
+
+        Returns:
+            List[PyPackage]: List of all Packages
+
+        Note:
+            ``lp_editor_py_packages`` are only included when ``all_pkg`` is True.
+        """
+
+        def make_pkg(name: str, constraint: str) -> PyPackage:
+            ver = ReqVersion(constraint, ">=")
+            return PyPackage(name=name, version=str(ver), restriction=ver.prefix, platform=("all",))
+
+        pkgs = []
+        for pkg in self.packages:
+            if all_pkg:
+                pkgs.append(pkg.copy())
+            else:
+                if pkg.pkg_type == "py_packages":
+                    pkgs.append(pkg.copy())
+
+        for key, value in self._config.requirements.items():
+            if include_non_removable_packages:
+                pkgs.append(make_pkg(key, value))
+            else:
+                if key not in self._config.no_pip_remove:
+                    pkgs.append(make_pkg(key, value))
+        return pkgs
 
     # endregion Methods
 

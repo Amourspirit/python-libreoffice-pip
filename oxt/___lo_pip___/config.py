@@ -714,6 +714,25 @@ class Config(metaclass=Singleton):
         """
         return self._basic_config.require_install_name_match
 
+    @property
+    def cmd_clean_file_prefix(self) -> str:
+        """
+        Gets the command clean file prefix.
+
+        The value for this property can be set in pyproject.toml (tool.oxt.config.cmd_clean_file_prefix)
+        """
+        return self._basic_config.cmd_clean_file_prefix
+
+    @property
+    def cmd_clean_file_enabled(self) -> bool:
+        """
+        Gets the flag indicating if the command clean file is enabled.
+        When True a script will be created in the LibreOffice user directory to remove the extension python packages.
+
+        The value for this property can be set in pyproject.toml (tool.oxt.config.cmd_clean_file_enabled)
+        """
+        return self._basic_config.cmd_clean_file_enabled
+
     # endregion Properties
 
 
