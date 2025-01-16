@@ -29,9 +29,9 @@ tokes_files = [] # ["python_impl.py"] https://tinyurl.com/ymeh4c9j#tokes_files
 no_pip_remove = ["pip", "setuptools", "wheel"] # https://tinyurl.com/ymeh4c9j#no_pip_remove
 require_install_name_match = false # https://tinyurl.com/ymeh4c9j#require_install_name_match
 unload_after_install = true # https://tinyurl.com/ymeh4c9j#unload_after_install
-cmd_clean_file_enabled = true
-cmd_clean_file_prefix = "cleanup_"
-pip_shared_dirs = ["bin", "lib", "include", "inc", "docs", "config"]
+cmd_clean_file_enabled = true # https://tinyurl.com/ymeh4c9j#cmd_clean_file_enabled
+cmd_clean_file_prefix = "cleanup_" # https://tinyurl.com/ymeh4c9j#cmd_clean_file_prefix
+pip_shared_dirs = ["bin", "lib", "include", "inc", "docs", "config"] # https://tinyurl.com/ymeh4c9j#pip_shared_dirs
 
 [tool.oxt.token]
 # in the form of "token_name": "token_value"
