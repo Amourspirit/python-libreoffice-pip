@@ -283,6 +283,7 @@ class ButtonOthListener(XActionListener, unohelper.Base):
             window.getPeer(),
             title=title,
             message=msg,
+            type=INFOBOX,
         ).execute()
 
     def _action_copy_cmd_bash(self, ev: Any) -> None:  # noqa: ANN401
@@ -305,6 +306,7 @@ class ButtonOthListener(XActionListener, unohelper.Base):
             window.getPeer(),
             title=title,
             message=msg,
+            type=INFOBOX,
         ).execute()
 
 
