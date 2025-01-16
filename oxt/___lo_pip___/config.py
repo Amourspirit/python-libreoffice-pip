@@ -244,7 +244,7 @@ class Config(metaclass=Singleton):
 
         This is the default locale to use if the locale is not set in the LibreOffice configuration.
         """
-        return self._basic_config._default_locale
+        return self._basic_config.default_locale
 
     @property
     def default_locale_str(self) -> str:
@@ -378,7 +378,7 @@ class Config(metaclass=Singleton):
 
         If this is set to ``True`` then the dialog is owned by the LibreOffice desktop window.
         """
-        return self._basic_config._dialog_desktop_owned
+        return self._basic_config.dialog_desktop_owned
 
     @property
     def is_linux(self) -> bool:
@@ -551,7 +551,7 @@ class Config(metaclass=Singleton):
 
         This is the name of the directory containing the resource files.
         """
-        return self._basic_config._resource_dir_name
+        return self._basic_config.resource_dir_name
 
     @property
     def resource_properties_prefix(self) -> str:
@@ -562,7 +562,7 @@ class Config(metaclass=Singleton):
 
         This is the prefix for the resource properties.
         """
-        return self._basic_config._resource_properties_prefix
+        return self._basic_config.resource_properties_prefix
 
     @property
     def show_progress(self) -> bool:
@@ -732,6 +732,16 @@ class Config(metaclass=Singleton):
         The value for this property can be set in pyproject.toml (tool.oxt.config.cmd_clean_file_enabled)
         """
         return self._basic_config.cmd_clean_file_enabled
+
+    @property
+    def pip_shared_dirs(self) -> List[str]:
+        """
+        Gets the list of shared directories for pip packages.
+        These are used to build the cleanup scripts.
+
+        The value for this property can be set in pyproject.toml (tool.oxt.config.pip_shared_dirs)
+        """
+        return self._basic_config.pip_shared_dirs
 
     # endregion Properties
 

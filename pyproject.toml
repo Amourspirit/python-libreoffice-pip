@@ -31,6 +31,7 @@ require_install_name_match = false # https://tinyurl.com/ymeh4c9j#require_instal
 unload_after_install = true # https://tinyurl.com/ymeh4c9j#unload_after_install
 cmd_clean_file_enabled = true
 cmd_clean_file_prefix = "cleanup_"
+pip_shared_dirs = ["bin", "lib", "include", "inc", "docs", "config"]
 
 [tool.oxt.token]
 # in the form of "token_name": "token_value"

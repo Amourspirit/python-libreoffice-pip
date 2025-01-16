@@ -10,6 +10,10 @@ from ..config import Config
 from .token import Token
 
 
+def has_whitespace(value: str) -> bool:
+    return any(char.isspace() for char in value)
+
+
 class JsonConfig(metaclass=Singleton):
     """Singleton Class the Config Json."""
 
@@ -134,6 +138,11 @@ class JsonConfig(metaclass=Singleton):
         except Exception:
             self._cmd_clean_file_enabled = False
 
+        try:
+            self._pip_shared_dirs = cast(list, self._cfg["tool"]["oxt"]["config"]["pip_shared_dirs"])
+        except Exception:
+            self._pip_shared_dirs = ["bin", "lib", "include", "inc", "docs", "config"]
+
         # region Requirements Rule
         # Access a specific table
         try:
@@ -176,6 +185,7 @@ class JsonConfig(metaclass=Singleton):
         json_config["install_on_no_uninstall_permission"] = self._install_on_no_uninstall_permission
         json_config["extension_version"] = self._extension_version
         json_config["unload_after_install"] = self._unload_after_install
+        json_config["pip_shared_dirs"] = self._pip_shared_dirs
         # json_config["log_pip_installs"] = self._log_pip_installs
         # update the requirements
         json_config["requirements"] = self._requirements
@@ -196,9 +206,6 @@ class JsonConfig(metaclass=Singleton):
             json.dump(json_config, f, indent=4)
 
     def _validate_config_dict(self, config_dict: Dict[str, str]) -> None:
-        def has_whitespace(value: str) -> bool:
-            return any(char.isspace() for char in value)
-
         value = config_dict["py_pkg_dir"]
         assert isinstance(value, str), "py_pkg_dir must be an int"
         assert len(value) > 0, "py_pkg_dir must not be an empty string"
@@ -257,6 +264,12 @@ class JsonConfig(metaclass=Singleton):
         assert isinstance(self._cmd_clean_file_prefix, str), "cmd_clean_file_prefix must be a string"
         assert len(self._cmd_clean_file_prefix) > 0, "cmd_clean_file_prefix must not be an empty string"
         assert isinstance(self._cmd_clean_file_enabled, bool), "cmd_clean_file_enabled must be a bool"
+        assert isinstance(self._pip_shared_dirs, list), "pip_shared_dirs must be a list"
+        for pip_dir in self._pip_shared_dirs:
+            assert isinstance(pip_dir, str), "pip_shared_dirs must be a list of strings"
+            assert len(pip_dir) > 0, "pip_shared_dirs must not be an empty string"
+            assert not has_whitespace(pip_dir), "pip_shared_dirs must not contain whitespace"
+
         # region Requirements Rule
         platforms = {"linux", "macos", "win", "flatpak", "snap", "all"}
         restrictions = {"<", "<=", "==", "!=", ">", ">=", "^", "~", "~="}

@@ -1,13 +1,13 @@
 from __future__ import annotations
 from pathlib import Path
-from typing import Dict, List, Set, cast
+from typing import Any, Dict, List, Set, cast
 import json
 
 
 class ConfigMeta(type):
     _instance = None
 
-    def __call__(cls, *args, **kwargs):
+    def __call__(cls, *args, **kwargs) -> Any:  # noqa: ANN002, ANN003, ANN401
         if cls._instance is None:
             root = Path(__file__).parent
             config_file = Path(root, "config.json")
@@ -49,6 +49,7 @@ class BasicConfig(metaclass=ConfigMeta):
         self._cmd_clean_file_prefix = str(kwargs["cmd_clean_file_prefix"])
         self._cmd_clean_file_enabled = bool(kwargs["cmd_clean_file_enabled"])
         self._libreoffice_debug_port = int(kwargs.get("libreoffice_debug_port", 0))
+        self._pip_shared_dirs = cast(List[str], kwargs.get("pip_shared_dirs", []))
 
         if "requirements" not in kwargs:
             kwargs["requirements"] = {}
@@ -208,6 +209,16 @@ class BasicConfig(metaclass=ConfigMeta):
         The value for this property can be set in pyproject.toml (tool.oxt.token.oxt_name)
         """
         return self._oxt_name
+
+    @property
+    def pip_shared_dirs(self) -> List[str]:
+        """
+        Gets the list of shared directories for pip packages.
+        These are used to build the cleanup scripts.
+
+        The value for this property can be set in pyproject.toml (tool.oxt.config.pip_shared_dirs)
+        """
+        return self._pip_shared_dirs
 
     @property
     def py_pkg_dir(self) -> str:
