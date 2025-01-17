@@ -16,7 +16,7 @@ create_build_dir:
 	mkdir -p tmp
 
 diff: create_build_dir
-	git diff > ./tmp/changes_since_last_commit.diff
+	git diff HEAD > ./tmp/changes_since_last_commit.diff
 
 diff_sum: create_build_dir
-	git diff --compact-summary > ./tmp/summary_since_last_commit.diff
+	git diff HEAD --compact-summary > ./tmp/summary_since_last_commit.diff

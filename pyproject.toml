@@ -8,7 +8,7 @@ oxt_name = "OooPip" # https://tinyurl.com/ymeh4c9j#oxt_name
 py_pkg_dir = "py_pkgs" # https://tinyurl.com/ymeh4c9j#py_pkg_dir
 py_pkg_files = [] # https://tinyurl.com/ymeh4c9j#py_pkg_files
 py_pkg_names = [] # ["ooodev", "ooo"] https://tinyurl.com/ymeh4c9j#py_pkg_names
-token_file_ext = ["txt", "xml", "xcu", "xcs", "py","components"] # https://tinyurl.com/ymeh4c9j#token_file_ext
+token_file_ext = ["txt", "xml", "xcu", "xcs", "py","components", "json"] # https://tinyurl.com/ymeh4c9j#token_file_ext
 update_file = "update.xml" # https://tinyurl.com/ymeh4c9j#update_file
 zip_preinstall_pure = true # https://tinyurl.com/ymeh4c9j#zip_preinstall_pure
 window_timeout = 5 # https://tinyurl.com/ymeh4c9j#window_timeout number of seconds to wait for window to appear
@@ -29,6 +29,9 @@ tokes_files = [] # ["python_impl.py"] https://tinyurl.com/ymeh4c9j#tokes_files
 no_pip_remove = ["pip", "setuptools", "wheel"] # https://tinyurl.com/ymeh4c9j#no_pip_remove
 require_install_name_match = false # https://tinyurl.com/ymeh4c9j#require_install_name_match
 unload_after_install = true # https://tinyurl.com/ymeh4c9j#unload_after_install
+cmd_clean_file_enabled = true # https://tinyurl.com/ymeh4c9j#cmd_clean_file_enabled
+cmd_clean_file_prefix = "cleanup_" # https://tinyurl.com/ymeh4c9j#cmd_clean_file_prefix
+pip_shared_dirs = ["bin", "lib", "include", "inc", "docs", "config"] # https://tinyurl.com/ymeh4c9j#pip_shared_dirs
 
 [tool.oxt.token]
 # in the form of "token_name": "token_value"
@@ -56,6 +59,7 @@ platform = "all" # https://tinyurl.com/ymeh4c9j#platform
 startup_event = "OnStartApp" # OnStartApp or onFirstVisibleTask https://tinyurl.com/ymeh4c9j#startup_event
 show_progress = true # https://tinyurl.com/ymeh4c9j#show_progress
 delay_startup = true # determines if installing waits fo the window to load before installing https://tinyurl.com/ymeh4c9j#delay_startup
+libreoffice_debug_port = 5678
 
 [tool.oxt.requirements]
 # https://tinyurl.com/ymeh4c9j#tooloxtrequirements
@@ -64,6 +68,7 @@ delay_startup = true # determines if installing waits fo the window to load befo
 # If the requirements are platform specific, use the platform specific sections below
 # If the requirement is added here and in the platform specific section, the platform specific section takes precedence
 typing-extensions = ">=4.12.2"
+debugpy = ">=1.8"
 
 [[tool.oxt.py_packages]]
 # https://tinyurl.com/ymeh4c9j#tooloxtpy_packages
@@ -78,7 +83,7 @@ name="pacote-hello-world"
 version="0.0.1"
 restriction="=="
 platforms=["linux"]
-python_versions=["<=3.12"]
+python_versions=[">=3.12"]
 
 
 [tool.oxt.isolate]
@@ -182,11 +187,14 @@ disable = """
 include = ["src"]
 reportMissingModuleSource = false
 
-# https://docs.astral.sh/ruff/configuration/
 [tool.ruff]
+# https://docs.astral.sh/ruff/configuration/
+
+ignore = ["E501"]
+show-fixes = true
+target-version = "py38"
 line-length = 119
 
-target-version = "py38"
 exclude = [
     ".bzr",
     ".direnv",
@@ -202,19 +210,24 @@ exclude = [
     ".svn",
     ".tox",
     "__pypackages__",
-    "_build",
+    "build",
     "buck-out",
     "build",
     "dist",
     "node_modules",
+    "site-packages",
     ".venv",
-    "venv",
     "tmp",
 ]
 src = ["otx", "src"]
 
+
 [tool.ruff.lint]
-exclude = ["tmp", ".devcontainer", ".githooks", ".github", ".hypothesis", ".idea", ".pytest_cache", ".venv", ".vscode", "cmds", "dist", "docs"]
+select = ["ANN", "C4", "N", "SIM"]
+ignore = []
+
+[tool.ruff.format]
+exclude = ["tmp", ".devcontainer", ".githooks", ".github", ".hypothesis", ".idea", ".pytest_cache", ".venv", ".vscode", "cmds", "dist", "docs", "*.pyi"]
 
 [tool.ruff.lint.pylint]
 max-args = 10

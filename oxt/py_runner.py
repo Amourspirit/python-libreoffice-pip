@@ -37,8 +37,8 @@ def add_local_path_to_sys_path() -> None:
 
 
 add_local_path_to_sys_path()
-
 if TYPE_CHECKING:
+    # Direct imports see to work on Linux but not in a container, so use the relative import and type checking.
     from .___lo_pip___.dialog.handler import logger_options
     from .___lo_pip___.config import Config
     from .___lo_pip___.install.install_pip import InstallPip
@@ -48,7 +48,6 @@ if TYPE_CHECKING:
     from .___lo_pip___.events.args.event_args import EventArgs
     from .___lo_pip___.events.startup.startup_monitor import StartupMonitor
     from .___lo_pip___.events.named_events.startup_events import StartupNamedEvent
-
 else:
     from ___lo_pip___.dialog.handler import logger_options
     from ___lo_pip___.config import Config
@@ -70,12 +69,12 @@ implementation_services = ("com.sun.star.task.Job",)
 
 
 # region XJob
-class ___lo_implementation_name___(unohelper.Base, XJob):
+class ___lo_implementation_name___(unohelper.Base, XJob):  # noqa: N801
     """Python UNO Component that implements the com.sun.star.task.Job interface."""
 
     # region Init
 
-    def __init__(self, ctx):
+    def __init__(self, ctx: Any) -> None:  # noqa: ANN401
         self._this_pth = os.path.dirname(__file__)
         self._error_msg = ""
         self._job_event_name = ""
@@ -84,6 +83,7 @@ class ___lo_implementation_name___(unohelper.Base, XJob):
         self._added_packaging = False
         self._start_timed_out = True
         self._start_time = 0.0
+        self._is_init = False
         self._window_timer: threading.Timer | None = None
         self._thread_lock = threading.Lock()
         self._events = LoEvents()
@@ -149,7 +149,7 @@ class ___lo_implementation_name___(unohelper.Base, XJob):
         # make sure our pythonpath is in sys.path
         self._start_time = time.time()
         self._logger.debug("___lo_implementation_name___ executing")
-        if self._config.require_install_name_match:
+        if self._config.require_install_name_match:  # noqa: SIM102
             if self._config.oxt_name != self._config.package_name:
                 msg = f"Oxt name: {self._config.oxt_name} does not match installed name: {self._config.package_name}. The extensions must be named {self._config.oxt_name}.oxt before installing. Rename extension to {self._config.oxt_name}.oxt and reinstall."
                 self._logger.error(msg)
@@ -194,6 +194,7 @@ class ___lo_implementation_name___(unohelper.Base, XJob):
 
             if requirements_met:
                 self._logger.debug("Requirements are met. Nothing more to do.")
+                self._init_checks()
                 self._log_ex_time(self._start_time)
                 return
 
@@ -212,7 +213,7 @@ class ___lo_implementation_name___(unohelper.Base, XJob):
 
             if self._delay_start:
 
-                def _on_window_opened(source: Any, event_args: EventArgs, *args, **kwargs) -> None:
+                def _on_window_opened(source: Any, event_args: EventArgs, *args, **kwargs) -> None:  # noqa: ANN002, ANN003, ANN401
                     self.on_window_opened(source=source, event_args=event_args, *args, **kwargs)
 
                 self._fn_on_window_opened = _on_window_opened
@@ -285,6 +286,7 @@ class ___lo_implementation_name___(unohelper.Base, XJob):
             self._handel_bz2()
 
             self._post_install()
+            self._init_checks()
 
             if has_window:
                 self._display_complete_dialog()
@@ -303,7 +305,7 @@ class ___lo_implementation_name___(unohelper.Base, XJob):
     # endregion execute
 
     # region Destructor
-    def __del__(self):
+    def __del__(self) -> None:
         if self._added_packaging and "packaging" in sys.modules:
             del sys.modules["packaging"]
         if self._config.unload_after_install and "___lo_pip___" in sys.modules:
@@ -409,8 +411,21 @@ class ___lo_implementation_name___(unohelper.Base, XJob):
     # endregion Register/Unregister sys paths
 
     # region other methods
+    def _init_checks(self) -> None:
+        if self._is_init:
+            self._logger.debug("Already initialized. Skipping init checks.")
+            return
+        self._is_init = True
+        try:
+            from ___lo_pip___.initializer import Initializer  # type: ignore
 
-    def on_window_opened(self, source: Any, event_args: EventArgs, *args, **kwargs) -> None:
+            init = Initializer()
+            init.run_checks()
+            self._logger.debug("Init checks done.")
+        except Exception:
+            self._logger.exception("Error running init checks")
+
+    def on_window_opened(self, source: Any, event_args: EventArgs, *args, **kwargs) -> None:  # noqa: ANN002, ANN003, ANN401
         """is invoked when a LibreOffice top window is activated."""
         if self._twl is None:
             return
@@ -512,7 +527,7 @@ class ___lo_implementation_name___(unohelper.Base, XJob):
         total_time = end_time - start_time
         self._logger.info("%s execution time: %.3f seconds", self._config.lo_implementation_name, total_time)
 
-    def _get_user_profile_path(self, as_sys_path: bool = True, ctx: Any = None) -> str:
+    def _get_user_profile_path(self, as_sys_path: bool = True, ctx: Any = None) -> str:  # noqa: ANN401
         """
         Returns the path to the user profile directory.
 
@@ -703,7 +718,7 @@ class ___lo_implementation_name___(unohelper.Base, XJob):
 
     # region Debug
 
-    def _show_extra_debug_info(self):
+    def _show_extra_debug_info(self) -> None:
         self._logger.debug("Config Package Location: %s", self._config.package_location)
         self._logger.debug("Config Package Name: %s", self._config.package_name)
         self._logger.debug("Config Python Path: %s", self._config.python_path)
@@ -765,9 +780,9 @@ class ___lo_implementation_name___(unohelper.Base, XJob):
 
 # region Implementation
 
-g_TypeTable = {}
+g_TypeTable = {}  # noqa: N816
 # python loader looks for a static g_ImplementationHelper variable
-g_ImplementationHelper = unohelper.ImplementationHelper()
+g_ImplementationHelper = unohelper.ImplementationHelper()  # noqa: N816
 
 # add the FormatFactory class to the implementation container,
 # which the loader uses to register/instantiate the component.
@@ -783,5 +798,12 @@ g_ImplementationHelper.addImplementation(
 # g_ImplementationHelper.addImplementation(
 #     example.OptionsDialogHandler, example.IMPLEMENTATION_NAME, (example.IMPLEMENTATION_NAME,)
 # )
+
+if TYPE_CHECKING:
+    from .___lo_pip___.dialog.handler.uninstall import OptionsDialogUninstallHandler
+else:
+    from ___lo_pip___.dialog.handler.uninstall import OptionsDialogUninstallHandler
+
+g_ImplementationHelper.addImplementation(*OptionsDialogUninstallHandler.get_imple())
 
 # endregion Implementation

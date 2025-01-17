@@ -1,13 +1,13 @@
 from __future__ import annotations
 from pathlib import Path
-from typing import Dict, List, Set, cast
+from typing import Any, Dict, List, Set, cast
 import json
 
 
 class ConfigMeta(type):
     _instance = None
 
-    def __call__(cls, *args, **kwargs):
+    def __call__(cls, *args, **kwargs) -> Any:  # noqa: ANN002, ANN003, ANN401
         if cls._instance is None:
             root = Path(__file__).parent
             config_file = Path(root, "config.json")
@@ -46,6 +46,10 @@ class BasicConfig(metaclass=ConfigMeta):
         self._no_pip_remove = set(kwargs["no_pip_remove"])
         self._extension_version = str(kwargs["extension_version"])
         self._require_install_name_match = bool(kwargs.get("require_install_name_match", False))
+        self._cmd_clean_file_prefix = str(kwargs["cmd_clean_file_prefix"])
+        self._cmd_clean_file_enabled = bool(kwargs["cmd_clean_file_enabled"])
+        self._libreoffice_debug_port = int(kwargs.get("libreoffice_debug_port", 0))
+        self._pip_shared_dirs = cast(List[str], kwargs.get("pip_shared_dirs", []))
 
         if "requirements" not in kwargs:
             kwargs["requirements"] = {}
@@ -67,6 +71,25 @@ class BasicConfig(metaclass=ConfigMeta):
             When running in a dev container (Codespace), this value is always set to ``True``.
         """
         return self._auto_install_in_site_packages
+
+    @property
+    def cmd_clean_file_prefix(self) -> str:
+        """
+        Gets the command clean file prefix.
+
+        The value for this property can be set in pyproject.toml (tool.oxt.config.cmd_clean_file_prefix)
+        """
+        return self._cmd_clean_file_prefix
+
+    @property
+    def cmd_clean_file_enabled(self) -> bool:
+        """
+        Gets the flag indicating if the command clean file is enabled.
+        When True a script will be created in the LibreOffice user directory to remove the extension python packages.
+
+        The value for this property can be set in pyproject.toml (tool.oxt.config.cmd_clean_file_enabled)
+        """
+        return self._cmd_clean_file_enabled
 
     @property
     def default_locale(self) -> List[str]:
@@ -159,6 +182,15 @@ class BasicConfig(metaclass=ConfigMeta):
         return self._lo_implementation_name
 
     @property
+    def libreoffice_debug_port(self) -> int:
+        """
+        Gets the LibreOffice debug port.
+
+        The value for this property can be set in pyproject.toml (tool.oxt.token.libreoffice_debug_port)
+        """
+        return self._libreoffice_debug_port
+
+    @property
     def no_pip_remove(self) -> Set[str]:
         """
         Gets the pip packages that are not allowed to be removed.
@@ -177,6 +209,16 @@ class BasicConfig(metaclass=ConfigMeta):
         The value for this property can be set in pyproject.toml (tool.oxt.token.oxt_name)
         """
         return self._oxt_name
+
+    @property
+    def pip_shared_dirs(self) -> List[str]:
+        """
+        Gets the list of shared directories for pip packages.
+        These are used to build the cleanup scripts.
+
+        The value for this property can be set in pyproject.toml (tool.oxt.config.pip_shared_dirs)
+        """
+        return self._pip_shared_dirs
 
     @property
     def py_pkg_dir(self) -> str:
