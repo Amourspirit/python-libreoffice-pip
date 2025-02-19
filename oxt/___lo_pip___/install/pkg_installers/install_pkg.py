@@ -759,8 +759,9 @@ class InstallPkg:
         data_dict = self._get_json_data(pth, pkg)
         data: Dict[str, str] = data_dict.get("data", {})
         new_dirs = set(data.get("new_dirs", []))
-        if "bin" in new_dirs:
-            new_dirs.remove("bin")
+        for pip_dir in self.config.pip_shared_dirs:
+            if pip_dir in new_dirs:
+                new_dirs.remove(pip_dir)
 
         for d in new_dirs:
             dir_path = os.path.join(pth, d)
