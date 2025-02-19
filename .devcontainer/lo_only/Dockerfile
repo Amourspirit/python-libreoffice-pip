@@ -21,6 +21,7 @@ RUN apk update \
     linux-headers \
     libc-dev \
     rsync \
+    g++ \
     gcc \
     python3-dev \
     git \
